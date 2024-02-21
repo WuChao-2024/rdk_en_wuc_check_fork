@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # route
 
 The **route** command is used to display and set the network routing table in the Linux kernel. The routes set by the route command are mainly static routes. To achieve communication between two different subnets, a router connecting both networks or a gateway located in both networks is needed.

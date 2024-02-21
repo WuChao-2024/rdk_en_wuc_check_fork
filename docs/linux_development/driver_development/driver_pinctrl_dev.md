@@ -1,3 +1,6 @@
+---
+sidebar_position: 5
+---
 # Pinctrl Debugging Guide
 
 X3 Pinctrl uses the pinctrl-single driver from the mainline Linux Kernel code, primarily implementing pinctrl functionality through DTS configuration.

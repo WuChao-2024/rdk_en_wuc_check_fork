@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # Camera Object
 
 The Camera object is used to perform image acquisition and processing functions for MIPI cameras. It includes several methods such as `open_cam`, `open_vps`, `get_img`, `set_img`, `close_cam`, etc. Here are the detailed explanations:

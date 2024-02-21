@@ -1,3 +1,6 @@
+---
+sidebar_position: 11
+---
 # Modifying BPU Reserved Memory Size
 
 ## Temporarily setting BPU reserved memory

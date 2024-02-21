@@ -1,3 +1,7 @@
+---
+sidebar_position: 4
+---
+
 # On-board Model Application Development Guide
 
 ## Model Inference DNN API Usage Example

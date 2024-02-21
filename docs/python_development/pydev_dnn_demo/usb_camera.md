@@ -1,3 +1,7 @@
+---
+sidebar_position: 3
+---
+
 # Inference Based on USB Camera {#usb}
 
 ## Object Detection Algorithm - FCOS

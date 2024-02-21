@@ -1,3 +1,6 @@
+---
+sidebar_position: 12
+---
 # 7.12 Multimedia Performance Debugging
 ## Overview
 Camera is the main external source of image data, and the VIO software is a relatively opaque internal software that mainly provides relevant images and information to internal applications. The internal image processing IP information of the XJ3 chip is roughly as follows:

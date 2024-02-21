@@ -1,3 +1,6 @@
+---
+sidebar_position: 7
+---
 # 7.7 Region Processing
 ## Overview
 Users generally need to overlay OSD (On-Screen Display) on videos to display specific information (such as channel number, timestamp, etc.), and may also fill color blocks when necessary. These OSDs overlaid on the videos and color blocks obscured on the videos are collectively referred to as regions. The REGION module is used to manage these region resources uniformly.

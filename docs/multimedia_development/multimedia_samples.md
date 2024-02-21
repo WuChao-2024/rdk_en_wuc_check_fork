@@ -1,3 +1,6 @@
+---
+sidebar_position: 2
+---
 # 7.2 Sample Program
 This chapter briefly describes the Horizon multimedia application examples. The source code involved can be obtained by running `sudo apt install hobot-multimedia-samples` and installed under the directory `/app/multimedia_samples`.
 ## Instructions for using get_sif_data{#get_sif_data}

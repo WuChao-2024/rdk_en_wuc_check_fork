@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # ifconfig
 
 **ifconfig** is a command used to configure and manage network interfaces. It allows users to view and modify the configuration of network interfaces, including IP address, subnet mask, MAC address, MTU, broadcast address, point-to-point address, etc.

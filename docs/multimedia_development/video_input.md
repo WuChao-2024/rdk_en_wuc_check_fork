@@ -1,3 +1,6 @@
+---
+sidebar_position: 4
+---
 # 7.4 Video Input
 ## Overview
 The Video Input (VIN) module functions by receiving video data through the MIPI Rx interface. VIN passes the received data to the next module, VPS, and can also store it in a designated memory area. During this process, VIN can process the received raw video image data to achieve video data acquisition.

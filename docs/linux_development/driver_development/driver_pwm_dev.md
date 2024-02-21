@@ -1,3 +1,6 @@
+---
+sidebar_position: 8
+---
 # PWM Drive Debugging Guide
 
 X3 has two types of controllers: one is standard PWM, with 3 groups of 3 each, totaling 9; the other is LPWM, mainly used to support synchronous exposure of sensors.

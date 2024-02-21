@@ -1,3 +1,6 @@
+---
+sidebar_position: 4
+---
 # Display Object
 
 The Display object implements video display functionality and can output image data to a monitor through the HDMI interface. This object includes methods such as `display`, `send_frame`, `set_rect`, `set_word`, `close`, etc. Detailed explanations are as follows:

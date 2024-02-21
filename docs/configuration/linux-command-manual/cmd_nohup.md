@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # nohup
 
 **nohup** (short for no hang up) is used to run a command in the background without being affected by terminal closures.

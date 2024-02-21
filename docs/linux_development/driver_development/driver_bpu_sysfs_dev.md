@@ -1,3 +1,6 @@
+---
+sidebar_position: 9
+---
 # BPU Driver sysfs debugging interface
 
 ## BPU sysfs node description

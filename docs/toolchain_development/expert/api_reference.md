@@ -45,7 +45,7 @@ Get default qconfig.
 ```python 
 
 default_qat_8bit_fake_quant_qconfig = get_default_qconfig(
-```activation_observer="min_max",
+        activation_observer="min_max",
         activation_qkwargs=None,
         weight_qkwargs={"qscheme": torch.per_channel_symmetric, "ch_axis": 0,},
     )

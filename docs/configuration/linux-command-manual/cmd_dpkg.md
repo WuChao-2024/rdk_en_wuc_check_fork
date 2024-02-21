@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # dpkg
 
 Install, create, and manage software packages on Debian Linux systems.
@@ -43,7 +47,8 @@ The dpkg command has options for setting and requires a command to execute diffe
 - --log=<filename>: Log status updates and operation information to <filename>.
 - --ignore-depends=<package>,...: Ignore all dependencies related to <package>.
 - --force-...: Ignore encountered problems (see --force-help for more details).
-- --no-force-...|--refuse-...: Abort execution when encountering problems.--abort-after `<n>`         Abort after encountering `<n>` errors.
+- --no-force-...|--refuse-...: Abort execution when encountering problems.
+- --abort-after `<n>`         Abort after encountering `<n>` errors.
 
 ## Common Commands
 
@@ -92,7 +97,10 @@ dpkg -S keyword
 - List all currently installed packages
 
 ```
-dpkg -l- List the contents of a deb package
+dpkg -l
+```
+
+- List the contents of a deb package
 
 ```
 dpkg -c package.deb

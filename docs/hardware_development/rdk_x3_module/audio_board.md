@@ -1,3 +1,6 @@
+---
+sidebar_position: 6
+---
 # How to use audio breakout board
 
 Currently, the RDK X3 Module supports two audio breakout boards: the Audio Driver HAT and the WM8960 Audio HAT. These boards are used to meet the functional requirements of different voice scenarios. The following will provide detailed instructions on how to use these two audio boards.

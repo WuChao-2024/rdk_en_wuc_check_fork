@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # dpkg-deb
 
 The **dpkg-deb command** is a software package management tool for Debian Linux. It can perform packaging and unpackaging operations on software packages and provide package information.

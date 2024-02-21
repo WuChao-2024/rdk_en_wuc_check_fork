@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # find
 
 The `find` command is used to search for files and directories in a specified directory.

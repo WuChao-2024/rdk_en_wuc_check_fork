@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # VIO(Camera Input) API
 
 The `VIO` module provides functions for operating `MIPI` cameras and image processing.

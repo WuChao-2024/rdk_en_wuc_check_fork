@@ -1,3 +1,6 @@
+---
+sidebar_position: 4
+---
 # 1.4 Remote Login
 
 This chapter is intended to introduce users who need to remotely access the development board through their personal computer (PC) on how to remotely login via serial port and network (VNC, SSH) methods.

@@ -1,3 +1,6 @@
+---
+sidebar_position: 8
+---
 # Model Inference DEBUG Method
 
 ## Error Codes

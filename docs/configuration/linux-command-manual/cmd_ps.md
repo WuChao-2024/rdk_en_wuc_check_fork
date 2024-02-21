@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # ps
 
 The **ps command** is used to display the current system process status. Ps is the most basic and powerful process viewing command. By using this command, you can determine which processes are running, their running status, whether processes have ended, if any processes are in a zombie state, and which processes are consuming excessive resources.

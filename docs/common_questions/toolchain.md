@@ -1,3 +1,6 @@
+---
+sidebar_position: 4
+---
 # 10.4 Algorithm toolchain class
 
 ### Model quantization errors and solutions {#model_convert_errors_and_solutions}

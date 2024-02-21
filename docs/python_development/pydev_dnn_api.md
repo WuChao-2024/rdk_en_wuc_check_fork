@@ -1,3 +1,6 @@
+---
+sidebar_position: 4
+---
 # 4.4 Model Inference Interface Description
 
 ## Overview

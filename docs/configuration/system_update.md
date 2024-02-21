@@ -1,3 +1,6 @@
+---
+sidebar_position: 2
+---
 # 2.2 System Updates
 For system security and stability considerations, it is recommended for users to update the system using the `apt` command after the installation.
 

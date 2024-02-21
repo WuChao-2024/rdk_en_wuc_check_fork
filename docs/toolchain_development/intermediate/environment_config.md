@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # Environment Installation
 
 This chapter mainly introduces the complete deployment method of the Horizon algorithm toolchain development environment.

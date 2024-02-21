@@ -1,3 +1,6 @@
+---
+sidebar_position: 3
+---
 # 7.3 System Control
 ## Overview
 System control is used to initialize and deinitialize the entire media system, and establish relationships between modules through binding interfaces. It provides the VP (Video Pool) module for managing large blocks of physical memory allocation.

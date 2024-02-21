@@ -1,3 +1,6 @@
+---
+sidebar_position: 5
+---
 # BPU (Algorithm Inference Module) API
 
 The `BPU` API provides the following interfaces:

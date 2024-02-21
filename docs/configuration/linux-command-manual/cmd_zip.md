@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # zip
 
 The **zip command** can be used to decompress files or perform packaging operations on files. zip is a widely used compression program, and files compressed with it will produce a compressed file with the extension `.zip`.

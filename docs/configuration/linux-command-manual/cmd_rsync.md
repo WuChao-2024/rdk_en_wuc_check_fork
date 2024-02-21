@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # rsync
 
 Rsync is a fast and powerful file copying tool. It can copy files locally or from another host using any remote shell, and it can also copy files with a remote rsync daemon. It provides numerous options that allow control over various aspects of its behavior and enables flexible specification of the files to be copied. Rsync is known for its incremental transfer algorithm, which reduces the amount of data sent over the network by only sending the differences between the source and existing files in the target. Rsync is widely used for backup and mirroring operations, as well as an improved alternative to the standard copy command for everyday use.

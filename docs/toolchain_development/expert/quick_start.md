@@ -1,3 +1,6 @@
+---
+sidebar_position: 2
+---
 # Quick Start {#quick_start}
 
 The Horizon Plugin Pytorch (referred to as Plugin) refers to the PyTorch official quantization interface and ideas. The Plugin adopts the Quantization Aware Training (QAT) scheme. Therefore, it is recommended that users first read the relevant parts of the [**PyTorch official documentation**](https://pytorch.org/docs/stable/quantization.html#quantization) and be familiar with the usage of quantization training and deployment tools provided by PyTorch.

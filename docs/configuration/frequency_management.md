@@ -1,3 +1,6 @@
+---
+sidebar_position: 5
+---
 # 2.5 Thermal Control and CPU Frequency Management
 
 :::info Note

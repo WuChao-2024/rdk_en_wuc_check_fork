@@ -1,3 +1,6 @@
+---
+sidebar_position: 6
+---
 # IO-DOMAIN Debugging Guide
 
 The IO-Domain is used to configure the voltage domain of certain modules in X3J3. Taking the RGMII interface as an example, if the external voltage domain is 3.3V in the circuit design, the IO-DOMAIN of the RGMII module needs to be configured as 3.3V. If the external voltage domain is 1.8V, it needs to be configured as 1.8V. It is important to note that:

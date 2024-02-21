@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # hrut_somstatus
 
 The **hrut_somstatus** command can obtain the temperature of the temperature sensor, the operating frequency of the CPU/BPU, and the BPU load.

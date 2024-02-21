@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # 6.1 Development Environment Setup and Compilation Instructions
 
 This chapter introduces the requirements and setup of the cross-compilation development environment, as well as instructions for downloading the source code and compiling the system image.

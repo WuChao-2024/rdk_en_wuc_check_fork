@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # ssh
 
 The **ssh command** is a client connection tool in the openssh suite, which can be used to securely remote login to a server using the ssh encryption protocol.

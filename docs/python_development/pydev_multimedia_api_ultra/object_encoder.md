@@ -1,3 +1,6 @@
+---
+sidebar_position: 2
+---
 # Encoder Object
 
 The Encoder object implements the encoding and compression functions for video data. It includes several methods such as `encode`, `send_frame`, `get_frame`, `close`, etc. The detailed description is as follows:

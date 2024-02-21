@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # 5.1 Reference Example
 
 This chapter introduces various functional examples for multimedia library development, including camera image capture, video encoding and decoding, video display, algorithm inference, and more.

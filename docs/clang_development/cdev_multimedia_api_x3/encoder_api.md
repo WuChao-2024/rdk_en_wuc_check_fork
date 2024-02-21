@@ -1,3 +1,6 @@
+---
+sidebar_position: 2
+---
 # ENCODER (Encoder Module) API
 
 The `ENCODER` API provides the following interfaces:

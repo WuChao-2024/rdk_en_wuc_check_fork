@@ -1,3 +1,6 @@
+---
+sidebar_position: 2
+---
 # Audio Adapter Board
 
 The RDK X3 currently supports two audio adapter boards: **Audio Driver HAT** and **WM8960 Audio HAT**. These boards are designed to meet the functional requirements of different voice scenarios. The following will provide detailed instructions on how to use these two audio boards.

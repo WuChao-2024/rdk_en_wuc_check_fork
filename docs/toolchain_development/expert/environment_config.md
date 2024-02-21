@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # Environment Dependency
 
 This section introduces the environment dependency requirements for Horizon Plugin Pytorch. We recommend using the Docker environment provided by Horizon, and you can refer to the [**Machine Deployment**](/toolchain_development/intermediate/environment_config#machine_deploy) documentation for instructions on how to obtain it.

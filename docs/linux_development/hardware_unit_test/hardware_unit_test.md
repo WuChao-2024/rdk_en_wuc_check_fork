@@ -1,3 +1,6 @@
+---
+sidebar_position: 3
+---
 # 6.3 Hardware Unit Testing
 This chapter introduces how to perform hardware unit testing for X3. Please download the program and script required from [here](http://sunrise.horizon.cc/downloads/unittest/sample_base_test.tar.gz).
 ### Instructions for using the testing program

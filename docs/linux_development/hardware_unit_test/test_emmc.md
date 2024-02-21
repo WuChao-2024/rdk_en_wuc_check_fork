@@ -1,3 +1,6 @@
+---
+sidebar_position: 2
+---
 # EMMC Related Testing
 
 For EMMC, the main concerns are its stability and performance.

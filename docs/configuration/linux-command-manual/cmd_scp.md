@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # scp
 
 The Linux scp command is used to copy files and directories between Linux systems.

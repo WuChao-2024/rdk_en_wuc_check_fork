@@ -1,3 +1,6 @@
+---
+sidebar_position: 8
+---
 # 7.8 Video Output
 
 ## Overview

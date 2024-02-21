@@ -1,3 +1,6 @@
+---
+sidebar_position: 12
+---
 # GPIO Debugging Guide
 
 The X3 chip has a total of 121 IO functional pins, each of which can be configured to work in GPIO mode. However, it is important to note the multiplexing relationship with other functional pins.

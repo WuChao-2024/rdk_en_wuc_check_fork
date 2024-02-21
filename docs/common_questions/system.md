@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # 10.1 System Class
 
 ## No display after power on the development board

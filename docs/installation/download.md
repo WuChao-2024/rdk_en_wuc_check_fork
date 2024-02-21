@@ -1,3 +1,6 @@
+---
+sidebar_position: 6
+---
 # 1.6 Resource Download Summary
 
 ## Hardware Design

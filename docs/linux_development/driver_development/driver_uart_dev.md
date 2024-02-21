@@ -1,3 +1,6 @@
+---
+sidebar_position: 2
+---
 # UART Driver Debugging Guide
 
 The X3 chip has 4 UART ports: UART0, UART1, UART2, UART3

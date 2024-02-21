@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # 7.1 System Overview
 
 ## Overview

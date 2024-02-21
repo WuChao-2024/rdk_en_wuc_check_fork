@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # mount
 
 **mount** is a command used to mount file systems.

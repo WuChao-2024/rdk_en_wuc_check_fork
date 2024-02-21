@@ -1,4 +1,6 @@
-```markdown
+---
+sidebar_position: 11
+---
 # 7.11 Query Multimedia Module Debug Information
 
 ## Interaction between Driver and Multimedia System

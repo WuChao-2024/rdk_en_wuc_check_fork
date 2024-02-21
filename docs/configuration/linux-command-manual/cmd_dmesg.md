@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # dmesg
 
 The `dmesg` command is used to view or control the kernel ring buffer.

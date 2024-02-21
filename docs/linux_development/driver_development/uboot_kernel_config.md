@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # Configuration of Uboot and Kernel Options
 
 In software development, it is often necessary to configure the functional options of Uboot and Kernel. This chapter introduces several commonly used configuration methods for users' reference.

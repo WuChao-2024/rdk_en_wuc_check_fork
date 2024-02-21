@@ -1,3 +1,7 @@
+---
+sidebar_position: 7
+---
+
 # SPI Debugging Guide
 
 ## Driver Code

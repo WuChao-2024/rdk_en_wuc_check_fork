@@ -1,3 +1,6 @@
+---
+sidebar_position: 5
+---
 # LCD Display Usage
 
 The RDK X3 Module carrier board provides one MIPI DSI interface, supporting the connection of various LCD screens. The following example uses a 4.3-inch MIPI LCD to illustrate the screen connection and usage.

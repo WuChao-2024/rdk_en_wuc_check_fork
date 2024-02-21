@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # netstat
 
 The **netstat command** is used to print the status of the network system in Linux, allowing you to know the network situation of the entire system.

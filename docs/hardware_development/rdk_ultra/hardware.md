@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # Hardware Information
 
 This section provides materials such as the physical inventory, technical manuals, hardware design guides, and other resources for the RDK Ultra development kit to help developers fully understand the product and provide guidance for hardware design work.

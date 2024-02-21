@@ -1,3 +1,6 @@
+---
+sidebar_position: 3
+---
 # Decoder Object
 
 The Decoder object implements the decoding function for video data and includes several methods such as `decode`, `send_frame`, `get_frame`, `close`, etc. The detailed description is as follows:

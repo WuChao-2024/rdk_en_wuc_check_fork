@@ -1,3 +1,6 @@
+---
+sidebar_position: 4
+---
 # DISPLAY API
 
 The `DISPLAY` API provides the following interfaces:

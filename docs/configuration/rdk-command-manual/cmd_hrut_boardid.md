@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # hrut_boardid
 
 The **hrut_boardid** command is used to retrieve the board ID of the current development board (different development boards have different IDs).

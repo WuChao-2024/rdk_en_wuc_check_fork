@@ -1,3 +1,6 @@
+---
+sidebar_position: 7
+---
 # Data Types and Data Structures
 
 ## Version Information Class

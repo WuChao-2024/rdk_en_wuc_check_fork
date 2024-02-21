@@ -1,3 +1,7 @@
+---
+sidebar_position: 4
+---
+
 # 40pin_uart_usage
 
 RDK X3 enables UART3 by default on the 40-pin connector, with physical pin numbers 8 and 10, and IO voltage of 3.3V.
@@ -44,7 +48,7 @@ Recv: AA55
 
 import sys
 import os
-```import time
+import time
 
 # Import Python serial library
 import serial

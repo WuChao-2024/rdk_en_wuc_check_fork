@@ -1,3 +1,6 @@
+---
+sidebar_position: 6
+---
 # SYS (Module Binding) API
 
 The `SYS` API provides the following interfaces:

@@ -1,3 +1,6 @@
+---
+sidebar_position: 10
+---
 # 7.10 Video Decoding
 ## Overview
 The video decoding module supports hardware decoding of H.264/H.265/JPEG/MJPEG. This module supports multi-channel real-time encoding, with each channel being independent. Common use cases include smart boxes and classroom recording.

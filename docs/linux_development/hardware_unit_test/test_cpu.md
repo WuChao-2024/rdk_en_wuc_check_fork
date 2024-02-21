@@ -1,3 +1,6 @@
+---
+sidebar_position: 7
+---
 # CPU Performance Test
 
 ## Test Description

@@ -1,3 +1,6 @@
+---
+sidebar_position: 3
+---
 # I2C Debugging Guide
 
 ## Introduction

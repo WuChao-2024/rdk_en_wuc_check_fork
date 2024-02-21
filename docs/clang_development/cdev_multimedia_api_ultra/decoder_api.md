@@ -1,3 +1,6 @@
+---
+sidebar_position: 3
+---
 # DECODER API
 
 The `DECODER` API provides the following interfaces:

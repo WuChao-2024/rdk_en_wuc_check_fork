@@ -1,4 +1,4 @@
-```yaml
+---
 sidebar_position: 1
 ---
 

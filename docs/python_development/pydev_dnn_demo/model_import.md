@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # Importing the Model Inference Library
 
 The `hobot_dnn` model inference library is pre-installed on the Ubuntu system of the development board. Users can import the module and check the version information.

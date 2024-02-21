@@ -1,3 +1,6 @@
+---
+sidebar_position: 14
+---
 # Watchdog Driver Debugging Guide
 
 ## Code Path

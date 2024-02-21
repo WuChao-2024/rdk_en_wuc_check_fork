@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # 11.1 Feedback Suggestions
 
 We highly value your valuable suggestions and feedback on our product. These feedback can cover various aspects, including but not limited to desired improvements or additions of features, user experience issues, product defects, encountered problems, etc.

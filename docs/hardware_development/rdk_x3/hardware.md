@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # Hardware Information
 
 This section provides the product manual and design documentation for RDK X3 (Sunrise X3 Pie), helping developers to fully understand the product and provide guidance for hardware design work.

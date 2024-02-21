@@ -1,3 +1,6 @@
+---
+sidebar_position: 2
+---
 # Interface Description
 
 The RDK Ultra development kit provides various peripheral interfaces such as Ethernet, USB, HDMI, MIPI CSI, and 40PIN, making it convenient for users to experience and develop the RDK Ultra development kit. The interface layout is as follows:

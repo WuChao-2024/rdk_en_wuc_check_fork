@@ -1,3 +1,6 @@
+---
+sidebar_position: 4
+---
 # Camera Usage
 
 The RDK Ultra development kit provides two 15-pin MIPI CSI interfaces, `CAM0` and `CAM2`, which can support the connection of the imx219 camera included in the kit. When connecting the camera ribbon cable, make sure the blue side is facing up. In addition, the sample program has implemented automatic detection of the camera, so users do not need to worry about the corresponding relationship between the CAM interface and the camera.

@@ -1,3 +1,6 @@
+---
+sidebar_position: 4
+---
 # 3.4 Using MIPI Camera
 
 <iframe src="//player.bilibili.com/player.html?aid=700903305&bvid=BV1rm4y1E73q&cid=1196558356&page=19" scrolling="no" border="0" frameborder="no" framespacing="0" width="100%" height="500" allowfullscreen="true"> </iframe>

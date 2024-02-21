@@ -1,3 +1,6 @@
+---
+sidebar_position: 1
+---
 # 2.1 Network Configuration
 
 This section mainly introduces the methods for modifying the wired and wireless network configurations of the development board.

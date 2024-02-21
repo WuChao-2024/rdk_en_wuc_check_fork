@@ -1,3 +1,6 @@
+---
+sidebar_position: 9
+---
 # 7.9 Video Encoding
 ## Overview
 The video encoding module implements hardware encoding protocols such as H.264/H.265/JPEG/MJPEG. This module supports real-time encoding of multiple channels, with each channel being independent. Common use cases include single-channel recording, multi-channel recording, single-channel VIO video streaming, multi-channel VIO video streaming, recording + VIO video streaming, etc.
