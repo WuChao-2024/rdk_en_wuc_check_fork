@@ -30,22 +30,22 @@ The dpkg command has options for setting and requires a command to execute diffe
 
 ## Option explanations
 
-- --admindir=<directory>: Use <directory> instead of /var/lib/dpkg.
-- --root=<directory>: Install to a different root directory.
-- --instdir=<directory>: Change the installation directory while maintaining the management directory.
-- --path-exclude=<expression>: Do not install paths that match the shell expression.
-- --path-include=<expression>: Include an additional pattern after exclusion patterns.
+- --admindir= directory: Use directory instead of /var/lib/dpkg.
+- --root= directory: Install to a different root directory.
+- --instdir=directory: Change the installation directory while maintaining the management directory.
+- --path-exclude= expression: Do not install paths that match the shell expression.
+- --path-include= expression: Include an additional pattern after exclusion patterns.
 - -O|--selected-only: Ignore software packages that are not selected for installation or upgrade.
 - -E|--skip-same-version: Ignore software packages with the same version as the installed package.
 - -G|--refuse-downgrade: Ignore software packages with versions earlier than the installed package.
 - -B|--auto-deconfigure: Install even if it affects other software packages.
 - --[no-]triggers: Skip or force the handling of triggers that follow.
-- --verify-format=<format>: Check the output format ('rpm' is supported).
+- --verify-format=format: Check the output format ('rpm' is supported).
 - --no-debsig: Do not attempt to verify the signature of the software package.
-- -D|--debug=<octal>: Enable debugging (see -Dhelp or --debug=help for more information).
-- --status-logger=<command>: Send status updates to the standard input of <command>.
-- --log=<filename>: Log status updates and operation information to <filename>.
-- --ignore-depends=<package>,...: Ignore all dependencies related to <package>.
+- -D|--debug=octal: Enable debugging (see -Dhelp or --debug=help for more information).
+- --status-logger=command: Send status updates to the standard input of command.
+- --log=filename: Log status updates and operation information to filename.
+- --ignore-depends=package,...: Ignore all dependencies related to package.
 - --force-...: Ignore encountered problems (see --force-help for more details).
 - --no-force-...|--refuse-...: Abort execution when encountering problems.
 - --abort-after `<n>`         Abort after encountering `<n>` errors.

@@ -48,7 +48,9 @@ The steps are described as follows:
             activation_qkwargs: Optional[Dict] = None,
             weight_qkwargs: Optional[Dict] = None,
         ):
-    ```3. Set the `fake quantize` state to `CALIBRATION`.
+    ```
+    
+    3. Set the `fake quantize` state to `CALIBRATION`.
 
     ```python
         horizon.quantization.set_fake_quantize(model, horizon.quantization.FakeQuantState.CALIBRATION)
@@ -95,7 +97,9 @@ For the same model, different methods and parameters may have significant differ
 
 1. min_max. This method only calculates the sliding average of the maximum and minimum values, which is used to quickly determine common parameters such as Batch size and average_constant, without much technique involved.
 
-2. percentile. This method has the highest upper limit of accuracy among all methods, but it is also the most difficult to tune. If the accuracy requirements can be met through other methods or the default parameters of this method, it is not recommended to spend too much time on parameter tuning. There are two adjustable parameters in percentile: bins and percentile. The more bins, the smaller the interval between candidate options for max, and the finer the granularity for adjustment, but it also means higher computational cost. It is recommended to determine the percentile first and then adjust the bins. Iterate between the two to narrow down the parameter range until satisfactory results are achieved. In most cases, taking 2048 as the bin provides sufficient adjustment granularity, and there is no need to separately adjust this parameter. The following is an example of the parameter tuning path for a model:| Order | percentile | bins | accuracy |
+2. percentile. This method has the highest upper limit of accuracy among all methods, but it is also the most difficult to tune. If the accuracy requirements can be met through other methods or the default parameters of this method, it is not recommended to spend too much time on parameter tuning. There are two adjustable parameters in percentile: bins and percentile. The more bins, the smaller the interval between candidate options for max, and the finer the granularity for adjustment, but it also means higher computational cost. It is recommended to determine the percentile first and then adjust the bins. Iterate between the two to narrow down the parameter range until satisfactory results are achieved. In most cases, taking 2048 as the bin provides sufficient adjustment granularity, and there is no need to separately adjust this parameter. The following is an example of the parameter tuning path for a model:
+
+| Order | percentile | bins | accuracy |
 |-------|------------|------|----------|
 | 1     | 99.99      | 2048 | 53.75    |
 | 2     | 99.99      | 4096 | 54.38    |
@@ -143,6 +147,8 @@ The output distribution of layernorm will show several highly concentrated areas
 
 ### Observer Parameters Documentation```python
 
+```python
+
     class horizon_plugin_pytorch.quantization.observer_v2.KLObserver(bins: int = 512, update_interval: int = 1, averaging_constant: float = 0.01, ch_axis: int = - 1, dtype: Union[torch.dtype, horizon_plugin_pytorch.dtype.QuantDType] = 'qint8', qscheme: torch.qscheme = torch.per_tensor_symmetric, quant_min: int = None, quant_max: int = None, is_sync_quantize: bool = False, factory_kwargs: Dict = None)
 
 ```
@@ -189,7 +195,9 @@ Should be overridden by all subclasses.
 
     class horizon_plugin_pytorch.quantization.observer_v2.MSEObserver(stride: int = 1, averaging_constant: float = 0.01, ch_axis: int = - 1, dtype: Union[torch.dtype, horizon_plugin_pytorch.dtype.QuantDType] = 'qint8', qscheme: torch.qscheme = torch.per_tensor_symmetric, quant_min: int = None, quant_max: int = None, is_sync_quantize: bool = False, factory_kwargs: Dict = None)
 
-```MSE observer.
+```
+
+MSE observer.
 
 Observer模块用于基于原始张量和量化张量之间的均方误差（MSE）计算量化参数。
 
@@ -231,9 +239,9 @@ Observer模块用于基于原始张量和量化张量之间的均方误差（MSE
 
     class horizon_plugin_pytorch.quantization.observer_v2.MinMaxObserver(averaging_constant: float = 0.01, ch_axis: int = - 1, dtype: Union[torch.dtype, horizon_plugin_pytorch.dtype.QuantDType] = 'qint8', qscheme: torch.qscheme = torch.per_tensor_symmetric, quant_min: int = None, quant_max: int = None, is_sync_quantize: bool = False, factory_kwargs: Dict = None)
 ```
-最小-最大观察器。
+Min max observer.
 
-该观察器基于输入张量的最小值和最大值计算量化参数。该模块记录输入张量的移动平均最小值和最大值，并使用这些统计数据计算量化参数。
+This observer computes the quantization parameters based on minimums and maximums of the incoming tensors. The module records the moving average minimum and maximum of incoming tensors, and uses this statistic to compute the quantization parameters.
 
 **Parameters**- **averaging_constant** – Averaging constant for min/max.
 - **ch_axis** – Channel axis.
@@ -256,37 +264,39 @@ Record the running minimum and maximum of x.
 
 ```
 
-混合观察器。
+Mix observer.
 
-该观察器基于多种校准方法计算量化参数，并选择具有最小量化误差的量化参数。
+This observer computes the quantization parameters based on multiple calibration methods and selects the quantization parameters with the smallest quantization error.
 
 **Parameters**
 
-  - **averaging_constant** – 最小值和最大值的平均常数。
+  - **averaging_constant** – Averaging constant for min/max.
 
-  - **ch_axis** – 通道轴。
+  - **ch_axis** – Channel axis.
 
-  - **dtype** – 量化数据类型。
+  - **dtype** – Quantized data type.
 
-  - **qscheme** – 要使用的量化方案。
+  - **qscheme** – Quantization scheme to be used.
 
-  - **quant_min** – 最小量化值。如果未指定，将遵循dtype。
+  - **quant_min** – Min quantization value. Will follow dtype if unspecified.
 
-  - **quant_max** – 最大量化值。如果未指定，将遵循dtype。
+  - **quant_max** – Max quantization value. Will follow dtype if unspecified.
 
-  - **is_sync_quantize** – 如果在使用多个设备进行训练时同步统计数据。
+  - **is_sync_quantize** – If sync statistics when training with multiple devices.
 
-  - **factory_kwargs** – 传递给最小值和最大值工厂函数的kwargs。```python
+  - **factory_kwargs** – kwargs which are passed to factory functions for min_val and max_val.
+
+```python
     forward(x_orig)
 ```
 
-定义了每次调用时执行的计算。
+Defines the computation performed at every call.
 
-应该由所有子类进行重写。
+Should be overridden by all subclasses.
 
-:::info 小技巧
+:::info skill
 
-虽然前向传播的步骤需要在这个函数中定义，但我们应该调用Module实例而不是直接调用这个函数，因为前者会处理已注册的钩子，而后者则会忽略它们。
+  Although the recipe for forward pass needs to be defined within this function, one should call the Module instance afterwards instead of this since the former takes care of running the registered hooks while the latter silently ignores them.
 
 :::
 
@@ -295,41 +305,43 @@ Record the running minimum and maximum of x.
     class horizon_plugin_pytorch.quantization.observer_v2.PercentileObserver(percentile: float = 99.99, bins: int = 2048, averaging_constant: float = 0.01, ch_axis: int = - 1, dtype: Union[torch.dtype, horizon_plugin_pytorch.dtype.QuantDType] = 'qint8', qscheme: torch.qscheme = torch.per_tensor_symmetric, quant_min: int = None, quant_max: int = None, is_sync_quantize: bool = False, factory_kwargs: Dict = None)
 ```
 
-百分位数观察器。
+Percentile observer.
 
-基于直方图的百分位数观察器。直方图是在线计算的，不会保存。最小值和最大值被移动平均以计算量化参数。
+Percentile observer based on histogram. Histogram is calculated online and won’t be saved. The minimum and maximum are moving averaged to compute the quantization parameters.
 
-**参数**
+**Parameters**
 
-  - **percentile** – 直方图的百分位数
+  - **percentile** – Index percentile of histrogram
 
-  - **bins** – 直方图的数量。
+  - **bins** – Number of histograms bins.
 
-  - **averaging_constant** – min/max的平均常数。
+  - **averaging_constant** – Averaging constant for min/max.
 
-  - **ch_axis** – 通道轴。
+  - **ch_axis** – Channel axis.
 
-  - **dtype** – 量化数据的类型。
+  - **dtype** – Quantized data type.
 
-  - **qscheme** – 要使用的量化方案。
+  - **qscheme** – Quantization scheme to be used.
 
-  - **quant_min** – 最小的量化值。如果未指定则遵循dtype。
+  - **quant_min** – Min quantization value. Will follow dtype if unspecified.
 
-  - **quant_max** – 最大的量化值。如果未指定则遵循dtype。
+  - **quant_max** – Max quantization value. Will follow dtype if unspecified.
 
-  - **is_sync_quantize** – 如果在使用多个设备进行训练时同步统计信息。
+  - **is_sync_quantize** – If sync statistics when training with multiple devices.
 
-  - **factory_kwargs** – 传递给min_val和max_val的工厂函数的kwargs参数。
+  - **factory_kwargs** – kwargs which are passed to factory functions for min_val and max_val.
 
 ```python
     forward(x_orig)
 ```
 
-定义了每次调用时执行的计算。Should be overridden by all subclasses.
+Defines the computation performed at every call.
 
+Should be overridden by all subclasses.
 :::info Tips
 
-  虽然前向传播的步骤需要在这个函数中定义，但是应该在调用Module实例之后调用它，而不是直接调用这个函数，因为Module实例会负责运行注册的钩子，而直接调用该函数则会忽略钩子的存在。
+  Although the recipe for forward pass needs to be defined within this function, one should call the Module instance afterwards instead of this since the former takes care of running the registered hooks while the latter silently ignores them.
+  
 :::
 
 ```python
@@ -337,76 +349,76 @@ Record the running minimum and maximum of x.
     class horizon_plugin_pytorch.quantization.MovingAverageMinMaxObserver(averaging_constant=0.01, dtype=torch.qint8, qscheme=torch.per_tensor_symmetric, quant_min=None, quant_max=None, is_sync_quantize=False, factory_kwargs=None)
 ```
 
-MovingAverageMinMax Observer（移动平均最小最大值观测器）。
+MovingAverageMinMax Observer.
 
-用于基于最小值和最大值的移动平均计算量化参数的观测器模块。
+Observer module for computing the quantization parameters based on the moving average of the min and max values.
 
-该观测器通过计算输入张量的最小值和最大值的移动平均来计算量化参数。该模块记录输入张量的平均最小值和最大值，并根据这些统计数据计算量化参数。
+This observer computes the quantization parameters based on the moving averages of minimums and maximums of the incoming tensors. The module records the average minimum and maximum of incoming tensors, and uses this statistic to compute the quantization parameters.
 
-**参数**
+**Parameters**
 
-  - **averaging_constant** – 最小值/最大值的移动平均的常数。
+  - **averaging_constant** – Averaging constant for min/max.
 
-  - **dtype** – 用于量化的数据类型。
+  - **dtype** – Quantized data type
 
-  - **qscheme** – 要使用的量化方案，只支持 per_tensor_symmetric 方案。
+  - **qscheme** – Quantization scheme to be used, only support per_tensor_symmetric scheme
 
-  - **reduce_range** – 将量化数据类型的范围减少 1 位。
+  - **reduce_range** – Reduces the range of the quantized data type by 1 bit
 
-  - **quant_min** – 量化的最小值。
+  - **quant_min** – Minimum quantization value.
 
-  - **quant_max** – 量化的最大值。
+  - **quant_max** – Maximum quantization value.
 
-  - **is_sync_quantize** – 是否使用同步量化。
+  - **is_sync_quantize** – Whether use sync quantize
 
-  - **factory_kwargs** – 用于注册数据缓冲区的参数。
-
+  - **factory_kwargs** – Arguments for register data buffer
 
 ```python
     forward(x_orig)
 ```
 
-记录x的最小值和最大值的运行值。
+Record the running minimum and maximum of x.
 
 
 ```python
 
     class horizon_plugin_pytorch.quantization.MovingAveragePerChannelMinMaxObserver(averaging_constant=0.01, ch_axis=0, dtype=torch.qint8, qscheme=torch.per_channel_symmetric, quant_min=None, quant_max=None, is_sync_quantize=False, factory_kwargs=None)
-```MovingAveragePerChannelMinMax Observer.
+```
+MovingAveragePerChannelMinMax Observer.
 
-基于每个通道的最小值和最大值的运行观察器模块，用于计算量化参数。
+Observer module for computing the quantization parameters based on the running per channel min and max values.
 
-该观察器使用张量的最小/最大统计信息来计算每个通道的量化参数。该模块记录传入张量的运行最小值和最大值，并使用这些统计数据来计算量化参数。
+This observer uses the tensor min/max statistics to compute the per channel quantization parameters. The module records the running minimum and maximum of incoming tensors, and uses this statistic to compute the quantization parameters.
 
 **Parameters**
 
-- **averaging_constant** - 最小/最大值的平均常数。
+  - **averaging_constant** – Averaging constant for min/max.
 
-- **ch_axis** - 通道轴
+  - **ch_axis** – Channel axis
 
-- **dtype** - 量化数据类型
+  - **dtype** – Quantized data type
 
-- **qscheme** - 要使用的量化方案，仅支持per_channel_symmetric
+  - **qscheme** – Quantization scheme to be used, Only support per_channel_symmetric
 
-- **quant_min** - 最小的量化值。
+  - **quant_min** – Minimum quantization value.
 
-- **quant_max** - 最大的量化值。
+  - **quant_max** – Maximum quantization value.
 
-- **is_sync_quantize** - 是否使用同步量化
+  - **is_sync_quantize** – whether use sync quantize
 
-- **factory_kwargs** - 用于注册数据缓冲区的参数
+  - **factory_kwargs** – Arguments for register data buffer
 
 ```python
     forward(x_orig)
 ```
 
-定义每次调用时执行的计算。
+Defines the computation performed at every call.
 
-应该由所有子类重写。
+Should be overridden by all subclasses.
 
-:::info 小技巧
+:::info tips
 
-虽然向前传递步骤的制作需要在此函数中定义，但应该之后调用Module实例而不是此函数，因为前者会处理运行注册的钩子，而后者会静默地忽略它们。
+  Although the recipe for forward pass needs to be defined within this function, one should call the Module instance afterwards instead of this since the former takes care of running the registered hooks while the latter silently ignores them.
 :::
 
 
@@ -420,7 +432,10 @@ Quantization training is generally more challenging than training pure floating-
 
 ### Process and Examples
 
-Although the quantization training tool does not require users to start from a pre-trained floating-point model, experience has shown that starting quantization training from a pre-trained high-precision floating-point model can greatly reduce the difficulty of quantization training.from horizon_plugin_pytorch.quantization import get_default_qconfig
+Although the quantization training tool does not require users to start from a pre-trained floating-point model, experience has shown that starting quantization training from a pre-trained high-precision floating-point model can greatly reduce the difficulty of quantization training.
+
+```python
+from horizon_plugin_pytorch.quantization import get_default_qconfig
 # Convert the model to QAT state
 default_qat_8bit_fake_quant_qconfig = get_default_qconfig(
     activation_fake_quant="fake_quant",
@@ -562,7 +577,8 @@ Although the gradient of round is 0, researchers have found through experiments 
 ```python
 def round_ste(x: Tensor):
     return (x.round() - x).detach() + x
-```Please refer to `default_qat_8bit_lsq_quant_qconfig` and its related interfaces for instructions on how to use the tool.
+```
+Please refer to `default_qat_8bit_lsq_quant_qconfig` and its related interfaces for instructions on how to use the tool.
 
 Users who are interested in further understanding can refer to the following paper: [**Learned Step Size Quantization**](<https://arxiv.org/abs/1902.08153>)
 
@@ -645,7 +661,7 @@ def prepare_qat_fx(
     """
 ```
 
-```python
+
 `horizon_plugin_pytorch.utils.onnx_helper.export_to_onnx`
 
 Export the `onnx` model to integrate with `hb_mapper`.
@@ -675,17 +691,19 @@ def export_to_onnx(
     custom_opsets=None,
     enable_onnx_checker=False,
 ):
-"""This interface is basically the same as torch.onnx.export, hiding the parameters that do not need modification. The parameters that need attention are:
-    `model`: The model to be exported
-    `args`: Model input for tracing the model
-    `f`: Filename or file descriptor for saving the onnx file
-    `operator_export_type`: Operator export type
-        1. For non-heterogeneous models, onnx is only used for visualization and does not need to be guaranteed to be actually available. The default value is OperatorExportTypes.ONNX_FALLTHROUGH.
-        2. For heterogeneous models, onnx needs to be guaranteed to be actually available, and None is used to ensure that the exported operator is a standard onnx operator.
-    `opset_version`: Can only be 11. horizon_plugin_pytorch has registered specific mapping rules in opset 11.
-    Note: If you use the public torch.onnx.export, make sure the above parameters are set correctly, 
-    and import horizon_plugin_pytorch.utils._register_onnx_ops to register specific mapping rules in opset 11.
+    """This interface is basically the same as torch.onnx.export, hiding the parameters that do not need modification. The parameters that need attention are:
+        `model`: The model to be exported
+        `args`: Model input for tracing the model
+        `f`: Filename or file descriptor for saving the onnx file
+        `operator_export_type`: Operator export type
+            1. For non-heterogeneous models, onnx is only used for visualization and does not need to be guaranteed to be actually available. The default value is OperatorExportTypes.ONNX_FALLTHROUGH.
+            2. For heterogeneous models, onnx needs to be guaranteed to be actually available, and None is used to ensure that the exported operator is a standard onnx operator.
+        `opset_version`: Can only be 11. horizon_plugin_pytorch has registered specific mapping rules in opset 11.
+        Note: If you use the public torch.onnx.export, make sure the above parameters are set correctly, 
+        and import horizon_plugin_pytorch.utils._register_onnx_ops to register specific mapping rules in opset 11.
 """
+```
+
 `horizon_plugin_pytorch.quantization.convert_fx`
 
 You can reuse `convert_fx` to convert the quantized fake quantization model into a heterogeneous quantization model for model accuracy evaluation.
@@ -859,7 +877,7 @@ qat_model = prepare_qat_fx(
     hybrid_dict={
         "module_name": ["conv1.conv", "conv3"],
         "module_type": [_SeluModule],
-    },},
+    },
 )
 
 load_observer_params(calibration_model, qat_model)
@@ -956,59 +974,69 @@ HybridModel(
 (selu_2_input_dequant): DeQuantStub()
 )
 
+
 def forward(self, input):
     input_1 = input
-    quant = self.quant(input_1)
-    input_1 = None
-    conv0 = self.conv0(quant)
-    quant = None
-    identity = self.identity(conv0)
-    conv0 = None
-    prelu_input_dequant_0 = self.prelu_input_dequant(identity)
-    identity = None
-    prelu = self.prelu(prelu_input_dequant_0)
-    prelu_input_dequant_0 = None
-    selu = torch.nn.functional.selu(prelu, inplace=False)
-    prelu = None
-    conv1_conv = self.conv1.conv(selu)
-    selu = None
-    conv1_prelu = self.conv1.prelu(conv1_conv)
-    conv1_conv = None
-    selu_1 = torch.nn.functional.selu(conv1_prelu, inplace=False)
-    conv1_prelu = None使用 `model_profiler`，您需要按照以下步骤进行操作：
-
-1. 导入相关模块：
-
-```python
-from horizon_plugin_pytorch.model_profiler import model_profiler
+    quant = self.quant(input_1);  input_1 = None
+    conv0 = self.conv0(quant);  quant = None
+    identity = self.identity(conv0);  conv0 = None
+    prelu_input_dequant_0 = self.prelu_input_dequant(identity);  identity = None
+    prelu = self.prelu(prelu_input_dequant_0);  prelu_input_dequant_0 = None
+    selu = torch.nn.functional.selu(prelu, inplace = False);  prelu = None
+    conv1_conv = self.conv1.conv(selu);  selu = None
+    conv1_prelu = self.conv1.prelu(conv1_conv);  conv1_conv = None
+    selu_1 = torch.nn.functional.selu(conv1_prelu, inplace = False);  conv1_prelu = None
+    selu_1_activation_post_process = self.selu_1_activation_post_process(selu_1);  selu_1 = None
+    conv2 = self.conv2(selu_1_activation_post_process);  selu_1_activation_post_process = None
+    conv3_input_dequant_0 = self.conv3_input_dequant(conv2);  conv2 = None
+    conv3 = self.conv3(conv3_input_dequant_0);  conv3_input_dequant_0 = None
+    conv3_activation_post_process = self.conv3_activation_post_process(conv3);  conv3 = None
+    identity_1 = self.identity(conv3_activation_post_process);  conv3_activation_post_process = None
+    conv4 = self.conv4(identity_1);  identity_1 = None
+    selu_2_input_dequant_0 = self.selu_2_input_dequant(conv4);  conv4 = None
+    selu_2 = torch.nn.functional.selu(selu_2_input_dequant_0, inplace = False);  selu_2_input_dequant_0 = None
+    dequant = self.dequant(selu_2);  selu_2 = None
+    return dequant
 ```
 
-2. 创建 `model_profiler` 对象，并指定调用的模型和输入数据：
+The exported ONNX model shown in the image contains CPU operators highlighted in red circles.
 
-```python
-profiler = model_profiler(model, input_data)
-```
+## Guide to Analysis Tools
 
-3. 调用 `profiler.profile()` 方法开始分析：
+When encountering precision issues with QAT or quantized models, you can use various tools provided to analyze the models and identify precision drop points.
 
-```python
-profiler.profile()
-```
+![debug_tools](./image/expert/debug_tools.svg)
 
-4. 分析结果会保存到指定的文件夹中，默认为当前路径下的 `model_profiler_result`：
+### Overview
 
-```
-model_profiler_result
-├── model_profile.html  # 包含所有分析结果的 html 文件
-├── feature_similarity.png  # 相似度对比的结果图像
-├── raw_features.txt  # 统计量分析的结果文本文件
-└── weight_comparison.txt  # 权重比较的结果文本文件
-```
+The following table summarizes the usage interfaces and scenarios of various tools. Except for the model visualization tool, all other tools are in the `horizon_plugin_pytorch.utils.quant_profiler` package.
 
-5. 打开 `model_profile.html` 文件，即可查看所有分析结果。:::caution Caution
+| **Tool** | **Usage Interface/Method** | **Scenario** |
+|----------|---------------------------|--------------|
+| **Integration Interface** | model_profiler | Call other debug tools and display the results centrally in an HTML page;<br/>Currently, it calls similarity, statistics, shared op check, fuse check, weight comparison, and quantization configuration check tools. |
+| **Fuse Check** | check_unfused_operations | Check if there are op patterns in **floating-point models** that can be fused but are not fused. |
+| **Shared Op Check** | get_module_called_count | Check if there are shared-used ops in the model. |
+| **Quantization Configuration Check** | check_qconfig | Check if the quantization configuration in the QAT model meets expectations. |
+| **Model Visualization** | export_to_onnx <br/>export_quantized_onnx | Export ONNX models to view the model structure. **Does not support ONNX run**. |
+| **Similarity Comparison** | featuremap_similarity | Locate problematic ops when the precision of quantized models decreases. |
+| **Statistics** | get_raw_features /<br/>profile_featuremap | Output numerical features of each layer's output in the model to evaluate whether the current data distribution and quantization precision are suitable for quantization. |
+| **Model Weight Comparison** | compare_weights | Compare the similarity of weights in each layer of the model. |
+| **Step Quantization** | qconfig=None | When training QAT models is difficult, identify the bottleneck of precision loss by setting a part of the model to floating point. |
+| **Single Operator Conversion Precision Debugging** | set_preserve_qat_mode | When the precision of QAT model conversion to fixed point decreases, identify the bottleneck of precision loss by replacing some ops in the fixed-point model with QAT forms using this interface. |
+| **Heterogeneous Model Deployment Device Check** | check_deploy_device | Check whether each op runs on BPU or CPU as expected during the deployment of heterogeneous models. |
+| **Comparison of TorchScript and HBDK Results** | script_profile | Compare whether the results of each op in the fixed-point pt generated by horizon_plugin_pytorch and HBDK are consistent. |
+| **Comparison of Results of Different Versions of TorchScript** | compare_script_models | Compare the results of each op in the fixed-point pt generated by horizon_plugin_pytorch using different versions. |
+| **Model CUDA Memory Consumption Analysis Tool** | show_cuda_memory_consumption | Analyze the model's CUDA memory consumption to identify memory bottlenecks. |
 
-This interface involves the comparison between two models. In the fx mode, the model conversion process is defaultly inplace. If you need to use this tool, please manually deepcopy the original model before conversion. Otherwise, after conversion, two identical models will be incorrectly compared.
+### Integrated Interface {#a-name-integration-a}
+
+For convenience in usage and visualization, horizon_plugin_pytorch provides an integrated interface model_profiler. This interface invokes other debug tools and consolidates the results into an HTML page, where the results of all other debug tools are also simultaneously saved. Currently, it invokes several tools including similarity analysis, statistics, shared operation check, fuse check, weight comparison, and quantization configuration check.
+
+:::caution Note
+
+This interface involves the comparison between two models. In fx mode, the model conversion process is by default inplace. If you need to use this tool, please manually deepcopy the original model before conversion. Otherwise, after conversion, it will incorrectly compare two identical models.
 :::
+
 
 ```python
 # from horizon_plugin_pytorch.utils.quant_profiler import model_profiler
@@ -1051,7 +1079,9 @@ def model_profiler(
 Note:
 1) The parameters `model` and `example_inputs` are defined in the `model_profiler` interface. The `kwargs_dict` must not have definitions for these two parameters.
 2) The `out_dir` parameter in `kwargs_dict` will be replaced by the `out_dir` parameter in the `model_profiler` interface.
+    """
 ```
+
 Example usage:
 
 ```python
@@ -1091,7 +1121,7 @@ class Conv2dModule(nn.Module):
         bias=True,
         padding_mode="zeros",
     ):
-```        super().__init__()
+        super().__init__()
         self.conv2d = nn.Conv2d(
             in_channels,
             out_channels,
@@ -1132,6 +1162,7 @@ class TestFuseNet(nn.Module):
         self.relu = nn.ReLU()
         self.dequant = DeQuantStub()
 
+
     def forward(self, x, y):
         x = self.quantx(x)
         y = self.quanty(y)
@@ -1141,21 +1172,10 @@ class TestFuseNet(nn.Module):
         x = self.shared_conv(x)
         x = self.bn1(x)
         y = self.shared_conv(y)
-# Conversion
-```python
-y = self.bn2(y)
-x = self.sub.sub(x, y)
-x = self.relu(x)
-return self.dequant(x)
-```
-# Conversion
-
-```python
-y = self.bn2(y)
-x = self.sub.sub(x, y)
-x = self.relu(x)
-return self.dequant(x)
-```
+        y = self.bn2(y)
+        x = self.sub.sub(x, y)
+        x = self.relu(x)
+        return self.dequant(x)
 
 # **RDK X3** sets BERNOULLI2, **RDK Ultra** sets BAYES.
 set_march(March.BAYES)
@@ -1300,22 +1320,73 @@ class TestFuseNet(nn.Module):
         y = self.shared_conv(y)
         y = self.bn2(y)
         x = self.sub.sub(x, y)
+        x = self.relu(x)
 
-        return x`x = self.relu(x)` should be translated as `x = self.relu(x)` in English.
-print_tabulate: bool = True,
+        return x
+
+    def fuse_model(self):
+        self.convmod1.fuse_model()
+        self.convmod3.fuse_model()
+
+shape = np.random.randint(10, 20, size=4).tolist()
+data0 = torch.rand(size=shape)
+data1 = torch.rand(size=shape)
+float_net = TestFuseNet(shape[1])
+float_net.fuse_model()
+check_unfused_operations(float_net, (data0, data1))
+```
+
+The output result is as follows:
+
+```text
+name                 type
+-------------------  ------------------------------------------------
+shared_conv(shared)  <class 'torch.nn.modules.conv.Conv2d'>
+bn1                  <class 'torch.nn.modules.batchnorm.BatchNorm2d'>
+
+name                 type
+-------------------  ------------------------------------------------
+shared_conv(shared)  <class 'torch.nn.modules.conv.Conv2d'>
+bn2                  <class 'torch.nn.modules.batchnorm.BatchNorm2d'>
+
+name               type
+-----------------  --------------------------------------------------------------------------------
+convmod2.conv2d    <class 'torch.nn.modules.conv.Conv2d'>
+convmod2.bn_mod    <class 'torch.nn.modules.batchnorm.BatchNorm2d'>
+convmod2.add       <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.FloatFunctional'>
+convmod2.relu_mod  <class 'torch.nn.modules.activation.ReLU'>
+```
+
+Each group of patterns that can be fused but are not fused will be outputted in a tabular format, with the first column indicating the name of the module defined in the model, and the second column indicating the type of the module.
+
+### Shared Operation Check {#op-a-name-shared-op-check-a}
+
+This interface calculates and prints the number of times each operation is called in one forward pass of the model, thereby checking for shared operations in the model. If a module instance appears multiple times in the model with different names, the function will use the first name and record all calls under that name (you may see related warnings).
+
+```python
+# from horizon_plugin_pytorch.utils.quant_profiler import get_module_called_count
+def get_module_called_count(
+    model: torch.nn.Module,
+    example_inputs,
+    check_leaf_module: callable = None,
+    print_tabulate: bool = True,
 ) -> Dict[str, int]:
-"""Calculate the number of calls to leaf nodes in the model
+"""Calculate the number of calls to leaf nodes in the model.
 
-    Args:
-        model: The model
-        example_inputs: Model inputs
-        check_leaf_module: Check if the module is a leaf node. Default is None, using pre-defined
-        is_leaf_module, treat all ops defined in horizon_plugin_pytorch as well as unsupported floating point ops as leaf nodes.
-        print_tabulate: Whether to print the result. Default is True.
+    Parameters:
+        model: The model.
+        example_inputs: Input to the model.
+        check_leaf_module: Check whether the module is a leaf node. Default is None, 
+        using the predefined is_leaf_module, treating all defined operations in 
+        horizon_plugin_pytorch as well as unsupported floating point operations 
+        as leaf nodes.
+        print_tabulate: Whether to print the results. Default is True.
 
-    Returns:
-        Dict[str, int]: The name of each layer in the model and its corresponding number of calls.
+    Output:
+        Dict[str, int]: The name of each layer in the model and the corresponding 
+        number of calls.
 """
+
 ```
 
 Example usage:
@@ -1352,7 +1423,7 @@ class Net(nn.Module):
             ),
             nn.AvgPool2d(kernel_size=4),
             nn.Upsample(scale_factor=1.3, mode="bilinear"),
-```nn.UpsamplingBilinear2d(scale_factor=0.7),
+            nn.UpsamplingBilinear2d(scale_factor=0.7),
         )
         self.dequant_stub = DeQuantStub()
         self.float_ops = nn.Sequential(
@@ -1401,12 +1472,14 @@ quantized_ops.3               1
 quantized_ops.4               1
 quantized_ops.5               1
 quantized_ops.6               1
-quantized_ops.7               1quantized_ops.8               1
+quantized_ops.7               1
+quantized_ops.8               1
 dequant_stub                  1
 float_ops.0                   1
 float_ops.1                   1
 float_ops.2                   1
 float_ops.3                   1
+```
 
 ### Quantization Configuration Check {#a-name-qconfig-check-a}
 
@@ -1452,7 +1525,11 @@ def check_qconfig(
         out_dir: The path to save the result file `qconfig_info.txt`. If None, it will
         be saved in the current path.
     """
-```import numpy as np
+```
+Example usage:
+
+```python
+import numpy as np
 import torch
 from horizon_plugin_pytorch import nn as horizon_nn
 from horizon_plugin_pytorch.dtype import qint16
@@ -1620,28 +1697,31 @@ Please check if these OPs qconfigs are expected..
 
 The output txt file contains three tables in the following order:
 
-- Quantization information for each layer, from left to right columns represent:
+    - Quantization information for each layer, from left to right columns represent:
 
-    - Module Name: the name of each module defined in the model
-    - Module Type: the actual type of each module
-    - Input dtype: the input type of each module
-    - out dtype: the output type of each module
-    - ch_axis: the dimension on which the quantization is performed. -1 indicates per-tensor quantization; if qconfig=None is displayed, it means that the module does not have a qconfig and will not be quantized
+        - Module Name: the name of each module defined in the model
+        - Module Type: the actual type of each module
+        - Input dtype: the input type of each module
+        - out dtype: the output type of each module
+        - ch_axis: the dimension on which the quantization is performed. -1 indicates per-tensor quantization; if qconfig=None is displayed, it means that the module does not have a qconfig and will not be quantized
 
-- Quantization information for the weights in each layer, from left to right columns represent:
+    - Quantization information for the weights in each layer, from left to right columns represent:
 
-    - Module Name: the name of each module defined in the model
-    - Module Type: the actual type of each module
-    - weight dtype: the quantization precision used for the weights, currently only support qint8 quantization
-    - ch_axis: the dimension on which the quantization is performed. -1 indicates per-tensor quantization; by default, weights are quantized on the 0th dimension. If qconfig=None is displayed, it means that the weights of the module do not have a qconfig and will not be quantized
+        - Module Name: the name of each module defined in the model
+        - Module Type: the actual type of each module
+        - weight dtype: the quantization precision used for the weights, currently only support qint8 quantization
+        - ch_axis: the dimension on which the quantization is performed. -1 indicates per-tensor quantization; by default, weights are quantized on the 0th dimension. If qconfig=None is displayed, it means that the weights of the module do not have a qconfig and will not be quantized
 
-- Modules in the model with special quantization configurations (does not indicate configuration errors, need to be checked one by one). This table will also be displayed on the screen.
+    - Modules in the model with special quantization configurations (does not indicate configuration errors, need to be checked one by one). This table will also be displayed on the screen.
 
-    - Module Name: the name of each module defined in the model
-    - Module Type: the actual type of each module
-    - Msg: special quantization configuration
+        - Module Name: the name of each module defined in the model
+        - Module Type: the actual type of each module
+        - Msg: special quantization configuration
 
-- Screen outputPlease check if these OPs qconfigs are expected..
+- Screen output
+
+    ```text
+    Please check if these OPs qconfigs are expected..
     +---------------+----------------------------------------------------------------------------+------------------------------------------------------------------+
     | Module Name   | Module Type                                                                | Msg                                                              |
     |---------------+----------------------------------------------------------------------------+------------------------------------------------------------------|
@@ -1653,6 +1733,7 @@ The output txt file contains three tables in the following order:
     | sub           | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | input dtype ['qint8', 'qint8'] is not same with out dtype qint16 |
     | sub           | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | Fixed scale 3.0517578125e-05                                     |
     +---------------+----------------------------------------------------------------------------+------------------------------------------------------------------+
+```
 
 ### Visualization: ONNX Model Visualization{#onnx-a-name-onnx-a}
 
@@ -1696,8 +1777,9 @@ export_quantized_onnx(
     keep_initializers_as_inputs=None,
     custom_opsets=None,
 )
+```
 
-The meanings of the parameters are consistent with `torch.onnx.export`, except for the parameter `operator_export_type=OperatorExportTypes.ONNX_FALLTHROUGH`.
+The meanings of the parameters are consistent with `torch.onnx.export`, except for the parameter `operator_export_type=OperatorExportTypes.ONNX_FALLTHROUGH` .
 
 Note when using:
 
@@ -1737,7 +1819,7 @@ from horizon_plugin_pytorch.utils.onnx_helper import (
 
 class Net(nn.Module):
     def __init__(self, quant=False, share_op=True):
-```super(Net, self).__init__()
+        super(Net, self).__init__()
 
         self.quant_stubx = QuantStub()
         self.quant_stuby = QuantStub()
@@ -1781,40 +1863,13 @@ class Net(nn.Module):
             x = self.float_ops(x)
         return x
 
-# Set **RDK X3** to BERNOULLI2 and **RDK Ultra** to BAYES.
+# **RDK X3** set BERNOULLI2， **RDK Ultra** set as BAYES。
 set_march(March.BAYES)
 device = torch.device("cuda")
 float_net = Net(quant=True, share_op=True).to(device)
 float_net2 = deepcopy(float_net)
 qat_net = prepare_qat_fx(
-```
-def featuremap_similarity(
-    model1: torch.nn.Module,
-    model2: torch.nn.Module,
-    inputs: Any,
-    similarity_func: Union[str, Callable] = "Cosine",
-    threshold: Optional[Real] = None,
-    devices: Union[torch.device, tuple, None] = None,
-    out_dir: Optional[str] = None,
-)
-```
-
-**Description:**
-
-The `featuremap_similarity` function calculates and compares the similarity of each layer's output feature in two input models. The input models can be floating-point models, fused models, calibrated models, QAT models, or quantized models.
-
-**Parameters:**
-
-- `model1`: The first input model, which can be a floating-point model, fused model, calibrated model, QAT model, or quantized model.
-- `model2`: The second input model, which can be a floating-point model, fused model, calibrated model, QAT model, or quantized model.
-- `inputs`: The input to the models.
-- `similarity_func`: The method used to calculate the similarity. The default is cosine similarity (`Cosine`). Other options include `Cosine` and a custom callable function.
-- `threshold`: The similarity threshold used for filtering. If a threshold is provided, only the layers with a similarity below the threshold will be displayed.
-- `devices`: The device(s) to be used for running the models. It can be a single device or a tuple of devices. If `None`, the models will be run on the same device as `inputs`.
-- `out_dir`: The directory path to save the similarity result as a CSV file. If `None`, the result will not be saved.
-
-```python
-float_net2, {"": default_qat_8bit_fake_quant_qconfig}
+    float_net2, {"": default_qat_8bit_fake_quant_qconfig}
 )
 qat_net(data, data)
 qat_net2 = deepcopy(qat_net)
@@ -1827,6 +1882,247 @@ export_to_onnx(float_net, (data, data), "float_test.onnx")
 export_to_onnx(qat_net, (data, data), "qat_test.onnx")
 export_quantized_onnx(quantized_net, (data, data), "quantized_test.onnx")
 ```
+### Similarity Comparison {#a-name-similarity-a}
+
+When there is a significant decrease in accuracy of a fixed-point model compared to a QAT model, you can use the similarity comparison tool to compare the similarity of the output of each layer in the model, quickly identifying which op is causing the accuracy drop.
+
+:::caution Note
+
+- If the output of a certain layer is all zeros, the similarity result will also be 0 when using cosine similarity calculation. At this time, you can check if the output of this layer is all zeros, or confirm whether the output is the same based on indicators like printed atol. If the output of a certain layer is completely identical, the similarity result will be inf when using signal-to-noise ratio calculation;
+
+- If device=None, the tool will not move the model and input data, you need to manually ensure that the model and input data are on the same device;
+
+- Any two-stage model comparisons are supported in any input order, on any two devices. It is recommended to input in the order of float/qat/quantized, such as (float, qat) or (qat, quantized). If the order is (qat, float), there is no impact on similarity and per-op error, but the per-op error under the same input in the results may have bias, because it is impossible to generate inputs that correspond exactly to the float model for the QAT model. In addition, because the QAT model parameters change after training, directly comparing the similarity between the float model and the QAT model after training has little reference significance, so it is recommended to compare the similarity between the float model and the QAT model after calibration but before training;
+
+- In fx mode, the model conversion process is by default inplace. If you need to use the similarity tool, please manually deepcopy the original model before conversion. Otherwise, after conversion, the similarity of two identical models will be incorrectly compared.
+:::
+
+```python
+# from horizon_plugin_pytorch.utils.quant_profiler import featuremap_similarity
+
+def featuremap_similarity(
+    model1: torch.nn.Module,
+    model2: torch.nn.Module,
+    inputs: Any,
+    similarity_func: Union[str, Callable] = "Cosine",
+    threshold: Optional[Real] = None,
+    devices: Union[torch.device, tuple, None] = None,
+    out_dir: Optional[str] = None,
+)
+"""
+    Function for comparing the similarity of feature maps between two input models, 
+    calculating and comparing the similarity of each layer's output features. 
+    The input models can be floating-point models, models after operator fusion, 
+    calibrated models, QAT models, or fixed-point models.
+
+    Parameters:
+        model1: Can be a floating-point model, a model after operator fusion, 
+                a calibrated model, a QAT model, or a fixed-point model.
+        model2: Can be a floating-point model, a model after operator fusion, 
+                a calibrated model, a QAT model, or a fixed-point model.
+        inputs: Model input.
+        similarity_func: The method for calculating similarity. 
+                         Defaults to Cosine similarity. Supports Cosine/MSE/L1/KL/SQNR/Custom similarity calculation function. 
+                         If it is a custom similarity function, it is best to return a constant or a tensor with only one value, 
+                         otherwise, the displayed results may not meet expectations.
+        threshold: Threshold. Defaults to None, will set to different default thresholds 
+                   according to different similarity calculation methods. 
+                   If you pass in a value, depending on the similarity comparison method, 
+                   values exceeding or below this threshold and corresponding op similarity information will be printed on the screen.
+        devices: Specifies the device on which the model is to forward during similarity calculation. 
+                 If None, forward on the device where the model input is located by default; 
+                 If there is only one parameter such as torch.device("cpu"), 
+                 both models will be moved to the specified device for forward; 
+                 If two values are specified such as (torch.device("cpu"), torch.device("cuda")), 
+                 the two models will be moved to the corresponding device for forward respectively. 
+                 Generally used to compare intermediate results of the same model and stage on CPU/GPU.
+        out_dir: Specify the path for output result files and images. Defaults to None, 
+                 saving to the current path.
+
+    Output:
+        Output is a list, each item in the list is a sublist representing the similarity information of each layer, 
+        formatted as [index, module name, module type, similarity, output scale, maximum error, 
+        per-op error (N scale), per-op error under the same input (N scale)]
+"""
+```
+
+使用示例：
+
+```python
+from copy import deepcopy
+
+import torch
+from torch import nn
+from torch.quantization import DeQuantStub, QuantStub
+import horizon_plugin_pytorch as horizon
+from horizon_plugin_pytorch import nn as horizon_nn
+from horizon_plugin_pytorch.quantization.quantize_fx import (
+    convert_fx,
+    prepare_qat_fx,
+)
+from horizon_plugin_pytorch.quantization.qconfig import (
+    default_qat_8bit_fake_quant_qconfig,
+)
+from horizon_plugin_pytorch.march import March, set_march
+from horizon_plugin_pytorch.nn.quantized import FloatFunctional
+from horizon_plugin_pytorch.utils.quant_profiler import featuremap_similarity
+
+class Net(nn.Module):
+    def __init__(self, quant=False, share_op=True):
+        super(Net, self).__init__()
+
+        self.quant_stubx = QuantStub()
+        self.quant_stuby = QuantStub()
+        self.mul_op = FloatFunctional()
+        self.cat_op = FloatFunctional()
+        self.quantized_ops = nn.Sequential(
+            nn.ReLU(),
+            nn.Sigmoid(),
+            nn.Softmax(),
+            nn.SiLU(),
+            horizon_nn.Interpolate(
+                scale_factor=2, recompute_scale_factor=True
+            ),
+            horizon_nn.Interpolate(
+                scale_factor=2.3, recompute_scale_factor=True
+            ),
+            nn.AvgPool2d(kernel_size=4),
+            nn.Upsample(scale_factor=1.3, mode="bilinear"),
+            nn.UpsamplingBilinear2d(scale_factor=0.7),
+        )
+        self.dequant_stub = DeQuantStub()
+        self.float_ops = nn.Sequential(
+            nn.Tanh(),
+            nn.LeakyReLU(),
+            nn.PReLU(),
+            nn.UpsamplingNearest2d(scale_factor=0.7),
+        )
+        self.quant = quant
+        self.share_op = share_op
+
+    def forward(self, x, y):
+        x = self.quant_stubx(x)
+        y = self.quant_stuby(y)
+        z = self.mul_op.mul(x, y)
+        x = self.cat_op.cat((x, y), dim=1)
+        if self.share_op:
+            x = self.cat_op.cat((x, y), dim=1)
+        x = self.quantized_ops(x)
+        x = self.dequant_stub(x)
+        if not self.quant:
+            x = self.float_ops(x)
+        return x
+
+# **RDK X3** set BERNOULLI2， **RDK Ultra** set as BAYES。
+set_march(March.BAYES)
+device = torch.device("cuda")
+float_net = Net(quant=True, share_op=True).to(device)
+# fx transformations are all inplace modifications. If you need to compare similarity, you need to manually deepcopy the model before conversion.
+float_net2 = deepcopy(float_net)
+qat_net = prepare_qat_fx(
+    float_net2, {"": default_qat_8bit_fake_quant_qconfig}
+)
+qat_net(data, data)
+qat_net2 = deepcopy(qat_net)
+bpu_net = convert_fx(qat_net2)
+data = torch.arange(1 * 3 * 4 * 4) / 100 + 1
+data = data.reshape((1, 3, 4, 4))
+data = data.to(torch.float32).to(device)
+featuremap_similarity(qat_net, bpu_net, (data, data))
+```
+After running, the following files will be generated in the current directory or the directory specified by the `out_dir` parameter:
+
+- similarity.txt: Printed in table format, it displays the similarity and per-op error results of each layer in the order of model `forward`. Each column in the table from left to right represents:
+
+    - Index: Index, starting from 0, it represents the numbering of each op in the model according to the forward order. It has no practical significance and is used for the horizontal axis numbering in the similarity image.
+
+    - Module Name: The name used to define the op in the model, such as backbone.mod1.conv; Different formats of suffixes represent different meanings:
+        
+        - If the module name has the suffix '(I)', it indicates that the op is `Identity` in one of the models.
+        
+        - If the module name has the suffix '(I vs I)', it indicates that the op is `Identity` in both of the compared models.
+        
+        - If the module name has the suffix '(i)' (i >= 1), it indicates that the layer is a shared op, and it has been shared i times, currently it is the i+1th call. When a shared op is called for the first time, it is the same as other ops and does not have a suffix.
+
+    - Module Type: The type of the op, such as torch.nn.Conv2d, horizon_plugin_pytorch.nn.qat.stubs.QuantStub, etc.
+
+    - Similarity: The similarity of the corresponding op output in the two models. Generally, if the similarity of a certain layer suddenly decreases significantly and does not rise subsequently, it is likely that the decrease in model accuracy is caused by that layer. Further analysis of that layer can be done in conjunction with statistical tools.
+
+    - qscale: The scale value of the op in the quantized model; if it is per-channel quantization, it will not be output.
+
+    - Acc Error(float atol): The maximum difference between the corresponding op outputs in the two models, `Acc Error = N * qscale`.
+
+    - Acc Error(N out_qscale): The maximum difference in scale of the corresponding op outputs in the two models.
+
+    - Op Error with Same Input (N out_qscale): If the inputs of the corresponding op in the two models are completely the same (excluding the influence of cumulative errors), the maximum difference in scale of the outputs. Theoretically, the per-op error under the same input should all be within a few scales. If the difference is large, it indicates that there may be problems with the op transformation causing significant differences in results.
+
+    ```text
+        ---------------------------------------------------------------
+        Note:
+        * Suffix '(I)' means this layer is Identity in one model
+        * Suffix '(I vs I)' means this layer is Identity in both models
+        * Suffix '(i)'(i >= 1) means this op is shared i times
+        ---------------------------------------------------------------
+        +---------+----------------------------+----------------------------------------------------------------------------+--------------+-----------+----------------+------------------+------------------------+
+        | Index   | Module Name                | Module Type                                                                | Similarity   | qscale    | Acc Error      | Acc Error        | Op Error with Same     |
+        |         |                            |                                                                            |              |           | (float atol)   | (N out_qscale)   | Input (N out_qscale)   |
+        |---------+----------------------------+----------------------------------------------------------------------------+--------------+-----------+----------------+------------------+------------------------|
+        | 0       | quant_stubx                | <class 'horizon_plugin_pytorch.nn.qat.stubs.QuantStub'>                    | 1.0000000    | 0.0115294 | 0.0000000      | 0                | 0                      |
+        | 1       | quant_stuby                | <class 'horizon_plugin_pytorch.nn.qat.stubs.QuantStub'>                    | 1.0000000    | 0.0115294 | 0.0000000      | 0                | 0                      |
+        | 2       | mul_op                     | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 0.9999989    | 0.0168156 | 0.0168156      | 1                | 1                      |
+        | 3       | cat_op                     | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 0.9999971    | 0.0167490 | 0.0334979      | 2                | 0                      |
+        | 4       | cat_op(1)                  | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 0.9999980    | 0.0167490 | 0.0334979      | 2                | 0                      |
+        | 5       | quantized_ops.0            | <class 'horizon_plugin_pytorch.nn.qat.relu.ReLU'>                          | 0.9999980    | 0.0167490 | 0.0334979      | 2                | 0                      |
+        | 6       | quantized_ops.1            | <class 'horizon_plugin_pytorch.nn.qat.segment_lut.SegmentLUT'>             | 1.0000000    | 0.0070079 | 0.0000000      | 0                | 0                      |
+        | 7       | quantized_ops.2.sub        | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 0.9999999    | 0.0000041 | 0.0000041      | 1                | 1                      |
+        | 8       | quantized_ops.2.exp        | <class 'horizon_plugin_pytorch.nn.qat.segment_lut.SegmentLUT'>             | 1.0000000    | 0.0000305 | 0.0000305      | 1                | 1                      |
+        | 9       | quantized_ops.2.sum        | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 1.0000000    | 0.0002541 | 0.0005081      | 2                | 2                      |
+        | 10      | quantized_ops.2.reciprocal | <class 'horizon_plugin_pytorch.nn.qat.segment_lut.SegmentLUT'>             | 1.0000001    | 0.0000037 | 0.0000186      | 5                | 5                      |
+        | 11      | quantized_ops.2.mul        | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 1.0000000    | 0.0009545 | 0.0000000      | 0                | 0                      |
+        | 12      | quantized_ops.3            | <class 'horizon_plugin_pytorch.nn.qat.segment_lut.SegmentLUT'>             | 1.0000000    | 0.0005042 | 0.0000000      | 0                | 0                      |
+        | 13      | quantized_ops.4            | <class 'horizon_plugin_pytorch.nn.qat.interpolate.Interpolate'>            | 1.0000000    | 0.0005042 | 0.0005042      | 1                | 1                      |
+        | 14      | quantized_ops.5            | <class 'horizon_plugin_pytorch.nn.qat.interpolate.Interpolate'>            | 0.9999999    | 0.0005042 | 0.0005042      | 1                | 0                      |
+        | 15      | quantized_ops.6            | <class 'horizon_plugin_pytorch.nn.qat.avg_pool2d.AvgPool2d'>               | 0.9999995    | 0.0005022 | 0.0005022      | 1                | 1                      |
+        | 16      | quantized_ops.7            | <class 'horizon_plugin_pytorch.nn.qat.upsampling.Upsample'>                | 0.9999998    | 0.0005022 | 0.0005022      | 1                | 0                      |
+        | 17      | quantized_ops.8            | <class 'horizon_plugin_pytorch.nn.qat.upsampling.UpsamplingBilinear2d'>    | 1.0000000    | 0.0005022 | 0.0000000      | 0                | 0                      |
+        | 18      | dequant_stub               | <class 'horizon_plugin_pytorch.nn.qat.stubs.DeQuantStub'>                  | 1.0000000    |           | 0.0000000      | 0                | 0                      |
+        +---------+----------------------------+----------------------------------------------------------------------------+--------------+-----------+----------------+------------------+------------------------+
+    ```
+
+- ordered_op_error_similarity.txt: Similarly printed in table format, the results are sorted in descending order by **per-op error under the same input**, making it easier for you to quickly locate which op has a larger conversion error. The meaning of each column in the table is the same as similarity.txt.
+
+    ```text
+        ---------------------------------------------------------------
+        Note:
+        * Suffix '(I)' means this layer is Identity in one model
+        * Suffix '(I vs I)' means this layer is Identity in both models
+        * Suffix '(i)'(i >= 1) means this op is shared i times
+        ---------------------------------------------------------------
+        +---------+----------------------------+----------------------------------------------------------------------------+--------------+-----------+----------------+------------------+------------------------+
+        | Index   | Module Name                | Module Type                                                                | Similarity   | qscale    | Acc Error      | Acc Error        | Op Error with Same     |
+        |         |                            |                                                                            |              |           | (float atol)   | (N out_qscale)   | Input (N out_qscale)   |
+        |---------+----------------------------+----------------------------------------------------------------------------+--------------+-----------+----------------+------------------+------------------------|
+        | 10      | quantized_ops.2.reciprocal | <class 'horizon_plugin_pytorch.nn.qat.segment_lut.SegmentLUT'>             | 1.0000001    | 0.0000037 | 0.0000186      | 5                | 5                      |
+        | 9       | quantized_ops.2.sum        | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 1.0000000    | 0.0002541 | 0.0005081      | 2                | 2                      |
+        | 2       | mul_op                     | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 0.9999989    | 0.0168156 | 0.0168156      | 1                | 1                      |
+        | 7       | quantized_ops.2.sub        | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 0.9999999    | 0.0000041 | 0.0000041      | 1                | 1                      |
+        | 8       | quantized_ops.2.exp        | <class 'horizon_plugin_pytorch.nn.qat.segment_lut.SegmentLUT'>             | 1.0000000    | 0.0000305 | 0.0000305      | 1                | 1                      |
+        | 13      | quantized_ops.4            | <class 'horizon_plugin_pytorch.nn.qat.interpolate.Interpolate'>            | 1.0000000    | 0.0005042 | 0.0005042      | 1                | 1                      |
+        | 15      | quantized_ops.6            | <class 'horizon_plugin_pytorch.nn.qat.avg_pool2d.AvgPool2d'>               | 0.9999995    | 0.0005022 | 0.0005022      | 1                | 1                      |
+        | 0       | quant_stubx                | <class 'horizon_plugin_pytorch.nn.qat.stubs.QuantStub'>                    | 1.0000000    | 0.0115294 | 0.0000000      | 0                | 0                      |
+        | 1       | quant_stuby                | <class 'horizon_plugin_pytorch.nn.qat.stubs.QuantStub'>                    | 1.0000000    | 0.0115294 | 0.0000000      | 0                | 0                      |
+        | 3       | cat_op                     | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 0.9999971    | 0.0167490 | 0.0334979      | 2                | 0                      |
+        | 4       | cat_op(1)                  | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 0.9999980    | 0.0167490 | 0.0334979      | 2                | 0                      |
+        | 5       | quantized_ops.0            | <class 'horizon_plugin_pytorch.nn.qat.relu.ReLU'>                          | 0.9999980    | 0.0167490 | 0.0334979      | 2                | 0                      |
+        | 6       | quantized_ops.1            | <class 'horizon_plugin_pytorch.nn.qat.segment_lut.SegmentLUT'>             | 1.0000000    | 0.0070079 | 0.0000000      | 0                | 0                      |
+        | 11      | quantized_ops.2.mul        | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 1.0000000    | 0.0009545 | 0.0000000      | 0                | 0                      |
+        | 12      | quantized_ops.3            | <class 'horizon_plugin_pytorch.nn.qat.segment_lut.SegmentLUT'>             | 1.0000000    | 0.0005042 | 0.0000000      | 0                | 0                      |
+        | 14      | quantized_ops.5            | <class 'horizon_plugin_pytorch.nn.qat.interpolate.Interpolate'>            | 0.9999999    | 0.0005042 | 0.0005042      | 1                | 0                      |
+        | 16      | quantized_ops.7            | <class 'horizon_plugin_pytorch.nn.qat.upsampling.Upsample'>                | 0.9999998    | 0.0005022 | 0.0005022      | 1                | 0                      |
+        | 17      | quantized_ops.8            | <class 'horizon_plugin_pytorch.nn.qat.upsampling.UpsamplingBilinear2d'>    | 1.0000000    | 0.0005022 | 0.0000000      | 0                | 0                      |
+        | 18      | dequant_stub               | <class 'horizon_plugin_pytorch.nn.qat.stubs.DeQuantStub'>                  | 1.0000000    |           | 0.0000000      | 0                | 0                      |
+        +---------+----------------------------+----------------------------------------------------------------------------+--------------+-----------+----------------+------------------+------------------------+
+    ```
 
 ### Similarity Comparison
 

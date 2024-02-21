@@ -93,12 +93,15 @@ The RDK Ultra Module core board hardware interface is compatible with the Jetson
 
 </TabItem>
 
-</Tabs>## Power interface
+</Tabs>
+
+## Power interface
 
 <Tabs groupId="rdk-type">
 <TabItem value="x3" label="RDK X3">
 
-The development board provides one USB Type C interface (Interface 1) as the power interface, and it needs to be powered by a power adapter that supports **5V/3A**. After connecting the power adapter to the development board, the **red power indicator light on the development board will light up**, indicating that the development board is powered normally.
+
+The development board provides one USB Type C interface (Interface 1) as the power supply interface, which requires the use of a power adapter supporting 5V/3A to power the development board. After connecting the power adapter to the development board, the development board's <font color='Red'>red</font> power indicator light illuminates, indicating that the development board is powered properly.
 
 </TabItem>
 
@@ -139,23 +142,52 @@ The development board provides one debug UART (Interface 3) for serial port logi
 - Stop bits: 1
 - Flow Control: None
 
-When connecting the UART, the DuPont wire needs to be connected to Interface 3 of the development board, and the USB serial adapter needs to be connected to the computer. After the connection is completed, it should look like the following figure:</TabItem>
+When connecting the UART, the DuPont wire needs to be connected to Interface 3 of the development board, and the USB serial adapter needs to be connected to the computer. After the connection is completed, it should look like the following figure:![image-20220612121707048](./image/hardware_interface/image-20220612121707048.png)
 
-<TabItem value="ultra" label="RDK Ultra">
 
-开发板提供一路千兆以太网接口(接口0)，支持1000BASE-T、100BASE-T标准，默认采用静态IP模式，IP地址`192.168.1.10`。如需确认开发板IP地址，可通过串口登录设备，并用`ifconfig`命令进行查看 `eth0`网口的配置：
+</TabItem>
+
+<TabItem value="x3md" label="RDK X3 Module">
+
+The RDK X3 Module carrier board provides one debugging interface (Interface 15). Hardware-wise, the core module debugging serial port is converted into a USB interface via the `CH340` chip, allowing users to perform various debugging tasks using this interface. The parameters of the computer serial port tool should be configured as follows:
+
+- Baud rate: 921600
+- Data bits: 8
+- Parity: None
+- Stop bits: 1
+- Flow Control: None
+
+Typically, when users use this interface for the first time, they need to install the CH340 driver on the computer. Users can search for the keyword `CH340 serial port driver` for downloading and installation.
+
+</TabItem>
+
+<TabItem value="ulrta" label="RDK Ultra">
+
+The RDK Ultra development board provides one debugging interface (Interface 5). Hardware-wise, the core module debugging serial port is converted into a USB interface via the `CH340` chip, allowing users to perform various debugging tasks using this interface. The parameters of the computer serial port tool should be configured as follows:
+
+- Baud rate: 921600
+- Data bits: 8
+- Parity: None
+- Stop bits: 1
+- Flow Control: None
+
+Typically, when users use this interface for the first time, they need to install the CH340 driver on the computer. Users can search for the keyword `CH340 serial port driver` for downloading and installation.
+
+</TabItem>
+
+</Tabs>
+
+
+## Ethernet Port
+
+<Tabs groupId="rdk-type">
+<TabItem value="x3" label="RDK X3">
+
+The development board provides one Gigabit Ethernet interface (Interface 7), supporting the 1000BASE-T and 100BASE-T standards. It defaults to static IP mode with the IP address `192.168.1.10`. To confirm the IP address of the development board, you can log in to the device via serial port and use the `ifconfig` command to view the configuration of the `eth0` interface:
+
 
 ```bash
-root@ubuntu:/# ifconfig 
-eth0      Link encap:Ethernet  HWaddr 00:11:22:6f:de:17  
-          inet addr:192.168.1.10  Bcast:192.168.1.255  Mask:255.255.255.0
-          inet6 addr: fe80::211:22ff:fe6f:de17/64 Scope:Link
-          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
-          RX packets:112 errors:0 dropped:0 overruns:0 frame:0
-          TX packets:112 errors:0 dropped:0 overruns:0 carrier:0
-          collisions:0 txqueuelen:1000 
-          RX bytes:7327 (7.3 KB)  TX bytes:7327 (7.3 KB)
-``````bash
+sunrise@ubuntu:/# ifconfig 
 eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
         inet 192.168.1.10  netmask 255.255.255.0  broadcast 192.168.1.255
         inet6 fe80::211:22ff:fe6f:de17  prefixlen 64  scopeid 0x20<link>
@@ -167,7 +199,7 @@ eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
         device interrupt 39  base 0xc000 
 ```
 
-开发板插入网线后，以太网驱动会建立连接，如果系统有如下打印，说明网线连接正常：
+If the system displays the following printout after inserting the Ethernet cable into the development board, it indicates that the Ethernet connection is normal:
 
 ```bash
 [13293.952661] st_gmac a5014000.ethernet eth0: Link is Down
@@ -177,20 +209,99 @@ eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
 
 </TabItem>
 
-</TabNavigation>
+<TabItem value="x3md" label="RDK X3 Module">
 
-```The development board provides one HDMI (Interface 9) display interface, which supports a maximum resolution of 1080P. The development board outputs the Ubuntu system desktop (Ubuntu Server version displays the logo icon) on the monitor through the HDMI interface. In addition, the HDMI interface also supports real-time display of camera and network streaming images.
+The development board provides one Gigabit Ethernet interface (Interface 6), supporting the 1000BASE-T and 100BASE-T standards. It defaults to static IP mode with the IP address `192.168.1.10`. To confirm the IP address of the development board, you can log in to the device via serial port and use the `ifconfig` command to view the configuration of the `eth0` interface:
 
-Currently, the HDMI interface supports the following display resolutions:
+```bash
+sunrise@ubuntu:/# ifconfig 
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.1.10  netmask 255.255.255.0  broadcast 192.168.1.255
+        inet6 fe80::211:22ff:fe6f:de17  prefixlen 64  scopeid 0x20<link>
+        ether 00:11:22:6f:de:17  txqueuelen 1000  (Ethernet)
+        RX packets 112  bytes 7327 (7.3 KB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 197  bytes 8678 (8.6 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+        device interrupt 39  base 0xc000 
+```
+
+If the system displays the following printout after inserting the Ethernet cable into the development board, it indicates that the Ethernet connection is normal:
+
+```bash
+[13293.952661] st_gmac a5014000.ethernet eth0: Link is Down
+[13295.062996] st_gmac a5014000.ethernet: Link is Up - 1000/Full 
+[13296.000750] st_gmac a5014000.ethernet eth0: Link is Up - 1Gbps/Full - flow control rx/tx
+```
+
+</TabItem>
+
+<TabItem value="ulrta" label="RDK Ultra">
+
+The development board provides one Gigabit Ethernet interface (Interface 4), supporting the 1000BASE-T and 100BASE-T standards. It defaults to static IP mode with the IP address `192.168.1.10`. To confirm the IP address of the development board, you can log in to the device via serial port and use the `ifconfig` command to view the configuration of the `eth0` interface:
+
+```bash
+sunrise@ubuntu:/# ifconfig 
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.1.10  netmask 255.255.255.0  broadcast 192.168.1.255
+        inet6 fe80::211:22ff:fe6f:de17  prefixlen 64  scopeid 0x20<link>
+        ether 00:11:22:6f:de:17  txqueuelen 1000  (Ethernet)
+        RX packets 112  bytes 7327 (7.3 KB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 197  bytes 8678 (8.6 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+        device interrupt 39  base 0xc000 
+```
+
+If the system displays the following printout after inserting the Ethernet cable into the development board, it indicates that the Ethernet connection is normal:
+
+```bash
+[13293.952661] st_gmac a5014000.ethernet eth0: Link is Down
+[13295.062996] st_gmac a5014000.ethernet: Link is Up - 1000/Full 
+[13296.000750] st_gmac a5014000.ethernet eth0: Link is Up - 1Gbps/Full - flow control rx/tx
+```
+
+</TabItem>
+
+</Tabs>
+
+## HDMI Interface {#hdmi_interface}
+
+<Tabs groupId="rdk-type">
+<TabItem value="x3" label="RDK X3">
+
+## HDMI Interface
+
+<Tabs groupId="rdk-type">
+<TabItem value="x3" label="RDK X3">
+
+The development board provides one HDMI display interface (Interface 9), supporting a maximum resolution of 1080P. The development board outputs the Ubuntu system desktop (Ubuntu Server version displaying logo icons) on the monitor via the HDMI interface. Additionally, the HDMI interface supports real-time display of camera and network stream images.
+
+The currently supported display resolutions for the HDMI interface are as follows:
 
 - 1920x1080
 - 1280x720
 - 1024x600
-- 800x480</TabItem>
+- 800x480
+
+</TabItem>
+
+<TabItem value="x3md" label="RDK X3 Module">
+
+The RDK X3 Module carrier board provides one HDMI display interface (Interface 2), supporting a maximum resolution of 1080P. The development board outputs the Ubuntu system desktop (Ubuntu Server version displaying logo icons) on the monitor via the HDMI interface. Additionally, the HDMI interface supports real-time display of camera and network stream images.
+
+The currently supported display resolutions for the HDMI interface are as follows:
+
+- 1920x1080
+- 1280x720
+- 1024x600
+- 800x480
+
+</TabItem>
 
 <TabItem value="ulrta" label="RDK Ultra">
 
-The RDK Ultra development board provides one HDMI display interface (Interface 2), supporting a maximum resolution of 1080p. After powering on the development board, the Ubuntu graphical interface will be output through the HDMI interface. With specific sample programs, the HDMI interface also supports preview display of cameras and video streams.
+The RDK Ultra development board provides one HDMI display interface (Interface 2), supporting a maximum resolution of 1080P. Upon powering on the development board, the Ubuntu graphical interface is output via the HDMI interface. With specific example programs, the HDMI interface also supports preview display of camera and video stream images.
 
 Currently, the HDMI interface only supports the 1080p60 display mode. More display modes will be supported in future software versions.
 
@@ -203,17 +314,20 @@ Currently, the HDMI interface only supports the 1080p60 display mode. More displ
 <Tabs groupId="rdk-type">
 <TabItem value="x3" label="RDK X3">
 
-Since the X3 chip only provides one USB interface, the development board implements multiple USB interfaces through hardware circuits to meet the users' needs for multiple USB device connections. The interface description is as follows:
+Due to the X3 chip providing only one USB interface, the development board implements multiple USB interface extensions through hardware circuits to meet the needs of multiple USB device connections. The interface descriptions are as follows:
 
-| Interface Type | Interface Number | Interface Quantity | Interface Description                                      |
-| -------------- | ---------------- | ------------------ | --------------------------------------------------------- |
-| Micro USB 2.0  | Interface 4      | 1                  | USB Device mode, used for connecting to the host for ADB, Fastboot, UVC, and other functions |
-| USB 2.0 Type A | Interface 5      | 2                  | USB Host mode, used for connecting USB 2.0 peripherals     |
-| USB 3.0 Type A | Interface 6      | 1                  | USB Host mode, used for connecting USB 3.0 peripherals     |
+| Interface Type    | Interface Number | Quantity | Interface Description                                       |
+| ----------------- | ---------------- | -------- | ------------------------------------------------------------ |
+| Micro USB 2.0     | Interface 4      | 1        | USB Device mode, used for connecting to the host to implement functions such as ADB, Fastboot, UVC, etc. |
+| USB 2.0 Type A    | Interface 5      | 2        | USB Host mode, used for connecting USB 2.0 peripherals      |
+| USB 3.0 Type A    | Interface 6      | 1        | USB Host mode, used for connecting USB 3.0 peripherals      |
 
-The USB host-to-device mode switching is completely implemented by the hardware circuitry. Users only need to connect the devices according to the logic in the table above.
+USB host and device mode switching is fully implemented by hardware circuits. Users only need to connect devices according to the logic in the table above.
 
-The USB host and device functions on the development board are exclusive. After a device is connected to the device interface, the host interface will automatically be disabled.
+The development board's USB Host and Device functions are mutually exclusive. When a device is connected to the Device interface, the Host interface will automatically become inactive.
+
+</TabItem>
+
 
 ### Using a USB Flash Drive
 
@@ -233,7 +347,9 @@ sunrise@ubuntu:/media/sda1$
 
 The USB Type A interfaces (Interfaces 5 and 6) on the development board support USB serial port adapter functionality. They can automatically detect the USB serial port adapter and create device nodes `/dev/ttyUSB*` or `/dev/ttyACM*` (the asterisk represents a number starting from 0). Users can refer to the [UART Usage](../python_development/40pin_user_guide/uart.md#40pin_uart_usage) section for instructions on using the serial port.
 
-</TabItem><TabItem value="x3md" label="RDK X3 Module">
+</TabItem>
+
+<TabItem value="x3md" label="RDK X3 Module">
 
 The RDK X3 core module only supports one USB3.0 interface. Therefore, the carrier board expands to 4 USB3.0 host interfaces and 1 Micro USB2.0 device interface through peripheral circuits and USB hubs, meeting the diverse USB interface requirements of users. The interface descriptions are as follows:
 
@@ -327,7 +443,19 @@ Selection Video Capture: crop_bounds, Left 0, Top 0, Width 1920, Height 1080, Fl
 Streaming Parameters Video Capture:
 Capabilities: timeperframe
 Frames per second: 30.000 (30/1)
-Read buffers: 0| No. | Sensor | Resolution | FOV | I2C Device Address |
+Read buffers: 0
+```
+
+## MIPI CSI{#mipi_port}
+
+<Tabs groupId="rdk-type">
+<TabItem value="x3" label="RDK X3">
+<iframe src="//player.bilibili.com/player.html?aid=700903305&bvid=BV1rm4y1E73q&cid=1196554333&page=7" scrolling="no" border="0" frameborder="no" framespacing="0" width="100%" height="500" allowfullscreen="true"> </iframe>
+
+The development board provides 1 MIPI CSI interface (Interface 2), which allows for the connection of MIPI cameras. Currently, the development board is compatible with multiple specifications of camera modules. The module models and specifications are as follows:
+
+
+| No. | Sensor | Resolution | FOV | I2C Device Address |
 | --- | ------ | ---------- | --- | ----------------- |
 | 1   | GC4663 | 400W       | H:104 V:70 D:113 | 0x29 |
 | 2   | JXF37  | 200W       | H:62  V:37 D:68   | 0x40 |
@@ -354,36 +482,62 @@ sunrise@ubuntu:~# sudo i2cdetect -y -r 1
 30: -- -- -- -- -- -- -- -- -- -- -- UU -- -- -- --
 40: 40 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-60: -- -- -- -- -- -- -- -- -- -- -- -- --The purchase method for the above Camera module can be referred to on the [purchase link](/hardware_development/rdk_x3_module/accessory).
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --                         
+```
+
+The purchase method for the above Camera module can be referred to on the [purchase link](/hardware_development/rdk_x3_module/accessory).
+
+</TabItem>
+
+<TabItem value="x3md" label="RDK X3 Module">
+
+The RDK X3 Module carrier board provides three sets of MIPI CSI interfaces for CAM 0/1/2, allowing for the simultaneous connection of three camera modules to meet the diverse needs of users. The specific descriptions are as follows:
+
+1. CAM 0/2 (Interfaces 16/17), using 15-pin FPC connectors, can directly connect to various camera modules such as Raspberry Pi's OV5647, IMX219, IMX477, etc.
+2. CAM 1 (Interface 11), using a 24-pin FPC connector, supports various camera modules such as F37, GC4663, IMX415, etc.
+
+The basic specifications of the camera modules are as follows:
+
+| Number | Sensor | Resolution | FOV              | I2C Device Address |
+| ------ | ------ | ---------- | ---------------- | ------------------ |
+| 1      | GC4663 | 4MP        | H:104 V:70 D:113 | 0x29               |
+| 2      | JXF37  | 2MP        | H:62  V:37 D:68  | 0x40               |
+| 3      | IMX219 | 8MP        | H:62  V:37 D:68  | 0x10               |
+| 4      | IMX477 | 12MP       | H:62  V:37 D:68  | 0x1a               |
+| 5      | OV5647 | 5MP        | H:62  V:37 D:68  | 0x36               |
+
+The purchase links for the above camera modules can be found [here](/hardware_development/rdk_x3_module/accessory).
 
 </TabItem>
 
 <TabItem value="ulrta" label="RDK Ultra">
 
-The RDK Ultra development board provides four camera interfaces, `CAM 0~3`, which can support the simultaneous connection of 4 MIPI camera modules. Please note the following:
+The RDK Ultra development board provides four camera interfaces labeled `CAM 0~3`, allowing for the simultaneous connection of four MIPI camera modules. Please note the following:
 
-1. CAM 0/2 (Interface 11/12) uses a 15-pin FPC connector and supports the connection of Raspberry Pi OV5647, IMX219, IMX477, and other camera modules.
-2. CAM 1/3 (Interface 13/14) uses a 24-pin FPC connector and supports the connection of F37, GC4663, IMX415, and other camera modules.
+1. CAM 0/2 (Interfaces 11/12), using 15-pin FPC connectors, support connection to camera modules such as Raspberry Pi's OV5647, IMX219, IMX477, etc.
+2. CAM 1/3 (Interfaces 13/14), using 24-pin FPC connectors, support connection to camera modules such as F37, GC4663, IMX415, etc.
 
 The specifications of the camera modules are as follows:
 
-| Index | Sensor  | Resolution | FOV              | I2C Device Address |
-| ----- | ------- | ---------- | ---------------- | ----------------- |
-| 1     | GC4663  | 4MP        | H:104 V:70 D:113 | 0x29              |
-| 2     | JXF37   | 2MP        | H:62  V:37 D:68  | 0x40              |
-| 3     | IMX219  | 8MP        | H:62  V:37 D:68  | 0x10              |
-| 4     | IMX477  | 12MP       | H:62  V:37 D:68  | 0x1a              |
-| 5     | OV5647  | 5MP        | H:62  V:37 D:68  | 0x36              |
+| Number | Sensor | Resolution | FOV              | I2C Device Address |
+| ------ | ------ | ---------- | ---------------- | ------------------ |
+| 1      | GC4663 | 4MP        | H:104 V:70 D:113 | 0x29               |
+| 2      | JXF37  | 2MP        | H:62  V:37 D:68  | 0x40               |
+| 3      | IMX219 | 8MP        | H:62  V:37 D:68  | 0x10               |
+| 4      | IMX477 | 12MP       | H:62  V:37 D:68  | 0x1a               |
+| 5      | OV5647 | 5MP        | H:62  V:37 D:68  | 0x36               |
 
-The purchase method for camera modules can be referred to on the community accessory page, [purchase link](https://developer.horizon.cc/accessory).
+The purchase links for the camera modules can be found on the community accessories page, [here](https://developer.horizon.cc/accessory).
 
 </TabItem>
 
 </Tabs>
 
 :::caution
-Important Note: It is strictly prohibited to plug or unplug the camera module without turning off the development board, as it may easily damage the camera module.
+Important: It is strictly prohibited to plug or unplug the camera while the development board is powered on, as it may damage the camera module.
 :::
+
 
 ## MIPI DSI Interface
 
@@ -444,6 +598,8 @@ The development board supports both onboard and external antennas for wireless n
 To convert the onboard antenna to an external antenna, use the following command: sed -i 's/trace/cable/g' /etc/init.d/hobot-wifi. Restart the system for the changes to take effect.
 To revert to the onboard antenna, use the following command: sed -i 's/cable/trace/g' /etc/init.d/hobot-wifi. Restart the system for the changes to take effect.
 :::
+
+</TabItem>
 
 </TabItem><TabItem value="x3md" label="RDK X3 Module">
 

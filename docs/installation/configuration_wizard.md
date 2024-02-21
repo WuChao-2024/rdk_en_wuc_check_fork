@@ -151,3 +151,7 @@ Step 1: Select the desired language environment(s) (multiple selection). Usually
 Step 2: Select the default language environment. For the Chinese language environment, select `zh_CN.UTF-8 UTF-8`. Press Enter to confirm and wait for the configuration to complete.
 
 Step 3: Restart the machine to apply the latest configuration. Execute `sudo reboot`.
+
+
+</TabItem>
+</Tabs>

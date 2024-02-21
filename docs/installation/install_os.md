@@ -30,7 +30,7 @@ After downloading, unzip the Ubuntu system image file, such as `ubuntu-preinstal
 **Version description:**
 
 - Version 2.0: Made based on the RDK Linux open source code package, supporting the full range of hardware such as RDK X3 Pai and X3 module.
-- Version 1.0: Historical version of X3 Pai, only supporting X3 Pai hardware, the system image name is `system_sdcard.img`
+- Version 1.0: Historical version of X3 Pai, only supporting X3 Pai hardware, the system image name is `system_sdcard.img`.
 
 </TabItem>
 

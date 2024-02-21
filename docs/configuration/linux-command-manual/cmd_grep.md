@@ -35,6 +35,8 @@ Similar commands include egrep, fgrep, rgrep.
 
 **Additional parameter explanations:**
 
+
+```shell
 - **-a or --text**: Do not ignore binary data.
 - **-A\<num> or --after-context=\<num>**: In addition to displaying the column that matches the pattern, display the lines after that line.
 - **-b or --byte-offset**: Before displaying the line that matches the pattern, indicate the number of the first character in that line.
@@ -48,8 +50,7 @@ Similar commands include egrep, fgrep, rgrep.
 - **-F or --fixed-regexp**: Treat the pattern as a list of fixed strings.
 - **-G or --basic-regexp**: Treat the pattern as a plain representation.
 - **-h or --no-filename**: Do not display the file name before the line that matches the pattern.
-```
-```- **-H or --with-filename**: Displays the file name before the line that matches the pattern.
+- **-H or --with-filename**: Displays the file name before the line that matches the pattern.
 - **-i or --ignore-case**: Ignores case differences in the pattern.
 - **-l or --file-with-matches**: Lists the file names that contain matches of the specified pattern.
 - **-L or --files-without-match**: Lists the file names that do not contain any matches of the specified pattern.
@@ -63,6 +64,8 @@ Similar commands include egrep, fgrep, rgrep.
 - **-w or --word-regexp**: Only displays whole words that match the pattern.
 - **-x --line-regexp**: Only displays whole lines that match the pattern.
 - **-y**: The same effect as specifying "-i".
+```
+
 
 **Regular expressions:**
 
@@ -83,6 +86,7 @@ x\{m,n\}  # Repeats the character 'x' at least 'm' times but no more than 'n' ti
 \w    # Matches word and digit characters, equivalent to [A-Za-z0-9]. Example: 'G\w*p' matches a word that starts with 'G', followed by zero or more word or digit characters, and ends with 'p'.
 \W    # Matches a non-word character. Example: '\W' matches any non-word character.
 \b    # Matches a word boundary. Example: '\bgrep\b' only matches the word 'grep'.
+```
 
 ## Common commands
 
@@ -97,7 +101,9 @@ Searches for a pattern in multiple files.
 
 ```shell
 grep "match_pattern" file_1 file_2 file_3 ...
-```Recursively search for lines matching the regular expression `pattern` in all files within the directory `dir`, and print the filenames and line numbers of the matching lines:
+```
+
+Recursively search for lines matching the regular expression `pattern` in all files within the directory `dir`, and print the filenames and line numbers of the matching lines:
 
 ```
 grep -r -n pattern dir/
