@@ -47,7 +47,7 @@ For the sake of execution speed in the process demonstration, we use the `cifar-
         visualize_model,
     )
     from horizon_plugin_pytorch.quantization.qconfig import (
-```default_calib_8bit_fake_quant_qconfig,
+        default_calib_8bit_fake_quant_qconfig,
         default_qat_8bit_fake_quant_qconfig,
         default_qat_8bit_weight_32bit_out_fake_quant_qconfig,
         default_calib_8bit_weight_32bit_out_fake_quant_qconfig,
