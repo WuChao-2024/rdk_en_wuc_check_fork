@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 ---
+
 # 1.2 System burning
 ```mdx-code-block
 import Tabs from '@theme/Tabs';
@@ -25,7 +26,7 @@ Click [**Download image**](http://sunrise.horizon.cc/downloads/os_images) to ent
 
 ![image-20230510143353330](./image/install_os/image-20230510143353330.png)
 
-After downloading, unzip the Ubuntu system image file, such as `ubuntu-preinstalled-desktop-arm64.img`
+After downloading, unzip the Ubuntu system image file, such as `ubuntu-preinstalled-desktop-arm64.img`.
 
 **Version description:**
 
@@ -45,7 +46,11 @@ After downloading, unzip the Ubuntu system image file, such as `ubuntu-preinstal
 **Version description:**
 
 - Version 2.0: Made based on the RDK Linux open source code package, supporting the full range of hardware such as RDK X3 Pai and X3 module.
-- Version 1.0: Historical version of X3 Pai, only supporting X3 Pai hardware, the system image name is `system_sdcard.img`<TabItem value="ulrta" label="RDK Ultra">
+- Version 1.0: Historical version of X3 Pai, only supporting X3 Pai hardware, the system image name is `system_sdcard.img`
+
+</TabItem>
+
+<TabItem value="ulrta" label="RDK Ultra">
 
 Click [**here**](http://sunrise.horizon.cc/downloads/os_images) to download the image. Go to the rdk_ultra folder and select the corresponding version to enter the download page. Taking the example of downloading version 1.0.0 of the system image:
 
@@ -274,10 +279,11 @@ RDK X3 Module supports two modes of system startup: eMMC mode and SD card mode.
 
 - To switch back to eMMC startup from SD card startup:
 
-   When the system is started from the SD card and the system has already been burned to the eMMC, execute the following command to restore the eMMC startup. Restart the system for the change to take effect.```
+   When the system is started from the SD card and the system has already been burned to the eMMC, execute the following command to restore the eMMC startup. Restart the system for the change to take effect.
+   ```
   sudo parted /dev/mmcblk0 set 2 boot on
   sudo reboot
-```
+  ```
 
 </TabItem>
 

@@ -270,10 +270,6 @@ If the system displays the following printout after inserting the Ethernet cable
 <Tabs groupId="rdk-type">
 <TabItem value="x3" label="RDK X3">
 
-## HDMI Interface
-
-<Tabs groupId="rdk-type">
-<TabItem value="x3" label="RDK X3">
 
 The development board provides one HDMI display interface (Interface 9), supporting a maximum resolution of 1080P. The development board outputs the Ubuntu system desktop (Ubuntu Server version displaying logo icons) on the monitor via the HDMI interface. Additionally, the HDMI interface supports real-time display of camera and network stream images.
 
@@ -325,9 +321,6 @@ Due to the X3 chip providing only one USB interface, the development board imple
 USB host and device mode switching is fully implemented by hardware circuits. Users only need to connect devices according to the logic in the table above.
 
 The development board's USB Host and Device functions are mutually exclusive. When a device is connected to the Device interface, the Host interface will automatically become inactive.
-
-</TabItem>
-
 
 ### Using a USB Flash Drive
 
@@ -556,7 +549,15 @@ For detailed instructions on how to use the MIPI DSI interface, please refer to 
 
 </TabItem>
 
-<TabItem value="ulrta" label="RDK Ultra">## Micro SD Interface
+<TabItem value="ulrta" label="RDK Ultra">
+
+No such interface.
+
+</TabItem>
+
+</Tabs>
+
+## Micro SD Interface
 
 <Tabs groupId="rdk-type">
 <TabItem value="x3" label="RDK X3">
@@ -601,7 +602,7 @@ To revert to the onboard antenna, use the following command: sed -i 's/cable/tra
 
 </TabItem>
 
-</TabItem><TabItem value="x3md" label="RDK X3 Module">
+<TabItem value="x3md" label="RDK X3 Module">
 
 The development board supports both on-board and external antenna configurations for wireless networking. In most cases, the on-board antenna can meet the usage requirements. However, when the development board is installed with a metal housing, an external antenna needs to be connected to enhance signal strength.
 
@@ -654,6 +655,7 @@ The RDK Ultra development board provides a set of 40-pin header interfaces (Inte
 
 </Tabs>
 
+
 ## Functional Control Interfaces
 
 <Tabs groupId="rdk-type">
@@ -695,7 +697,8 @@ The RDK Ultra development board provides a set of functional control interfaces 
 | 3          | FC_REC   | Force the development board into recovery mode | Use a jumper cap to short with GND |
 | 4          | GND      | Ground signal                        | GND                                        |
 | 5          | SYS_RST  | Used to reset the system              | Use a jumper cap to short with GND and then remove it to reset the system |
-| 6          | GND      | Ground signal                        | GND                                        || 7      | PWR_EN   | Power Enable Signal        | Short connect with GND using a jumper cap to turn off the power to the core board. |
+| 6          | GND      | Ground signal                        | GND                                        |
+| 7      | PWR_EN   | Power Enable Signal        | Short connect with GND using a jumper cap to turn off the power to the core board. |
 | 8      | GND      | GDN                        | GND                                 |
 
 
@@ -742,7 +745,9 @@ This interface is not available.
 
 </TabItem>
 
-</Tabs>## Bluetooth
+</Tabs>
+
+## Bluetooth
 
 <iframe src="//player.bilibili.com/player.html?aid=700903305&bvid=BV1rm4y1E73q&cid=1196557328&page=9" scrolling="no" border="0" frameborder="no" framespacing="0" width="100%" height="500" allowfullscreen="true"> </iframe>
 
@@ -789,7 +794,9 @@ Now, you can use a mobile phone or computer to scan for the Bluetooth device wit
 
 ![image-20220601175322650](./image/hardware_interface/image-20220601175322650.png)
 
-Next, test the active scanning function of Bluetooth. In the interactive interface of `bluetoothctl`, enter `scan on` to enable active scanning. It will periodically print nearby devices. You can see that my mobile phone device has been discovered. Enter `scan off` to disable the scanning function and summarize the scanned Bluetooth devices.![image-20220601154131158](./image/hardware_interface/image-20220601154131158.png)
+Next, test the active scanning function of Bluetooth. In the interactive interface of `bluetoothctl`, enter `scan on` to enable active scanning. It will periodically print nearby devices. You can see that my mobile phone device has been discovered. Enter `scan off` to disable the scanning function and summarize the scanned Bluetooth devices.
+
+![image-20220601154131158](./image/hardware_interface/image-20220601154131158.png)
 
 ![image-20220601154253947](./image/hardware_interface/image-20220601154253947.png)
 

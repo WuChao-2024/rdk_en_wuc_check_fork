@@ -1670,29 +1670,31 @@ Output:
     | bn2               | <class 'horizon_plugin_pytorch.nn.qat.batchnorm.BatchNorm2d'>              | qint8              | qint8       | -1             |
     | sub[sub]          | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | ['qint8', 'qint8'] | qint16      | -1             |
     | relu              | <class 'horizon_plugin_pytorch.nn.qat.relu.ReLU'>                          | qint16             | qint16      | qconfig = None |
-    +-------------------+----------------------------------------------------------------------------+--------------------+-------------+----------------+Weight qconfig:
-+-----------------+--------------------------------------------------------------+----------------+-----------+
-| Module Name     | Module Type                                                  | weight dtype   |   ch_axis |
-|-----------------+--------------------------------------------------------------+----------------+-----------|
-| convmod1.add    | <class 'horizon_plugin_pytorch.nn.qat.conv2d.ConvAddReLU2d'> | qint16         |         0 |
-| convmod2.conv2d | <class 'horizon_plugin_pytorch.nn.qat.conv2d.Conv2d'>        | qint16         |         0 |
-| convmod3.add    | <class 'horizon_plugin_pytorch.nn.qat.conv2d.ConvAddReLU2d'> | qint16         |         0 |
-| shared_conv     | <class 'horizon_plugin_pytorch.nn.qat.conv2d.Conv2d'>        | qint16         |         0 |
-| shared_conv(1)  | <class 'horizon_plugin_pytorch.nn.qat.conv2d.Conv2d'>        | qint16         |         0 |
-+-----------------+--------------------------------------------------------------+----------------+-----------+
+    +-------------------+----------------------------------------------------------------------------+--------------------+-------------+----------------+
+    
+    Weight qconfig:
+    +-----------------+--------------------------------------------------------------+----------------+-----------+
+    | Module Name     | Module Type                                                  | weight dtype   |   ch_axis |
+    |-----------------+--------------------------------------------------------------+----------------+-----------|
+    | convmod1.add    | <class 'horizon_plugin_pytorch.nn.qat.conv2d.ConvAddReLU2d'> | qint16         |         0 |
+    | convmod2.conv2d | <class 'horizon_plugin_pytorch.nn.qat.conv2d.Conv2d'>        | qint16         |         0 |
+    | convmod3.add    | <class 'horizon_plugin_pytorch.nn.qat.conv2d.ConvAddReLU2d'> | qint16         |         0 |
+    | shared_conv     | <class 'horizon_plugin_pytorch.nn.qat.conv2d.Conv2d'>        | qint16         |         0 |
+    | shared_conv(1)  | <class 'horizon_plugin_pytorch.nn.qat.conv2d.Conv2d'>        | qint16         |         0 |
+    +-----------------+--------------------------------------------------------------+----------------+-----------+
 
-Please check if these OPs qconfigs are expected..
-+-----------------+----------------------------------------------------------------------------+------------------------------------------------------------------+
-| Module Name     | Module Type                                                                | Msg                                                              |
-|-----------------+----------------------------------------------------------------------------+------------------------------------------------------------------|
-| convmod1.add    | <class 'horizon_plugin_pytorch.nn.qat.conv2d.ConvAddReLU2d'>               | qint16 weight!!!                                                 |
-| convmod2.conv2d | <class 'horizon_plugin_pytorch.nn.qat.conv2d.Conv2d'>                      | qint16 weight!!!                                                 |
-| convmod3.add    | <class 'horizon_plugin_pytorch.nn.qat.conv2d.ConvAddReLU2d'>               | qint16 weight!!!                                                 |
-| shared_conv     | <class 'horizon_plugin_pytorch.nn.qat.conv2d.Conv2d'>                      | qint16 weight!!!                                                 |
-| shared_conv(1)  | <class 'horizon_plugin_pytorch.nn.qat.conv2d.Conv2d'>                      | qint16 weight!!!                                                 |
-| sub[sub]        | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | input dtype ['qint8', 'qint8'] is not same with out dtype qint16 |
-| sub[sub]        | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | Fixed scale 3.0517578125e-05                                     |
-+-----------------+----------------------------------------------------------------------------+------------------------------------------------------------------+
+    Please check if these OPs qconfigs are expected..
+    +-----------------+----------------------------------------------------------------------------+------------------------------------------------------------------+
+    | Module Name     | Module Type                                                                | Msg                                                              |
+    |-----------------+----------------------------------------------------------------------------+------------------------------------------------------------------|
+    | convmod1.add    | <class 'horizon_plugin_pytorch.nn.qat.conv2d.ConvAddReLU2d'>               | qint16 weight!!!                                                 |
+    | convmod2.conv2d | <class 'horizon_plugin_pytorch.nn.qat.conv2d.Conv2d'>                      | qint16 weight!!!                                                 |
+    | convmod3.add    | <class 'horizon_plugin_pytorch.nn.qat.conv2d.ConvAddReLU2d'>               | qint16 weight!!!                                                 |
+    | shared_conv     | <class 'horizon_plugin_pytorch.nn.qat.conv2d.Conv2d'>                      | qint16 weight!!!                                                 |
+    | shared_conv(1)  | <class 'horizon_plugin_pytorch.nn.qat.conv2d.Conv2d'>                      | qint16 weight!!!                                                 |
+    | sub[sub]        | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | input dtype ['qint8', 'qint8'] is not same with out dtype qint16 |
+    | sub[sub]        | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | Fixed scale 3.0517578125e-05                                     |
+    +-----------------+----------------------------------------------------------------------------+------------------------------------------------------------------+
 ```
 
 The output txt file contains three tables in the following order:
@@ -1733,7 +1735,7 @@ The output txt file contains three tables in the following order:
     | sub           | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | input dtype ['qint8', 'qint8'] is not same with out dtype qint16 |
     | sub           | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | Fixed scale 3.0517578125e-05                                     |
     +---------------+----------------------------------------------------------------------------+------------------------------------------------------------------+
-```
+    ```
 
 ### Visualization: ONNX Model Visualization{#onnx-a-name-onnx-a}
 
@@ -1946,7 +1948,7 @@ def featuremap_similarity(
 """
 ```
 
-使用示例：
+Example usage:
 
 ```python
 from copy import deepcopy
@@ -2030,6 +2032,7 @@ data = data.reshape((1, 3, 4, 4))
 data = data.to(torch.float32).to(device)
 featuremap_similarity(qat_net, bpu_net, (data, data))
 ```
+
 After running, the following files will be generated in the current directory or the directory specified by the `out_dir` parameter:
 
 - similarity.txt: Printed in table format, it displays the similarity and per-op error results of each layer in the order of model `forward`. Each column in the table from left to right represents:
@@ -2124,136 +2127,11 @@ After running, the following files will be generated in the current directory or
         +---------+----------------------------+----------------------------------------------------------------------------+--------------+-----------+----------------+------------------+------------------------+
     ```
 
-### Similarity Comparison
+- similarity.html: An interactive image displaying the similarity curve of each layer as the model forwards. It allows zooming in and out, and hovering over specific points reveals the exact similarity values. (This is a screenshot of an HTML webpage without interactive functionality).
 
-When there is a significant decrease in accuracy of the quantized model compared to the QAT model, the similarity comparison tool can be used to compare the similarity of each layer's output in the model and quickly identify which op is causing the accuracy drop.
+    ![](./image/expert/similarity.svg)
 
-:::caution Note
-
-- If all outputs of a certain layer are zero, the similarity will also be zero when using cosine similarity calculation. In this case, you can check if the output of that layer is all zeros or confirm whether the outputs are the same based on the printed `atol` and other indicators. If the outputs of a certain layer are completely identical, the similarity will be `inf` when calculated using signal-to-noise ratio (SNR).
-
-- If `device=None`, the tool will not move the model and input data, so you need to manually ensure that the model and input are on the same device.
-
-- The tool supports comparing the similarity of models in any order and on any device. It is recommended to input the models in the order of `(float, qat)` or `(qat, quantized)`. If the order is `(qat, float)`, it will not affect the similarity and single-operator error, but the `single-operator error under the same input` may have deviations in the result, as it is unable to generate inputs for the QAT model that exactly match the float model. In addition, since the QAT model's parameters are changed after training, directly comparing the similarity between the float model and the QAT model after training has little reference value. It is recommended to compare the similarity between the float model and the QAT model after calibration and before training.
-
-- In FX mode, the model conversion process is performed inplace by default. If you need to use the similarity tool, please manually create a deep copy of the original model before conversion. Otherwise, after conversion, the similarity of two identical models will be incorrectly compared.
-:::MSE / L1 / KL / SQNR / Custom similarity calculation function. If it is a custom similarity function, it is best to return a constant or a tensor with only one value, otherwise the displayed results may not match expectations.
-Threshold: Threshold. Default is None, it will be set to different default thresholds based on different similarity calculation functions. If you pass in a value, values that exceed or are below this threshold will print similarity information corresponding to the op on the screen, depending on the similarity comparison method.
-Devices: Specifies the device on which the model performs forward calculation when calculating similarity. If None, the model will be forwarded on the device that is set when the model is input. If there is only one parameter, such as torch.device("cpu"), both models will be moved to the specified device for forward calculation. If two values are specified, such as (torch.device("cpu"),torch.device("cuda")), both models will be moved to the corresponding devices for forward calculation. Generally used to compare CPU/GPU intermediate results of the same model and the same stage.
-Out_dir: Specifies the output result file and image path. Default is None, save to the current directory.
-
-Output:
-The output is a list, where each item is a sublist representing the similarity information of each layer. The format is [index, module name, module type, similarity, output scale, maximum error, single operator error (N scale), single operator error with the same input (N scale)].
-```            nn.Sigmoid(),
-            nn.Softmax(),
-            nn.SiLU(),
-            horizon_nn.Interpolate(
-                scale_factor=2, recompute_scale_factor=True
-            ),
-            horizon_nn.Interpolate(
-                scale_factor=2.3, recompute_scale_factor=True
-            ),
-            nn.AvgPool2d(kernel_size=4),
-            nn.Upsample(scale_factor=1.3, mode="bilinear"),
-            nn.UpsamplingBilinear2d(scale_factor=0.7),
-        )
-        self.dequant_stub = DeQuantStub()
-        self.float_ops = nn.Sequential(
-            nn.Tanh(),
-            nn.LeakyReLU(),
-            nn.PReLU(),
-            nn.UpsamplingNearest2d(scale_factor=0.7),
-        )
-        self.quant = quant
-        self.share_op = share_op
-
-    def forward(self, x, y):
-        x = self.quant_stubx(x)
-        y = self.quant_stuby(y)
-        z = self.mul_op.mul(x, y)
-        x = self.cat_op.cat((x, y), dim=1)
-        if self.share_op:
-            x = self.cat_op.cat((x, y), dim=1)
-        x = self.quantized_ops(x)
-        x = self.dequant_stub(x)
-        if not self.quant:
-            x = self.float_ops(x)
-        return x
-
-# **RDK X3** sets BERNOULLI2, **RDK Ultra** sets BAYES.
-set_march(March.BAYES)
-device = torch.device("cuda")
-float_net = Net(quant=True, share_op=True).to(device)
-# `fx` is inplace modification. If similarity comparison is needed, manually deepcopy the model for conversion.
-float_net2 = deepcopy(float_net)
-qat_net = prepare_qat_fx(
-    float_net2, {"": default_qat_8bit_fake_quant_qconfig}
-)
-qat_net(data, data)
-qat_net2 = deepcopy(qat_net)
-bpu_net = convert_fx(qat_net2)
-data = torch.arange(1 * 3 * 4 * 4) / 100 + 1
-data = data.reshape((1, 3, 4, 4))data = data.to(torch.float32).to(device)
-featuremap_similarity(qat_net, bpu_net, (data, data))
-```
-
-After running, the following files will be generated in the current directory or the directory specified by the `out_dir` parameter:
-
-- similarity.txt: Print the similarity and single-operator errors of each layer in the order of the model's forward pass in the form of a table. Each column in the table from left to right represents:
-
-    - Index: Index of each op in the model, starting from 0 in the order of the model's forward pass. It has no actual meaning but is used for the horizontal axis numbering in the similarity graph.
-
-    - Module Name: The name used to define and use the op in the model, such as backbone.mod1.conv. Different suffixes represent different meanings:
-
-        - If the module name has the suffix '(I)', it means the op is `Identity` in one of the models.
-
-        - If the module name has the suffix '(I vs I)', it means the op is `Identity` in both of the compared models.
-
-        - If the module name has the suffix '(i)' (i >= 1), it means the layer is a shared op and has been shared i times. The first time the shared op is called is the same as other ops and does not have a suffix.
-
-    - Module Type: The type of the op, such as torch.nn.Conv2d, horizon_plugin_pytorch.nn.qat.stubs.QuantStub, etc.
-
-    - Similarity: The similarity of the output of the corresponding op in the two models. Generally, if the similarity of a layer suddenly decreases significantly and does not rise afterwards, it is likely to be the cause of the decrease in model accuracy, which can be further analyzed with statistical tools.
-
-    - qscale: The scale value of the op in the quantized model. It will not be output if it is per-channel quantization.
-
-    - Acc Error(float atol): The maximum difference in the output of the corresponding op in the two models. `Acc Error = N * qscale`.
-
-    - Acc Error(N out_qscale): The maximum difference in the output of the corresponding op in the two models in terms of how many scales.
-
-    - Op Error with Same Input (N out_qscale): The maximum difference in the output of the corresponding op in the two models when the input is completely the same (excluding the cumulative error). In theory, the single-operator errors under the same input should all be within a few scales. If the difference is large, it indicates that there may be problems with the op transformation that cause significant differences in the results.
-
-    ```text
-        ---------------------------------------------------------------
-        Note:
-        * Suffix '(I)' means this layer is Identity in one model
-        * Suffix '(I vs I)' means this layer is Identity in both models
-        * Suffix '(i)'(i >= 1) means this op is shared i times
-        ---------------------------------------------------------------
-        +---------+----------------------------+----------------------------------------------------------------------------+--------------+-----------+----------------+------------------+------------------------+
-        | Index   | Module Name                | Module Type                                                                | Similarity   | qscale    | Acc Error      | Acc Error        | Op Error with Same     |
-        |         |                            |                                                                            |              |           | (float atol)   | (N out_qscale)   | Input (N out_qscale)   |
-        |---------+----------------------------+----------------------------------------------------------------------------+--------------+-----------+----------------+------------------+------------------------|
-        | 0       | quant_stubx                | <class 'horizon_plugin_pytorch.nn.qat.stubs.QuantStub'>                    | 1.0000000    | 0.0115294 | 0.0000000      | 0                | 0                      |
-        | 1       | quant_stuby                | <class 'horizon_plugin_pytorch.nn.qat.stubs.QuantStub'>                    | 1.0000000    | 0.0115294 | 0.0000000      | 0                | 0                      |
-        | 2       | mul_op                     | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 0.9999989    | 0.0168156 | 0.0168156      | 1                | 1                      |
-        | 3       | cat_op                     | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 0.9999971    | 0.0167490 | 0.0334979      | 2                | 0                      |
-        | 4       | cat_op(1)                  | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 0.9999980    | 0.0167490 | 0.0334979      | 2                | 0                      |
-        | 5       | quantized_ops.0            | <class 'horizon_plugin_pytorch.nn.qat.relu.ReLU'>                          | 0.9999980    | 0.0167490 | 0.0334979      | 2                | 0                      |
-        | 6       | quantized_ops.1            | <class 'horizon_plugin_pytorch.nn.qat.segment_lut.SegmentLUT'>             | 1.0000000    | 0.0070079 | 0.0000000      | 0                | 0                      |
-        | 7       | quantized_ops.2.sub        | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 0.9999999    | 0.0000041 | 0.0000041      | 1                | 1                      |
-        | 8       | quantized_ops.2.exp        | <class 'horizon_plugin_pytorch.nn.qat.segment_lut.SegmentLUT'>             | 1.0000000    | 0.0000305 | 0.0000305      | 1                | 1                      || Index | Module Name                | Module Type                                                           | Similarity | qscale    | Acc Error | Acc Error (N out_qscale) | Op Error with Same Input (N out_qscale) |
-|-------|----------------------------|-----------------------------------------------------------------------|------------|-----------|-----------|-------------------------|-----------------------------------------|
-| 9     | quantized_ops.2.sum        | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 1.0000000 | 0.0002541 | 0.0005081 | 2                       | 2                                       |
-| 10    | quantized_ops.2.reciprocal | <class 'horizon_plugin_pytorch.nn.qat.segment_lut.SegmentLUT'>             | 1.0000001 | 0.0000037 | 0.0000186 | 5                       | 5                                       |
-| 11    | quantized_ops.2.mul        | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | 1.0000000 | 0.0009545 | 0.0000000 | 0                       | 0                                       |
-| 12    | quantized_ops.3            | <class 'horizon_plugin_pytorch.nn.qat.segment_lut.SegmentLUT'>             | 1.0000000 | 0.0005042 | 0.0000000 | 0                       | 0                                       |
-| 13    | quantized_ops.4            | <class 'horizon_plugin_pytorch.nn.qat.interpolate.Interpolate'>            | 1.0000000 | 0.0005042 | 0.0005042 | 1                       | 1                                       |
-| 14    | quantized_ops.5            | <class 'horizon_plugin_pytorch.nn.qat.interpolate.Interpolate'>            | 0.9999999 | 0.0005042 | 0.0005042 | 1                       | 0                                       |
-| 15    | quantized_ops.6            | <class 'horizon_plugin_pytorch.nn.qat.avg_pool2d.AvgPool2d'>               | 0.9999995 | 0.0005022 | 0.0005022 | 1                       | 1                                       |
-| 16    | quantized_ops.7            | <class 'horizon_plugin_pytorch.nn.qat.upsampling.Upsample'>                | 0.9999998 | 0.0005022 | 0.0005022 | 1                       | 0                                       |
-| 17    | quantized_ops.8            | <class 'horizon_plugin_pytorch.nn.qat.upsampling.UpsamplingBilinear2d'>    | 1.0000000 | 0.0005022 | 0.0000000 | 0                       | 0                                       |
-| 18    | dequant_stub               | <class 'horizon_plugin_pytorch.nn.qat.stubs.DeQuantStub'>                  | 1.0000000 |           | 0.0000000 | 0                       | 0                                       |### Statistical Metrics {#a-name-statistic-a}
+### Statistical Metrics {#a-name-statistic-a}
 
 Calculate the numerical features `min/max/mean/var/scale` for each layer's input and output in the model. Statistical metrics can help you observe the data distribution in the current model and evaluate which quantization precision (int8/int16) should be used. This tool also checks for any numerical exceptional layers in the model, such as NaN or inf.
 
@@ -2294,9 +2172,9 @@ get_raw_features(
         - "scale": (Tensor | None) If the data is a QTensor, it represents the corresponding scale, which may be the scale of per-tensor quantization or per-channel quantization; otherwise, it is None
         - "ch_axis": (int) If the data is per-channel quantized data, it represents the dimension of quantization. Otherwise, it is -1
         - “ff_method”: (str) If the current module is FloatFunctional/QFunctional, it records the actual
-```The called method (`add/sub/mul/...`). Otherwise, it is `None`.
+        The called method (`add/sub/mul/...`). Otherwise, it is `None`.
 
-```
+"""
 
 profile_featuremap(
     featuremap: List[Dict],
@@ -2307,7 +2185,7 @@ profile_featuremap(
     out_dir: Optional[str] = None,
     file_name: Optional[str] = None,
 )
-```
+"""
     Input:
         featuremap: output of `get_raw_features`
         with_tensorboard: whether to use tensorboard to display data distribution. Default is False.
@@ -2316,7 +2194,34 @@ profile_featuremap(
         show_per_channel: whether to show the histogram of each channel in the feature in tensorboard. Default is False.
         out_dir: specify the path of the output result file and image. If not specified, it will be save in the current path.
         file_name: the name of the saved file and image. If not specified, it will be "statistic.txt" and an interactive "statistic.html" by default.
-```from horizon_plugin_pytorch.quantization.quantize_fx import (
+"""
+```
+:::caution 注意
+
+- Default usage of two interfaces together: `profile_featuremap(get_raw_features(model, example_inputs), with_tensorboard=True)`.
+
+- By default, the statistical results are saved in `statistic.txt`, and the results are plotted and saved in the `statistic.html` file, which can be opened and viewed in a browser.
+
+- If you need to calculate other information, you can customize the featuremap statistical processing function to handle the return data of the `get_raw_features` function.
+
+- The function `get_raw_features` records the input and output of each layer of the model by inserting `hooks`. However, the community's `hooks` currently do not support `kwargs` (see [here](https://github.com/pytorch/pytorch/blob/master/torch/nn/modules/module.py#L1193)), which leads to two issues:
+
+  - `cat((x,y), 1)`: In this writing style, the parameter `dim=1` will be filtered out, only recording the two tensors x and y, which is also expected;
+
+  - `cat(x=(x,y), dim=1)`: In this writing style, the two keyword arguments will not take effect during hook execution. There is currently no way to handle this situation, so you need to ensure that the **tensor type data is not passed as keyword arguments** when forwarding the model.
+
+:::
+
+Usage Example:
+
+
+```python
+import torch
+from torch import nn
+from torch.quantization import DeQuantStub, QuantStub
+import horizon_plugin_pytorch as horizon
+from horizon_plugin_pytorch import nn as horizon_nn
+from horizon_plugin_pytorch.quantization.quantize_fx import (
     convert_fx,
     prepare_qat_fx,
 )
@@ -2365,31 +2270,17 @@ class Net(nn.Module):
         self.share_op = share_op
 
     def forward(self, x, y):
-        x = self.quant_stubx(x)```python
-y = self.quant_stuby(y)
-z = self.mul_op.mul(x, y)
-x = self.cat_op.cat((x, y), dim=1)
-if self.share_op:
-    x = self.cat_op.cat((x, y), dim=1)
-x = self.quantized_ops(x)
-x = self.dequant_stub(x)
-if not self.quant:
-    x = self.float_ops(x)
-return x
-```
-
-```python
-y = self.quant_stuby(y)
-z = self.mul_op.mul(x, y)
-x = self.cat_op.cat((x, y), dim=1)
-if self.share_op:
-    x = self.cat_op.cat((x, y), dim=1)
-x = self.quantized_ops(x)
-x = self.dequant_stub(x)
-if not self.quant:
-    x = self.float_ops(x)
-return x
-```
+        x = self.quant_stubx(x)
+        y = self.quant_stuby(y)
+        z = self.mul_op.mul(x, y)
+        x = self.cat_op.cat((x, y), dim=1)
+        if self.share_op:
+            x = self.cat_op.cat((x, y), dim=1)
+        x = self.quantized_ops(x)
+        x = self.dequant_stub(x)
+        if not self.quant:
+            x = self.float_ops(x)
+        return x
 
 # **RDK X3** set BERNOULLI2, **RDK Ultra** set BAYES.
 set_march(March.BAYES)
@@ -2404,6 +2295,7 @@ data = data.reshape((1, 3, 4, 4))
 data = data.to(torch.float32).to(device)
 profile_featuremap(get_raw_features(qat_net, (data, data)), True)
 ```
+
 
 After running, the following files will be generated in the current directory or the directory specified by the `out_dir` parameter:
 
@@ -2441,27 +2333,94 @@ Currently, only **RDK Ultra** with BPU architecture set to "BAYES" supports "int
 
 Under normal circumstances, the statistic.txt file will contain two tables in the above format, one is the statistics of each layer printed in the order of the model forward; the other is the statistics of each layer printed in descending order of the quantization data range, which is convenient for you to quickly locate the layers with large value ranges. If there are NaN or inf in some layers of the model, the statistic.txt file will also include an additional table indicating which layers have NaN or inf, and this table will be printed on the screen to remind you to check these abnormal layers.
 
-```text
-+----------------+----------------------------+-------------------------------------------------------------------------------+---------------------+------------+-----------+------------+-----------+-----------+---------------+
-| Module Index   | Module Name                | Module Type                                                                   | Input/Output/Attr   | Min        | Max       | Mean       | Var       | Scale     | Dtype         |
-|----------------+----------------------------+-------------------------------------------------------------------------------+---------------------+------------+-----------+------------+-----------+-----------+---------------|
-| 0              | quant_stubx                | <class 'horizon_plugin_pytorch.nn.quantized.quantize.Quantize'>               | input               | -2.9943717 | 2.9613159 | -0.0791836 | 2.7670853 |           | torch.float32 |
-| 0              | quant_stubx                | <class 'horizon_plugin_pytorch.nn.quantized.quantize.Quantize'>               | output              | -2.9826291 | 2.9591436 | -0.0786467 | 2.7688842 | 0.0234853 | qint8         |
-| 1              | quant_stuby                | <class 'horizon_plugin_pytorch.nn.quantized.quantize.Quantize'>               | input               | 0.5011058  | 0.9995295 | 0.7525039  | 0.0210502 |           | torch.float32 |
-| 1              | quant_stuby                | <class 'horizon_plugin_pytorch.nn.quantized.quantize.Quantize'>               | output              | 0.5017246  | 0.9956098 | 0.7525385  | 0.0210164 | 0.0078394 | qint8         |
-| 2              | mul_op[mul]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-0             | -2.9826291 | 2.9591436 | -0.0786467 | 2.7688842 | 0.0234853 | qint8         |
-| 2              | mul_op[mul]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-1             | 0.5017246  | 0.9956098 | 0.7525385  | 0.0210164 | 0.0078394 | qint8         |
-| 2              | mul_op[mul]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | output              | -2.9577060 | 2.5648856 | -0.0374420 | 1.5830494 | 0.0231071 | qint8         |
-| 3              | cat_op[cat]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-0-0           | -2.9826291 | 2.9591436 | -0.0786467 | 2.7688842 | 0.0234853 | qint8         |
-| 3              | cat_op[cat]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-0-1           | -2.9577060 | 2.5648856 | -0.0374420 | 1.5830494 | 0.0231071 | qint8         |
-| 3              | cat_op[cat]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | output              | -2.9942081 | 2.9474237 | -0.0580113 | 2.1627743 | 0| 14             | quantized_ops.5            | <class 'horizon_plugin_pytorch.nn.quantized.interpolate.Interpolate'>         | input               | 0.0712454  | 0.1147329 | 0.0903947  | 0.0000526 | 0.0009253 | qint8         |
+    ```text
+    +----------------+----------------------------+-------------------------------------------------------------------------------+---------------------+------------+-----------+------------+-----------+-----------+---------------+
+    | Module Index   | Module Name                | Module Type                                                                   | Input/Output/Attr   | Min        | Max       | Mean       | Var       | Scale     | Dtype         |
+    |----------------+----------------------------+-------------------------------------------------------------------------------+---------------------+------------+-----------+------------+-----------+-----------+---------------|
+    | 0              | quant_stubx                | <class 'horizon_plugin_pytorch.nn.quantized.quantize.Quantize'>               | input               | -2.9943717 | 2.9613159 | -0.0791836 | 2.7670853 |           | torch.float32 |
+    | 0              | quant_stubx                | <class 'horizon_plugin_pytorch.nn.quantized.quantize.Quantize'>               | output              | -2.9826291 | 2.9591436 | -0.0786467 | 2.7688842 | 0.0234853 | qint8         |
+    | 1              | quant_stuby                | <class 'horizon_plugin_pytorch.nn.quantized.quantize.Quantize'>               | input               | 0.5011058  | 0.9995295 | 0.7525039  | 0.0210502 |           | torch.float32 |
+    | 1              | quant_stuby                | <class 'horizon_plugin_pytorch.nn.quantized.quantize.Quantize'>               | output              | 0.5017246  | 0.9956098 | 0.7525385  | 0.0210164 | 0.0078394 | qint8         |
+    | 2              | mul_op[mul]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-0             | -2.9826291 | 2.9591436 | -0.0786467 | 2.7688842 | 0.0234853 | qint8         |
+    | 2              | mul_op[mul]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-1             | 0.5017246  | 0.9956098 | 0.7525385  | 0.0210164 | 0.0078394 | qint8         |
+    | 2              | mul_op[mul]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | output              | -2.9577060 | 2.5648856 | -0.0374420 | 1.5830494 | 0.0231071 | qint8         |
+    | 3              | cat_op[cat]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-0-0           | -2.9826291 | 2.9591436 | -0.0786467 | 2.7688842 | 0.0234853 | qint8         |
+    | 3              | cat_op[cat]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-0-1           | -2.9577060 | 2.5648856 | -0.0374420 | 1.5830494 | 0.0231071 | qint8         |
+    | 3              | cat_op[cat]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | output              | -2.9942081 | 2.9474237 | -0.0580113 | 2.1627743 | 0.0233923 | qint8         |
+    | 4              | cat_op[cat](1)             | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-0             | -2.9942081 | 2.9474237 | -0.0580113 | 2.1627743 | 0.0233923 | qint8         |
+    | 4              | cat_op[cat](1)             | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-1             | 0.5017246  | 0.9956098 | 0.7525385  | 0.0210164 | 0.0078394 | qint8         |
+    | 4              | cat_op[cat](1)             | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | output              | -2.9942081 | 2.9474237 | 0.2123352  | 1.5946714 | 0.0233923 | qint8         |
+    | 5              | quantized_ops.0            | <class 'horizon_plugin_pytorch.nn.quantized.relu.ReLU'>                       | input               | -2.9942081 | 2.9474237 | 0.2123352  | 1.5946714 | 0.0233923 | qint8         |
+    | 5              | quantized_ops.0            | <class 'horizon_plugin_pytorch.nn.quantized.relu.ReLU'>                       | output              | 0.0000000  | 2.9474237 | 0.6510122  | 0.4357365 | 0.0233923 | qint8         |
+    | 6              | quantized_ops.1            | <class 'horizon_plugin_pytorch.nn.quantized.segment_lut.SegmentLUT'>          | input               | 0.0000000  | 2.9474237 | 0.6510122  | 0.4357365 | 0.0233923 | qint8         |
+    | 6              | quantized_ops.1            | <class 'horizon_plugin_pytorch.nn.quantized.segment_lut.SegmentLUT'>          | output              | 0.4992901  | 0.9464155 | 0.6408262  | 0.0163976 | 0.0074521 | qint8         |
+    | 7              | quantized_ops.2.sub[sub]   | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-0             | 0.4992901  | 0.9464155 | 0.6408262  | 0.0163976 | 0.0074521 | qint8         |
+    | 7              | quantized_ops.2.sub[sub]   | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-1             | 0.6334277  | 0.9464155 | 0.7888176  | 0.0090090 | 0.0074521 | qint8         |
+    | 7              | quantized_ops.2.sub[sub]   | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | output              | -0.4471186 | 0.0000000 | -0.1479909 | 0.0140247 | 0.0000136 | qint16        |
+    | 8              | quantized_ops.2.exp        | <class 'horizon_plugin_pytorch.nn.quantized.segment_lut.SegmentLUT'>          | input               | -0.4471186 | 0.0000000 | -0.1479909 | 0.0140247 | 0.0000136 | qint16        |
+    | 8              | quantized_ops.2.exp        | <class 'horizon_plugin_pytorch.nn.quantized.segment_lut.SegmentLUT'>          | output              | 0.6394446  | 0.9999847 | 0.8683713  | 0.0100195 | 0.0000305 | qint16        |
+    | 9              | quantized_ops.2.sum[sum]   | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input               | 0.6394446  | 0.9999847 | 0.8683713  | 0.0100195 | 0.0000305 | qint16        |
+    | 9              | quantized_ops.2.sum[sum]   | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | output              | 4.6700654  | 5.9043884 | 5.2101822  | 0.0529649 | 0.0001802 | qint16        |
+    | 10             | quantized_ops.2.reciprocal | <class 'horizon_plugin_pytorch.nn.quantized.segment_lut.SegmentLUT'>          | input               | 4.6700654  | 5.9043884 | 5.2101822  | 0.0529649 | 0.0001802 | qint16        |
+    | 10             | quantized_ops.2.reciprocal | <class 'horizon_plugin_pytorch.nn.quantized.segment_lut.SegmentLUT'>          | output              | 0.1693695  | 0.2141069 | 0.1923085  | 0.0000730 | 0.0000065 | qint16        |
+    | 11             | quantized_ops.2.mul[mul]   | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-0             | 0.6394446  | 0.9999847 | 0.8683713  | 0.0100195 | 0.0000305 | qint16        |
+    | 11             | quantized_ops.2.mul[mul]   | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-1             | 0.1693695  | 0.2141069 | 0.1923085  | 0.0000730 | 0.0000065 | qint16        |
+    | 11             | quantized_ops.2.mul[mul]   | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | output              | 0.1326724  | 0.2132835 | 0.1666716  | 0.0003308 | 0.0016794 | qint8         |
+    | 12             | quantized_ops.3            | <class 'horizon_plugin_pytorch.nn.quantized.segment_lut.SegmentLUT'>          | input               | 0.1326724  | 0.2132835 | 0.1666716  | 0.0003308 | 0.0016794 | qint8         |
+    | 12             | quantized_ops.3            | <class 'horizon_plugin_pytorch.nn.quantized.segment_lut.SegmentLUT'>          | output              | 0.0703202  | 0.1175087 | 0.0903590  | 0.0001112 | 0.0009253 | qint8         |
+    | 13             | quantized_ops.4            | <class 'horizon_plugin_pytorch.nn.quantized.interpolate.Interpolate'>         | input               | 0.0703202  | 0.1175087 | 0.0903590  | 0.0001112 | 0.0009253 | qint8         |
+    | 13             | quantized_ops.4            | <class 'horizon_plugin_pytorch.nn.quantized.interpolate.Interpolate'>         | output              | 0.0712454  | 0.1147329 | 0.0903947  | 0.0000526 | 0.0009253 | qint8         |
+    | 14             | quantized_ops.5            | <class 'horizon_plugin_pytorch.nn.quantized.interpolate.Interpolate'>         | input               | 0.0712454  | 0.1147329 | 0.0903947  | 0.0000526 | 0.0009253 | qint8         |
     | 14             | quantized_ops.5            | <class 'horizon_plugin_pytorch.nn.quantized.interpolate.Interpolate'>         | output              | 0.0712454  | 0.1147329 | 0.0903947  | 0.0000461 | 0.0009253 | qint8         |
     | 15             | quantized_ops.6            | <class 'horizon_plugin_pytorch.nn.quantized.avg_pool2d.AvgPool2d'>            | input               | 0.0712454  | 0.1147329 | 0.0903947  | 0.0000461 | 0.0009253 | qint8         |
     | 15             | quantized_ops.6            | <class 'horizon_plugin_pytorch.nn.quantized.avg_pool2d.AvgPool2d'>            | output              | 0.0747764  | 0.1091563 | 0.0903856  | 0.0000372 | 0.0008595 | qint8         |
     | 16             | quantized_ops.7            | <class 'horizon_plugin_pytorch.nn.quantized.upsampling.Upsample'>             | input               | 0.0747764  | 0.1091563 | 0.0903856  | 0.0000372 | 0.0008595 | qint8         |
     | 16             | quantized_ops.7            | <class 'horizon_plugin_pytorch.nn.quantized.upsampling.Upsample'>             | output              | 0.0756359  | 0.1074373 | 0.0903877  | 0.0000286 | 0.0008595 | qint8         |
     | 17             | quantized_ops.8            | <class 'horizon_plugin_pytorch.nn.quantized.upsampling.UpsamplingBilinear2d'> | input               | 0.0756359  | 0.1074373 | 0.0903877  | 0.0000286 | 0.0008595 | qint8         |
-    | 17             | quantized_ops.8            | <class 'hor | 14             | quantized_ops.5            | <class 'horizon_plugin_pytorch.nn.quantized.interpolate.Interpolate'>         | output              | 0.0712454  | 0.1147329 | 0.0903947  | 0.0000461 | 0.0009253 | qint8         |
+    | 17             | quantized_ops.8            | <class 'horizon_plugin_pytorch.nn.quantized.upsampling.UpsamplingBilinear2d'> | output              | 0.0773549  | 0.1048589 | 0.0903853  | 0.0000251 | 0.0008595 | qint8         |
+    | 18             | dequant_stub               | <class 'horizon_plugin_pytorch.nn.quantized.quantize.DeQuantize'>             | input               | 0.0773549  | 0.1048589 | 0.0903853  | 0.0000251 | 0.0008595 | qint8         |
+    | 18             | dequant_stub               | <class 'horizon_plugin_pytorch.nn.quantized.quantize.DeQuantize'>             | output              | 0.0773549  | 0.1048589 | 0.0903853  | 0.0000251 |           | torch.float32 |
+    +----------------+----------------------------+-------------------------------------------------------------------------------+---------------------+------------+-----------+------------+-----------+-----------+---------------+
+
+    Statistics with quant range in descending order...
+    +----------------+----------------------------+-------------------------------------------------------------------------------+---------------------+------------+-----------+------------+-----------+-----------+---------------+
+    | Module Index   | Module Name                | Module Type                                                                   | Input/Output/Attr   | Min        | Max       | Mean       | Var       | Scale     | Dtype         |
+    |----------------+----------------------------+-------------------------------------------------------------------------------+---------------------+------------+-----------+------------+-----------+-----------+---------------|
+    | 9              | quantized_ops.2.sum[sum]   | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | output              | 4.6700654  | 5.9043884 | 5.2101822  | 0.0529649 | 0.0001802 | qint16        |
+    | 10             | quantized_ops.2.reciprocal | <class 'horizon_plugin_pytorch.nn.quantized.segment_lut.SegmentLUT'>          | input               | 4.6700654  | 5.9043884 | 5.2101822  | 0.0529649 | 0.0001802 | qint16        |
+    | 0              | quant_stubx                | <class 'horizon_plugin_pytorch.nn.quantized.quantize.Quantize'>               | input               | -2.9943717 | 2.9613159 | -0.0791836 | 2.7670853 |           | torch.float32 |
+    | 3              | cat_op[cat]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | output              | -2.9942081 | 2.9474237 | -0.0580113 | 2.1627743 | 0.0233923 | qint8         |
+    | 4              | cat_op[cat](1)             | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-0             | -2.9942081 | 2.9474237 | -0.0580113 | 2.1627743 | 0.0233923 | qint8         |
+    | 4              | cat_op[cat](1)             | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | output              | -2.9942081 | 2.9474237 | 0.2123352  | 1.5946714 | 0.0233923 | qint8         |
+    | 5              | quantized_ops.0            | <class 'horizon_plugin_pytorch.nn.quantized.relu.ReLU'>                       | input               | -2.9942081 | 2.9474237 | 0.2123352  | 1.5946714 | 0.0233923 | qint8         |
+    | 0              | quant_stubx                | <class 'horizon_plugin_pytorch.nn.quantized.quantize.Quantize'>               | output              | -2.9826291 | 2.9591436 | -0.0786467 | 2.7688842 | 0.0234853 | qint8         |
+    | 2              | mul_op[mul]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-0             | -2.9826291 | 2.9591436 | -0.0786467 | 2.7688842 | 0.0234853 | qint8         |
+    | 3              | cat_op[cat]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-0-0           | -2.9826291 | 2.9591436 | -0.0786467 | 2.7688842 | 0.0234853 | qint8         |
+    | 2              | mul_op[mul]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | output              | -2.9577060 | 2.5648856 | -0.0374420 | 1.5830494 | 0.0231071 | qint8         |
+    | 3              | cat_op[cat]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-0-1           | -2.9577060 | 2.5648856 | -0.0374420 | 1.5830494 | 0.0231071 | qint8         |
+    | 5              | quantized_ops.0            | <class 'horizon_plugin_pytorch.nn.quantized.relu.ReLU'>                       | output              | 0.0000000  | 2.9474237 | 0.6510122  | 0.4357365 | 0.0233923 | qint8         |
+    | 6              | quantized_ops.1            | <class 'horizon_plugin_pytorch.nn.quantized.segment_lut.SegmentLUT'>          | input               | 0.0000000  | 2.9474237 | 0.6510122  | 0.4357365 | 0.0233923 | qint8         |
+    | 8              | quantized_ops.2.exp        | <class 'horizon_plugin_pytorch.nn.quantized.segment_lut.SegmentLUT'>          | output              | 0.6394446  | 0.9999847 | 0.8683713  | 0.0100195 | 0.0000305 | qint16        |
+    | 9              | quantized_ops.2.sum[sum]   | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input               | 0.6394446  | 0.9999847 | 0.8683713  | 0.0100195 | 0.0000305 | qint16        |
+    | 11             | quantized_ops.2.mul[mul]   | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-0             | 0.6394446  | 0.9999847 | 0.8683713  | 0.0100195 | 0.0000305 | qint16        |
+    | 1              | quant_stuby                | <class 'horizon_plugin_pytorch.nn.quantized.quantize.Quantize'>               | input               | 0.5011058  | 0.9995295 | 0.7525039  | 0.0210502 |           | torch.float32 |
+    | 1              | quant_stuby                | <class 'horizon_plugin_pytorch.nn.quantized.quantize.Quantize'>               | output              | 0.5017246  | 0.9956098 | 0.7525385  | 0.0210164 | 0.0078394 | qint8         |
+    | 2              | mul_op[mul]                | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-1             | 0.5017246  | 0.9956098 | 0.7525385  | 0.0210164 | 0.0078394 | qint8         |
+    | 4              | cat_op[cat](1)             | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-1             | 0.5017246  | 0.9956098 | 0.7525385  | 0.0210164 | 0.0078394 | qint8         |
+    | 6              | quantized_ops.1            | <class 'horizon_plugin_pytorch.nn.quantized.segment_lut.SegmentLUT'>          | output              | 0.4992901  | 0.9464155 | 0.6408262  | 0.0163976 | 0.0074521 | qint8         |
+    | 7              | quantized_ops.2.sub[sub]   | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-0             | 0.4992901  | 0.9464155 | 0.6408262  | 0.0163976 | 0.0074521 | qint8         |
+    | 7              | quantized_ops.2.sub[sub]   | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-1             | 0.6334277  | 0.9464155 | 0.7888176  | 0.0090090 | 0.0074521 | qint8         |
+    | 7              | quantized_ops.2.sub[sub]   | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | output              | -0.4471186 | 0.0000000 | -0.1479909 | 0.0140247 | 0.0000136 | qint16        |
+    | 8              | quantized_ops.2.exp        | <class 'horizon_plugin_pytorch.nn.quantized.segment_lut.SegmentLUT'>          | input               | -0.4471186 | 0.0000000 | -0.1479909 | 0.0140247 | 0.0000136 | qint16        |
+    | 10             | quantized_ops.2.reciprocal | <class 'horizon_plugin_pytorch.nn.quantized.segment_lut.SegmentLUT'>          | output              | 0.1693695  | 0.2141069 | 0.1923085  | 0.0000730 | 0.0000065 | qint16        |
+    | 11             | quantized_ops.2.mul[mul]   | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | input-1             | 0.1693695  | 0.2141069 | 0.1923085  | 0.0000730 | 0.0000065 | qint16        |
+    | 11             | quantized_ops.2.mul[mul]   | <class 'horizon_plugin_pytorch.nn.quantized.functional_modules.QFunctional'>  | output              | 0.1326724  | 0.2132835 | 0.1666716  | 0.0003308 | 0.0016794 | qint8         |
+    | 12             | quantized_ops.3            | <class 'horizon_plugin_pytorch.nn.quantized.segment_lut.SegmentLUT'>          | input               | 0.1326724  | 0.2132835 | 0.1666716  | 0.0003308 | 0.0016794 | qint8         |
+    | 12             | quantized_ops.3            | <class 'horizon_plugin_pytorch.nn.quantized.segment_lut.SegmentLUT'>          | output              | 0.0703202  | 0.1175087 | 0.0903590  | 0.0001112 | 0.0009253 | qint8         |
+    | 13             | quantized_ops.4            | <class 'horizon_plugin_pytorch.nn.quantized.interpolate.Interpolate'>         | input               | 0.0703202  | 0.1175087 | 0.0903590  | 0.0001112 | 0.0009253 | qint8         |
+    | 13             | quantized_ops.4            | <class 'horizon_plugin_pytorch.nn.quantized.interpolate.Interpolate'>         | output              | 0.0712454  | 0.1147329 | 0.0903947  | 0.0000526 | 0.0009253 | qint8         |
+    | 14             | quantized_ops.5            | <class 'horizon_plugin_pytorch.nn.quantized.interpolate.Interpolate'>         | input               | 0.0712454  | 0.1147329 | 0.0903947  | 0.0000526 | 0.0009253 | qint8         |
+    | 14             | quantized_ops.5            | <class 'horizon_plugin_pytorch.nn.quantized.interpolate.Interpolate'>         | output              | 0.0712454  | 0.1147329 | 0.0903947  | 0.0000461 | 0.0009253 | qint8         |
     | 15             | quantized_ops.6            | <class 'horizon_plugin_pytorch.nn.quantized.avg_pool2d.AvgPool2d'>            | input               | 0.0712454  | 0.1147329 | 0.0903947  | 0.0000461 | 0.0009253 | qint8         |
     | 15             | quantized_ops.6            | <class 'horizon_plugin_pytorch.nn.quantized.avg_pool2d.AvgPool2d'>            | output              | 0.0747764  | 0.1091563 | 0.0903856  | 0.0000372 | 0.0008595 | qint8         |
     | 16             | quantized_ops.7            | <class 'horizon_plugin_pytorch.nn.quantized.upsampling.Upsample'>             | input               | 0.0747764  | 0.1091563 | 0.0903856  | 0.0000372 | 0.0008595 | qint8         |
@@ -2520,6 +2479,7 @@ A dictionary that records the weights of the two models, in the following format
 * VALUE (dict): The weights of the corresponding layers in the two models:
   "float": The weights in the floating-point model
   "quantized": The weights in the qat/fixed-point model
+"""
 ```
 
 Example:
@@ -2557,7 +2517,7 @@ float_net = Resnet18().to(device)
 
 # Set BERNOULLI2 for **RDK X3**, Set BAYES for **RDK Ultra**.
 set_march(March.BAYES)
-```float_net.qconfig = get_default_qat_qconfig()
+float_net.qconfig = get_default_qat_qconfig()
 float_net2 = deepcopy(float_net)
 qat_net = prepare_qat_fx(float_net2, {"": default_qat_8bit_fake_quant_qconfig})
 qat_net(data)
@@ -2608,6 +2568,9 @@ When encountering difficulties in training QAT models that lead to poor performa
 
 If you use fx for quantization, you can directly refer to the API documentation [**prepare_qat_fx**](../api_reference/apis/qat.html#horizon_plugin_pytorch.quantization.prepare_qat_fx) and use the `hybrid` and `hybrid_dict` parameters to enable step-wise quantization.# from horizon_plugin_pytorch.quantization import prepare_qat
 
+```python
+# from horizon_plugin_pytorch.quantization import prepare_qat
+
 def prepare_qat(
     model: torch.nn.Module,
     mapping: Optional[Dict[torch.nn.Module, torch.nn.Module]] = None,
@@ -2653,7 +2616,7 @@ from torch.quantization import DeQuantStub, QuantStub
 class HyperQuantModel(nn.Module):
     def __init__(self, channels=3) -> None:
         super().__init__()
-```self.quant = QuantStub()
+        self.quant = QuantStub()
         self.conv0 = nn.Conv2d(channels, channels, 1)
         self.conv1 = nn.Conv2d(channels, channels, 1)
         self.conv2 = nn.Conv2d(channels, channels, 1)
@@ -2696,10 +2659,14 @@ assert isinstance(qat_model.conv1, nn.Conv2d)
 assert isinstance(qat_model.conv2, qat.Conv2d)
 
 qat_model(data)
+```
 
 ### Single Operator Conversion Precision Debugging
 
 When the precision of the fixed-point model is reduced during QAT conversion, you may need to verify which operator specifically causes the loss of precision by replacing some key operators in the fixed-point model with QAT.# from horizon_plugin_pytorch.utils.quant_profiler import set_preserve_qat_mode
+
+```python
+# from horizon_plugin_pytorch.utils.quant_profiler import set_preserve_qat_mode
 
 def set_preserve_qat_mode(model: nn.Module, prefixes=(), types=(), value=True):
 """
@@ -2762,6 +2729,7 @@ Parameters:
         types must be floating-point op types; 
         if the input is a QAT model, types can be either floating-point or qat op types
     value: Set preserve_qat_mode=value. Default value is True
+"""
 ```
 
 Usage example:
@@ -2796,7 +2764,8 @@ class Conv2dModule(nn.Module):
         groups=1,
         bias=True,
         padding_mode="zeros",
-```super().__init__()
+    ):
+        super().__init__()
         self.conv2d = nn.Conv2d(
             in_channels,
             out_channels,
@@ -2893,7 +2862,7 @@ import torch
 from horizon_plugin_pytorch.march import March, set_march
 from horizon_plugin_pytorch.nn import qat
 from horizon_plugin_pytorch.nn.quantized import FloatFunctional
-```from horizon_plugin_pytorch.quantization import (
+from horizon_plugin_pytorch.quantization import (
     prepare_qat_fx,
     convert_fx,
 )
@@ -2942,18 +2911,18 @@ class HybridModel(nn.Module):
     def forward(self, input):
         x = self.quant(input)
         x = self.conv0(x)
-        x = self.identity(x)name                            deploy device    type
-------------------------------  ---------------  --------
-x = self.prelu(x)               CPU              function
-x = torch.nn.functional.selu(x) CPU              function
-x = self.conv1(x)               CPU              function
-x = self.conv2(x)               CPU              function
-x = self.conv3(x)               CPU              function
-x = self.identity(x)            CPU              function
-y = self.conv4(x)               CPU              function
-x = self.add.add(x, y)          CPU              function
-x = self.selu(x)                CPU              function
-return self.dequant(x)          CPU              function
+        x = self.identity(x)
+        x = self.prelu(x)
+        x = torch.nn.functional.selu(x)
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        x = self.identity(x)
+        y = self.conv4(x)
+        x = self.add.add(x, y)
+        x = self.selu(x)
+        return self.dequant(x)     
+        
 
 # **RDK X3** set BERNOULLI2, **RDK Ultra** set to BAYES.
 set_march(March.BAYES)
@@ -2981,7 +2950,20 @@ qat_model(infer_data)
 check_deploy_device(qat_model)
 
 quantize_model = convert_fx(qat_model)
-check_deploy_device(quantize_model)conv0                           BPU              module
+check_deploy_device(quantize_model)
+```
+
+Will be presented in table format, simultaneously displayed on the screen and saved in `deploy_device.txt` as follows. Each column from left to right in the table represents:
+- **name**: The name defined for this operation in the model.
+- **deploy device**: The actual device on which the operation runs during deployment, either CPU or BPU.
+- **type**: The invocation form of this operation in the model, either module or function.
+
+
+
+```text
+name                            deploy device    type
+------------------------------  ---------------  --------
+conv0                           BPU              module
 prelu_input_dequant             CPU              module
 prelu                           CPU              module
 selu                            CPU              function
@@ -2996,15 +2978,51 @@ conv3_activation_post_process   CPU              module
 add_1                           BPU              method
 selu_2_input_dequant            CPU              module
 selu_2                          CPU              function
-dequant                         CPU              moduleIf it is None, use the default token function. The default is None.
+dequant                         CPU              module
+```
 
-compare_with_hbdk_parser: Whether to compare the results of each op in the ScriptModule with the results parsed by hbdk. The default is True, which will compare the results with hbdk's parsing results and output the comparison result on the screen.
+### Comparison of TorchScript and HBDK Results {#torchscript-hbdk}
+
+When encountering situations where the inference results of fixed-point PT generated by horizon_plugin_pytorch do not match the compiled HBM inference results, you can use this tool to check whether the inference results of PT and the results parsed by HBDK are consistent. This tool will output the comparison of each op in PT and the corresponding op in HBDK after parsing.
+
+:::caution Note
+
+When encountering inconsistencies between the inference results of fixed-point PT and HBM results or on-board results, please ensure that the preprocessing and postprocessing processes are consistent. In addition, the parsing of PT by HBDK is only one step in the compilation process, and the HBM inference results and the final on-board inference results are determined by HBDK and runtime, etc. Even if this tool is used to check and confirm that the inference results of fixed-point PT are consistent with the results parsed by HBDK, it still cannot guarantee consistency with the final on-board results. For verification of subsequent processes, please contact the HBDK or runtime development team.
+:::
+
+```python
+# from horizon_plugin_pytorch.utils.quant_profiler import script_profile
+
+def script_profile(
+    model: Union[torch.nn.Module, torch.jit.ScriptModule],
+    example_inputs: Any,
+    out_dir: Optional[str] = None,
+    march: Optional[str] = None,
+    mark_node_func: Optional[Callable] = None,
+    compare_with_hbdk_parser: bool = True,
+):
+"""
+Obtain the results of each op in the ScriptModel and compare them with the results parsed by HBDK.
+
+This function will obtain the results of each op in the ScriptModel and store the results in the "horizon_script_result.pt" file using torch.save, and also return the results in the form of a dictionary.
+
+Parameters:
+    model: The model to be checked. It must be a fixed-point model or a ScriptModule after tracing.
+    example_inputs: Model inputs.
+    out_dir: The path to save the results. If None, it will be saved in the current path. Default is None.
+    march: BPU architecture to use. If None, it will automatically use get_march() to get the current specified architecture.
+        Default is None. For **RDK X3**, set to BERNOULLI2, for **RDK Ultra**, set to BAYES.
+    mark_node_func: Function to mark which nodes in the ScriptModule need to save results.
+        If None, use the default marking function. Default is None.
+    compare_with_hbdk_parser: Whether to compare the results of each op in the ScriptModule with the results parsed by HBDK.
+        Default is True, it will compare with the parsing results of HBDK and output the comparison results on the screen.
 
 Returns:
-output (dict<str, tensor>): A dictionary that records the results of each op in pt, in the following format:
-* KEY (str): op name, consistent with each op name parsed by hbdk
-* VALUE (tensor): op result
+    output (dict<str, tensor>): A dictionary recording the results of each op in the pt, in the following format:
+        * KEY (str): op name, consistent with the name of each op parsed by HBDK
+        * VALUE (tensor): op result
 """
+```
 
 Example:
 
@@ -3044,7 +3062,7 @@ class Net(nn.Module):
             horizon_nn.Interpolate(
                 scale_factor=2, recompute_scale_factor=True
             ),
-```horizon_nn.Interpolate(
+            horizon_nn.Interpolate(
                 scale_factor=2.3, recompute_scale_factor=True
             ),
             nn.AvgPool2d(kernel_size=4),
@@ -3094,25 +3112,55 @@ arg1                                        True
 _hz_cat                                     True
 _hz_cat_1                                   True
 _aten_split.0                               True
+_aten_split.1                               True
+_hz_mul                                     True
+_quantized_ops_0_aten_relu                  True
+_quantized_ops_1_hz_lut                     True
+_quantized_ops_2_aten_max_val               True
+_quantized_ops_2_aten_max_arg               True
+_quantized_ops_2_hz_sub                     True
+_quantized_ops_2_exp_hz_segment_lut         True
+_quantized_ops_2_hz_sum                     True
+_quantized_ops_2_reciprocal_hz_segment_lut  True
+_quantized_ops_2_hz_mul                     True
+_quantized_ops_3_hz_lut                     True
+_quantized_ops_4_hz_interpolate             True
+_quantized_ops_5_hz_interpolate             True
+_quantized_ops_6_hz_avg_pool2d              True
+_quantized_ops_7_hz_interpolate             True
+_quantized_ops_8_hz_interpolate             True
+Torch run pt output is same with hbdk parser.
 ```
-import torchvision
+### Comparison of Results from Different Versions of TorchScript Models {#torchscript}
 
-# 导入 horizon_plugin_pytorch 模块
-from horizon_plugin_pytorch.models import resnet18 as resnet18_h
-from horizon_plugin_pytorch.utils.quant_profiler import compare_script_models
+When encountering issues where the fixed-point PT inference results of the same model are inconsistent after the version change of horizon_plugin_pytorch, **after ensuring consistency in the preprocessing and postprocessing processes of different versions**, you can use this tool to compare the results of each op in different versions of PT.
 
-# 构建两个不同版本的模型
-model1 = torchvision.models.resnet18(pretrained=True)
-model2 = resnet18_h()
+```python
+# from horizon_plugin_pytorch.utils.quant_profiler import compare_script_models
 
-# 构造一个示例输入
-example_input = torch.randn(1, 3, 224, 224)
+def compare_script_models(
+    model1: torch.jit.ScriptModule,
+    model2: torch.jit.ScriptModule,
+    example_inputs: Any,
+    march: Optional[str] = None,
+):
+"""
+Compare the results of two ScriptModules.
 
-# 比较两个模型的结果
-compare_script_models(model1, model2, example_input)
+This function compares whether the results of each op in the ScriptModule generated by different versions of horizon_plugin_pytorch for the same model are consistent.
+
+Parameters:
+    model1: ScriptModule generated by a certain version of horizon_plugin_pytorch.
+    model2: ScriptModule generated by another version of horizon_plugin_pytorch.
+    example_inputs: Model inputs.
+    march: BPU architecture to use. If None, it will automatically use get_march() to get the current specified architecture.
+        Default is None. For **RDK X3**, set to BERNOULLI2, for **RDK Ultra**, set to BAYES.
+"""
 ```
 
-执行此代码后，会打印出每个操作的输出信息，如果输出结果不同，会给出相对误差的值。from torch import nn
+```python
+import torch
+from torch import nn
 from torch.quantization import DeQuantStub, QuantStub
 
 from horizon_plugin_pytorch import nn as horizon_nn
@@ -3161,14 +3209,15 @@ class Net(nn.Module):
         y = self.quant_stuby(y)
         y = self.add_op.add(x, y)
         x = self.cat_op.cat((x, y), 1)
-        if self.share_op:x = self.cat_op.cat((x, y), dim=1)
-a, b = x.split(15, dim=1)
-x = self.mul_op.mul(a, b)
-x = self.quantized_ops(x)
-x = self.dequant_stub(x)
-return x
+        if self.share_op:
+            x = self.cat_op.cat((x, y), dim=1)
+        a, b = x.split(15, dim=1)
+        x = self.mul_op.mul(a, b)
+        x = self.quantized_ops(x)
+        x = self.dequant_stub(x)
+        return x
 
-# Set BERNOULLI2 for **RDK X3** and BAYES for **RDK Ultra**.
+# **RDK X3** set BERNOULLI2， **RDK Ultra** set BAYES。
 set_march(March.BAYES)
 device = torch.device("cpu")
 data = torch.rand((1, 10, 5, 5), device=device)
@@ -3181,11 +3230,13 @@ qat_net(*data)
 bpu_net = convert_fx(qat_net)
 script_module = torch.jit.trace(bpu_net.eval(), data)
 
-# When actually using, two different versions of ScriptModule should be provided as input.
+# Actual usage requires inputting two different versions of ScriptModules.
 compare_script_models(script_module, script_module, data)
+```
 
-The output on the screen will be as follows:
+会在屏幕输出如下结果：
 
+```text
 name                                        if equal
 ------------------------------------------  ----------
 arg0                                        True
@@ -3208,7 +3259,8 @@ _quantized_ops_2_hz_mul                     True
 _quantized_ops_3_hz_lut                     True
 _quantized_ops_4_hz_interpolate             True
 _quantized_ops_5_hz_interpolate             True
-_quantized_ops_6_hz_avg_pool2d              True_quantized_ops_7_hz_interpolate             True
+_quantized_ops_6_hz_avg_pool2d              True
+_quantized_ops_7_hz_interpolate             True
 _quantized_ops_8_hz_interpolate             True
 All ops in two ScriptModules are same.
 ```
@@ -3258,7 +3310,9 @@ Usage example:
 # Define MobilenetV1 here (omitted)
 float_net = MobilenetV1()
 show_cuda_memory_consumption(float_net, data, torch.device("cuda"))
-```The following results will be generated in the directory specified by the current or `out_dir` parameter.
+```
+
+The following results will be generated in the directory specified by the current or `out_dir` parameter.
 
 - mem_info.html
 
@@ -3305,13 +3359,14 @@ During QAT training or deployment of quantized models, the following common anom
 
 2. NAN appears
 
-   This is generally caused by gradient explosion leading to numerical overflow and NAN. We recommend that you try the following steps one by one:1. Check if the floating-point model precision is normal. If there are issues or low precision in the floating-point stage of the model, it may cause this problem. It is recommended to fully train and converge the floating-point model before using QAT.
+   This is generally caused by gradient explosion leading to numerical overflow and NAN. We recommend that you try the following steps one by one:
+    1. Check if the floating-point model precision is normal. If there are issues or low precision in the floating-point stage of the model, it may cause this problem. It is recommended to fully train and converge the floating-point model before using QAT.
 
-2. Check for the presence of nan or inf values in the data and labels.
+    2. Check for the presence of nan or inf values in the data and labels.
 
-3. Lower the learning rate or use a warmup strategy.
+    3. Lower the learning rate or use a warmup strategy.
 
-4. Use torch.nn.utils.clip_grad_norm_ to perform gradient clipping.
+    4. Use torch.nn.utils.clip_grad_norm_ to perform gradient clipping.
 
 If none of the above methods work, it is recommended to debug the quantization exception layer.
 
@@ -3331,26 +3386,26 @@ In general, the relative loss of Quantized compared to QAT is very small. If the
 In this case, it is recommended to debug the quantization exception layer.
 
 ### Parameter tuning strategy
+Besides adjusting the learning rate as mentioned in the [**Recommended Configuration**](#a-name-recommended-configuration-a), it is suggested to consider the following aspects to improve the accuracy of quantization training:
 
-In addition to adjusting the learning rate in the recommended hyperparameter configuration, it is recommended to consider the following aspects to improve quantization training accuracy:
+- Quantization Parameter Initialization
 
-- Quantization parameter initialization
+  Using quantization parameters that better match the statistical characteristics of the data for parameter initialization can improve the accuracy of QAT; we recommend using [**Calibration**](#Calibration) before QAT.
 
-  Use quantization parameters that better match the statistical characteristics of the data for parameter initialization, which can improve the accuracy of QAT. We recommend using Calibration before QAT.
+  :::info Note
 
-  Note:
+    If the accuracy of Calibration is not significantly different from floating-point, it is best not to adjust the activation scale further, i.e., set activation averaging_constant=0.0; specific settings can be found in [**Custom Qconfig**](../advanced_content/custom_qconfig).
+  :::
 
-    If the difference in precision between Calibration and floating-point is small, it is best not to adjust the activation scale, i.e., set activation averaging_constant=0.0. For specific settings, see custom_qconfig.
+- Transform (Data Augmentation)
 
-- Transform (data augmentation)
-
-  It is recommended to keep it consistent with floating-point by default during QAT, but it can also be appropriately weakened. For example, color transformation for classification can be removed, and the scale range for RandomResizeCrop can be narrowed down.
+  It is recommended to keep it consistent with floating-point by default during QAT, or it can be appropriately weakened, such as removing color conversion for classification, and reducing the range of scale for RandomResizeCrop.
 
 - Optimizer
 
-  By default, keep it consistent with floating-point during QAT, but you can also try SGD. If the floating-point training uses an optimizer that affects the LR setting, such as OneCycle, it is recommended not to keep it consistent with floating-point and use SGD instead.
+  By default, keep it consistent with floating-point during QAT, or you can try SGD. If the optimizer used for floating-point training affects LR setting, such as OneCycle, it is recommended not to keep it consistent with floating-point and use SGD instead.
 
-If the above strategies still do not effectively improve the quantization accuracy, please try debugging the quantization exception layer.
+If the above strategies still cannot effectively improve the quantization accuracy, please try [**Debug Quantization Exception Layers**](#debug-a-name-quantization-exception-a).
 
 ### Debug quantization exception layer
 
@@ -3404,108 +3459,110 @@ We recommend the following steps to identify layers that may have insufficient q
 
      :::caution NoteDebug Cost: In the above suggestions, the first 2 points require retraining with floating-point precision, while the last 2 points require retraining with QAT.
 
-:::
+     :::
 
-- Model Output
+    - Model Output
 
-   Model output often has physical meaning and may require high resolution, making it unsuitable for int8 quantization. It is recommended to:
+    Model output often has physical meaning and may require high resolution, making it unsuitable for int8 quantization. It is recommended to:
 
-   1. Output without quantization. Currently, when conv2d is used as the network output, it supports output without quantization.
+    1. Output without quantization. Currently, when conv2d is used as the network output, it supports output without quantization.
 
-   2. If quantized output is needed due to BPU performance or other reasons, it is recommended to use int16 quantization or reduce the output data resolution by adjusting the physical meaning of the output.
+    2. If quantized output is needed due to BPU performance or other reasons, it is recommended to use int16 quantization or reduce the output data resolution by adjusting the physical meaning of the output.
 
-   :::caution Note
+    :::caution Note
 
-      Currently, only **RDK Ultra** with BPU architecture "BAYES" supports setting "int16" quantization.
-   :::
+        Currently, only **RDK Ultra** with BPU architecture "BAYES" supports setting "int16" quantization.
+    :::
 
-   :::caution Note
+    :::caution Note
 
-      Debug Cost: In the above suggestions, if the physical meaning of the output is adjusted according to the second point, retraining with floating-point precision is required; otherwise, retraining with QAT is needed.
-   :::
+        Debug Cost: In the above suggestions, if the physical meaning of the output is adjusted according to the second point, retraining with floating-point precision is required; otherwise, retraining with QAT is needed.
+    :::
 
-- Intermediate Layers of the Model
+    - Intermediate Layers of the Model
 
-   - Output (feature map)
+        - Output (feature map)
 
-      From the implementation perspective, there are two types of operators: 1. Single-grain operators, such as conv2d; 2. Complex operators implemented by multiple smaller operators, such as layernorm. Here, the focus is on the overall output of the operator, ignoring the output of smaller operators within complex operators.
+            From the implementation perspective, there are two types of operators: 1. Single-grain operators, such as conv2d; 2. Complex operators implemented by multiple smaller operators, such as layernorm. Here, the focus is on the overall output of the operator, ignoring the output of smaller operators within complex operators.
 
-      If the numerical range of the operator output is large, it is recommended to:
+            If the numerical range of the operator output is large, it is recommended to:
 
-      1. Limit the values within a certain range by modifying the model structure. Different schemes can be used for different operators, such as adding BN after conv2d, replacing relu with relu6, etc.
+            1. Limit the values within a certain range by modifying the model structure. Different schemes can be used for different operators, such as adding BN after conv2d, replacing relu with relu6, etc.
 
-      2. Use int16 quantization.
+            2. Use int16 quantization.
 
-      :::caution Note
+            :::caution Note
 
-         Currently, only **RDK Ultra** with BPU architecture "BAYES" supports setting "int16" quantization.
-      :::
+                Currently, only **RDK Ultra** with BPU architecture "BAYES" supports setting "int16" quantization.
+            :::
 
-      3. If encountering patterns like conv-[bn]-[add]-relu, trying to specify the use of relu6 in the QAT stage may be effective (not guaranteed).
+            3. If encountering patterns like conv-[bn]-[add]-relu, trying to specify the use of relu6 in the QAT stage may be effective (not guaranteed).
 
-      :::caution Note
+            :::caution Note
 
-         Debug Cost: In the above suggestions, after adjusting according to the first point, retraining with floating-point precision is required; otherwise, retraining with QAT is needed.
-      :::
+                Debug Cost: In the above suggestions, after adjusting according to the first point, retraining with floating-point precision is required; otherwise, retraining with QAT is needed.
+            :::
 
-   - Weight
+        - Weight
 
-      If the numerical range of the weight in a certain layer is large, you can:
+            If the numerical range of the weight in a certain layer is large, you can:
 
-      1. Try adjusting the weight decay. It is recommended to make appropriate adjustments around 4e-5, avoiding values that are too large or too small. Too small weight decay may result in large weight variance, while too large weight decay may lead to chain reactions, such as large weight variance in network layer outputs.:::caution Caution
+            1. Try adjusting the weight decay. It is recommended to make appropriate adjustments around 4e-5, avoiding values that are too large or too small. Too small weight decay may result in large weight variance, while too large weight decay may lead to chain reactions, such as large weight variance in network layer outputs.
+            
+            :::caution Caution
+            Debug cost: retraining float required after adjustment.
+            :::
 
-    Debug cost: retraining float required after adjustment.
-:::
+        - Operators
 
-- Operators
+            If the quantized error is significantly larger than the unquantized error after quantization of a certain layer, it indicates that there may be some limitations in the quantized implementation of this operator. Generally, the following types of operators have larger quantization errors:
 
-    If the quantized error is significantly larger than the unquantized error after quantization of a certain layer, it indicates that there may be some limitations in the quantized implementation of this operator. Generally, the following types of operators have larger quantization errors:
+            1. Multi-input operators, such as "cat". If there is a large difference in input value range, it may result in large numbers overpowering small numbers, leading to abnormal accuracy. Try the following improvements:
 
-    1. Multi-input operators, such as "cat". If there is a large difference in input value range, it may result in large numbers overpowering small numbers, leading to abnormal accuracy. Try the following improvements:
+            1. Restrict the input range through various means to make the values of multiple inputs similar.
 
-       1. Restrict the input range through various means to make the values of multiple inputs similar.
+            2. Use int16 quantization.
 
-       2. Use int16 quantization.
+                :::caution Caution
+
+                    Currently, only the **RDK Ultra** with "BAYES" as the BPU architecture supports setting "int16" quantization.
+                :::
+
+            2. Non-linear activation operators, such as "reciprocal". If the operator itself has large fluctuations in certain interval values, it is generally implemented through table lookup. Due to the limited number of table entries, insufficient resolution may occur when the output is in a steep range. Try the following improvements:
+
+                1. Evaluate whether this operator can be omitted or replaced with other operators.
+
+                2. Limit the input range to a more gentle interval.
+
+                3. Use int16 quantization.
+
+                    :::caution Caution
+
+                        Currently, only the **RDK Ultra** with "BAYES" as the BPU architecture supports setting "int16" quantization.
+                    :::
+
+                4. If the QAT precision is normal but the quantized precision is insufficient, try manually adjusting the table lookup parameters.
+
+            3. Complex operators, such as "layernorm" and "softmax". They are generally composed of multiple small operators, which may also cause accuracy problems due to the aforementioned non-linear activation operators. Try the following improvements:
+
+                1. Evaluate whether this operator can be omitted or replaced with other operators.
+
+                2. If the QAT precision is normal but the quantized precision is insufficient, try manually adjusting the table lookup parameters. Both "layernorm" and "softmax" support manual parameter adjustment.
 
         :::caution Caution
 
             Currently, only the **RDK Ultra** with "BAYES" as the BPU architecture supports setting "int16" quantization.
+
+            Debug cost: If it is necessary to adjust the input range or operator in the above three cases, retraining float is required. If int16 quantization is to be used, retraining QAT is required. If only manually adjusting the table lookup parameters, it is only necessary to convert the QAT model to the quantized model again.
         :::
 
-    2. Non-linear activation operators, such as "reciprocal". If the operator itself has large fluctuations in certain interval values, it is generally implemented through table lookup. Due to the limited number of table entries, insufficient resolution may occur when the output is in a steep range. Try the following improvements:
-
-       1. Evaluate whether this operator can be omitted or replaced with other operators.
-
-       2. Limit the input range to a more gentle interval.
-
-       3. Use int16 quantization.
+        - Network structure
+            When implementing the network structure, if there is shared operator in multiple branches, it may cause the quantization parameter to quantize multiple branch outputs at the same time, which may result in insufficient resolution of the quantized output. It is recommended to split the shared operator into multiple operators.
 
         :::caution Caution
 
-            Currently, only the **RDK Ultra** with "BAYES" as the BPU architecture supports setting "int16" quantization.
+        Debug cost: Re-training QAT is needed.
         :::
-
-       4. If the QAT precision is normal but the quantized precision is insufficient, try manually adjusting the table lookup parameters.
-
-    3. Complex operators, such as "layernorm" and "softmax". They are generally composed of multiple small operators, which may also cause accuracy problems due to the aforementioned non-linear activation operators. Try the following improvements:
-
-       1. Evaluate whether this operator can be omitted or replaced with other operators.
-
-       2. If the QAT precision is normal but the quantized precision is insufficient, try manually adjusting the table lookup parameters. Both "layernorm" and "softmax" support manual parameter adjustment.
-
-:::caution Caution
-
-    Currently, only the **RDK Ultra** with "BAYES" as the BPU architecture supports setting "int16" quantization.
-
-    Debug cost: If it is necessary to adjust the input range or operator in the above three cases, retraining float is required. If int16 quantization is to be used, retraining QAT is required. If only manually adjusting the table lookup parameters, it is only necessary to convert the QAT model to the quantized model again.
-:::
-
-- Network structureWhen implementing the network structure, if there is shared operator in multiple branches, it may cause the quantization parameter to quantize multiple branch outputs at the same time, which may result in insufficient resolution of the quantized output. It is recommended to split the shared operator into multiple operators.
-
-:::caution Caution
-
-Debug cost: Re-training QAT is needed.
-:::
 
 3. Find the quantization abnormal layer by quantizing in a modular way.
 
@@ -3549,7 +3606,7 @@ class Net(torch.nn.Module):
 
 
 script_mod = torch.jit.trace(
-```Net(), torch.rand(2, 3, 3, 3, device=torch.device("cpu"))
+    Net(), torch.rand(2, 3, 3, 3, device=torch.device("cpu"))
 )
 script_mod.to(torch.device("cuda"))
 print(script_mod.graph)
@@ -3647,7 +3704,8 @@ import torch.multiprocessing as mp
 from horizon_plugin_pytorch.jit import to_device
 
 model_path = "path_to_pt_model_file"
-```def main_func(rank, world_size, device_ids):
+
+def main_func(rank, world_size, device_ids):
     torch.cuda.set_device(device_ids[rank])
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
 
@@ -3787,7 +3845,9 @@ qat_model = prepare_qat_fx(
         "": default_qat_8bit_fake_quant_qconfig, # Set the entire network to int8 quantization
     },
 )
-```Correct approach: To improve model accuracy, set the model output node to high precision. The example is as follows:
+```
+
+Correct approach: To improve model accuracy, set the model output node to high precision. The example is as follows:
 
 ```python
 qat_model = prepare_qat_fx(
