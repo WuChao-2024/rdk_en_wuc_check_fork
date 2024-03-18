@@ -47,7 +47,8 @@ auto lo
 iface lo inet loopback
 auto eth0
 iface eth0 inet dhcp
-```metric 700
+metric 700
+```
 
 After modifying, enter the `sudo restart_network` command in the command line to make the configuration take effect.
 
@@ -82,26 +83,31 @@ The development board integrates a 2.4GHz wireless WiFi module, which supports S
 In Station mode, the development board acts as a client and accesses the router's wireless hotspot for internet connection.
 
 - For users of Ubuntu Desktop version, you can click on the Wi-Fi icon in the upper right corner of the desktop, select the corresponding hotspot, and enter the password to complete the network configuration, as shown in the figure below:
+
 ![image-wifi-config](./image/network/image-wifi-config.jpeg)
 
 - For users of Ubuntu Server version, you can complete the wireless network configuration through the command line, following these steps:
 
 1. Use the `sudo nmcli device wifi rescan` command to scan for hotspots. If you get the following message, it means scanning is too frequent and you need to try again later:
+
     ```shell
     root@ubuntu:~# sudo nmcli device wifi rescan
     Error: Scanning not allowed immediately following previous scan.
     ```
 2. Use the `sudo nmcli device wifi list` command to list the scanned hotspots.
 3. Use the `sudo wifi_connect "SSID" "PASSWD"` command to connect to the hotspot. If you get the following message, it means the network connection is successful:
+
     ```shell
     root@ubuntu:~# sudo wifi_connect "WiFi-Test" "12345678" 
-    Device 'wlan0' successfully activated with 'd7468833-4195-45aa-aa33-3d43da86e1a7'.:::tip
-If you receive the following message after connecting to the hotspot, it means the hotspot is not found. You can execute the `sudo nmcli device wifi rescan` command to rescan and reconnect.
+    Device 'wlan0' successfully activated with 'd7468833-4195-45aa-aa33-3d43da86e1a7'.
+    ```
 
-```shell
-root@ubuntu:~# sudo wifi_connect "WiFi-Test" "12345678" 
-Error: No network with SSID 'WiFi-Test' found.
-```
+:::tip
+If you receive the following message after connecting to the hotspot, it means the hotspot is not found. You can execute the `sudo nmcli device wifi rescan` command to rescan and reconnect.
+    ```shell
+    root@ubuntu:~# sudo wifi_connect "WiFi-Test" "12345678" 
+    Error: No network with SSID 'WiFi-Test' found.
+    ```
 :::
 
 ### Soft AP Mode
@@ -144,70 +150,77 @@ By default, the development board's wireless network runs in Station mode. To us
 
     ```shell
     interface=wlan0driver=nl80211
-ctrl_interface=/var/run/hostapd
-ssid=Sunrise
-channel=6
-ieee80211n=1
-hw_mode=g
-ignore_broadcast_ssid=0
-wpa=2
-wpa_key_mgmt=WPA-PSK
-rsn_pairwise=CCMP
-wpa_passphrase=12345678
-```
+    ctrl_interface=/var/run/hostapd
+    ssid=Sunrise
+    channel=6
+    ieee80211n=1
+    hw_mode=g
+    ignore_broadcast_ssid=0
+    wpa=2
+    wpa_key_mgmt=WPA-PSK
+    rsn_pairwise=CCMP
+    wpa_passphrase=12345678
+    ```
 3. Configure the `isc-dhcp-server` file as follows:
 
-    - Execute `sudo vim /etc/default/isc-dhcp-server` to modify the `isc-dhcp-server` file and add the following definition for the network interface:
-    ```shell
-    INTERFACESv4="wlan0"
-    ```
-    - Execute `sudo vim /etc/dhcp/dhcpd.conf` to modify the `dhcpd.conf` file and uncomment the following fields:
-    ```shell
-      authoritative;
-    ```
-    - Then, add the following configuration to the end of the `/etc/dhcp/dhcpd.conf` file:
-    ```shell
-      subnet 10.5.5.0 netmask 255.255.255.0 { #network and subnet mask
-      range 10.5.5.100 10.5.5.254;#IP range available
-      option subnet-mask 255.255.255.0; #subnet mask
-      option routers 10.5.5.1;#default gateway
-      option broadcast-address 10.5.5.31;#broadcast address
-      default-lease-time 600;#default lease time in seconds
-      max-lease-time 7200;#maximum lease time in seconds
-    }
-    ```
+- Execute `sudo vim /etc/default/isc-dhcp-server` to modify the `isc-dhcp-server` file and add the following definition for the network interface:
+
+```shell
+INTERFACESv4="wlan0"
+```
+
+- Execute `sudo vim /etc/dhcp/dhcpd.conf` to modify the `dhcpd.conf` file and uncomment the following fields:
+
+```shell
+authoritative;
+```
+
+- Then, add the following configuration to the end of the `/etc/dhcp/dhcpd.conf` file:
+
+```shell
+subnet 10.5.5.0 netmask 255.255.255.0 { #network and subnet mask
+range 10.5.5.100 10.5.5.254;#IP range available
+option subnet-mask 255.255.255.0; #subnet mask
+option routers 10.5.5.1;#default gateway
+option broadcast-address 10.5.5.31;#broadcast address
+default-lease-time 600;#default lease time in seconds
+max-lease-time 7200;#maximum lease time in seconds
+```
 
 4. Stop the `wpa_supplicant` service and restart `wlan0`
 
-    ```bash
-    systemctl stop wpa_supplicant
+```bash
+systemctl stop wpa_supplicant
 
-    ip addr flush dev wlan0
-    sleep 0.5
-    ifconfig wlan0 down
-    sleep 1
-    ifconfig wlan0 up
-    ```
+ip addr flush dev wlan0
+sleep 0.5
+ifconfig wlan0 down
+sleep 1
+ifconfig wlan0 up
+```
 
 5. Start the `hostapd` service as follows:
-    - Execute the command `sudo hostapd -B /etc/hostapd.conf`
-    ```bashroot@ubuntu:~# sudo hostapd -B /etc/hostapd.conf
-   
-    Configuration file: /etc/hostapd.conf
-    Using interface wlan0 with hwaddr 08:e9:f6:af:18:26 and ssid "sunrise"
-    wlan0: interface state UNINITIALIZED->ENABLED
-    wlan0: AP-ENABLED
-   ```
-   - Configure the IP and subnet of wireless interface `wlan0` using the `ifconfig` command, make sure it matches the configuration in the third step
-    ```bash
-    sudo ifconfig wlan0 10.5.5.1 netmask 255.255.255.0
-    ```
-   - Finally, start the `dhcp` server. Clients connecting to the hotspot will be assigned an IP address from `10.5.5.100` to `10.5.5.255`
-    ```bash
-    sudo ifconfig wlan0 10.5.5.1 netmask 255.255.255.0
-    sudo systemctl start isc-dhcp-server
-    sudo systemctl enable isc-dhcp-server
-    ```
+- Execute the command `sudo hostapd -B /etc/hostapd.conf`
+```bash
+root@ubuntu:~# sudo hostapd -B /etc/hostapd.conf
+Configuration file: /etc/hostapd.conf
+Using interface wlan0 with hwaddr 08:e9:f6:af:18:26 and ssid "sunrise"
+wlan0: interface state UNINITIALIZED->ENABLED
+wlan0: AP-ENABLED
+```
+- Configure the IP and subnet of wireless interface `wlan0` using the `ifconfig` command, make sure it matches the configuration in the third step
+
+```bash
+sudo ifconfig wlan0 10.5.5.1 netmask 255.255.255.0
+```
+
+- Finally, start the `dhcp` server. Clients connecting to the hotspot will be assigned an IP address from `10.5.5.100` to `10.5.5.255`
+
+```bash
+sudo ifconfig wlan0 10.5.5.1 netmask 255.255.255.0
+sudo systemctl start isc-dhcp-server
+sudo systemctl enable isc-dhcp-server
+```
 
 6. Connect to the hotspot on the development board, for example, `sunrise`
 ![image-20220601203025803](./image/network/image-20220601203025803.png)  
@@ -239,7 +252,10 @@ DNS (Domain Name Server) is a server that converts domain names to their corresp
 
 The DNS configuration on the development board is managed through the `/etc/systemd/resolved.conf` file. Users can modify this file to configure DNS settings. The steps are as follows:
 1. Modify the `resolved.conf` file and add the DNS server address, for example:
-    ```bashDNS=8.8.8.8 114.114.114.114
+
+    ```bash
+    DNS=8.8.8.8 114.114.114.114
+    ```
 
 2. Enable DNS configuration using the following commands:
 

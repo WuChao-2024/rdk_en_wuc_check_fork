@@ -47,7 +47,9 @@ Currently, the default strategy can be determined by the following command, whic
 
 ```
 cat /sys/class/thermal/thermal_zone0/policy
-```The supported policies can be viewed using the following command: user_space and step_wise, a total of two.
+```
+
+The supported policies can be viewed using the following command: user_space and step_wise, a total of two.
 
 ```
 cat /sys/class/thermal/thermal_zone0/available_policies

@@ -143,31 +143,6 @@ int HB_SYS_UnBind(const SYS_MOD_S *pstSrcMod, const SYS_MOD_S *pstDstMod);
 【Function Description】
 > Unbinds the binding relationship between VIN pipelines, channels, VPS groups/channels, VO channels, and VENC channels.
 
-【Parameter Description】int HB_SYS_GetVINVPSMode(int pipeId, SYS_VIN_VPS_MODE_E *pMode);
-```
-【功能描述】
-> 获取VIN，VPS模块间的工作模式。
-
-【参数描述】
-
-| 参数名称 |       描述       | 输入/输出 |
-| :------: | :--------------: | :-------: |
-|  pipeId  |      Pipe号      |   输入    |
-|  pMode   | VIN，VPS工作模式 |   输出    |
-
-【返回值】
-
-| 返回值 | 描述 |
-|:------:|:----:|
-|    0   | 成功 |
-|   非0  | 失败 |
-
-【注意事项】
-> 无
-
-【参考代码】
-> 无int HB_SYS_GetVINVPSMode(int pipeId);
-```
 【Function Description】
 > Get the working mode of the VIN, VPS module of the specified pipe ID.
 
@@ -190,7 +165,62 @@ int HB_SYS_UnBind(const SYS_MOD_S *pstSrcMod, const SYS_MOD_S *pstDstMod);
 【Reference Code】
 > None
 
-Video Pool
+### HB_SYS_SetVINVPSMode
+**Function Declaration**
+```c
+int HB_SYS_SetVINVPSMode(int pipeId, const SYS_VIN_VPS_MODE_E mode);
+```
+**Function Description**
+> Sets the working mode between the VIN and VPS modules.
+
+**Parameter Descriptions**
+
+| Parameter Name |       Description       | Input/Output |
+| :-------------: | :---------------------: | :---------: |
+|     pipeId      |          Pipe ID         |    Input    |
+|       mode      | VIN-VPS operating mode |    Input    |
+
+**Return Values**
+
+| Return Value | Description |
+| :---------: | :----------: |
+|      0      |     Success    |
+| Non-zero   |      Failure   |
+
+**Caution**
+> None
+
+**Reference Code**
+> None
+
+### HB_SYS_GetVINVPSMode
+**Function Declaration**
+```c
+int HB_SYS_GetVINVPSMode(int pipeId);
+```
+**Function Description**
+> Retrieves the working mode of the VIN and VPS modules for the specified pipe ID.
+
+**Parameter Descriptions**
+
+| Parameter Name |       Description       | Input/Output |
+| :-------------: | :---------------------: | :---------: |
+|     pipeId      |          Pipe ID         |    Input    |
+
+**Return Values**
+
+| Return Value |                Meaning                 |
+| :---------: | :----------------------------------: |
+|    >=0     | A value of type SYS_VIN_VPS_MODE_E    |
+|    <0      |                            Failure        |
+
+**Caution**
+> None
+
+**Reference Code**
+> None
+
+Video Cache Pool
 
 ### HB_VP_SetConfig
 【Function Declaration】
@@ -504,7 +534,9 @@ int HB_VP_MmapPool(uint32_t Pool);
 【Function Declaration】
 ```c
 int HB_VP_MunmapPool(uint32_t Pool);
-```【Function Description】
+```
+
+【Function Description】
 > Remove user-mode mapping for a buffer pool
 
 【Parameter Description】
@@ -553,7 +585,9 @@ int HB_VP_GetBlockVirAddr(uint32_t Pool, uint64_t u64PhyAddr, void **ppVirAddr);
 > None
 
 【Reference Code】
-> Reference code for VideoPool### HB_VP_InquireUserCnt
+> Reference code for VideoPool
+
+### HB_VP_InquireUserCnt
 【Function Declaration】
 ```c
 int HB_VP_InquireUserCnt(uint32_t Block);
@@ -601,7 +635,9 @@ int HB_VP_SetAuxiliaryConfig (const VP_AUXILIARY_CONFIG_S *pstAuxiliaryConfig);
 |    0   | Success |
 |   Non-zero  | Failure |
 
-【Note】### HB_SYS_Alloc
+【Note】
+
+### HB_SYS_Alloc
 【Function Declaration】
 ```c
 int HB_SYS_Alloc(uint64_t *pu64PhyAddr, void **ppVirAddr, uint32_t u32Len);
@@ -618,6 +654,7 @@ int HB_SYS_Alloc(uint64_t *pu64PhyAddr, void **ppVirAddr, uint32_t u32Len);
 |    u32Len    |    Size of memory allocation    |    Input    |
 
 【Return Value】
+
 | Return Value | Description |
 |:------:|:----:|
 |    0   | Success |
@@ -691,19 +728,65 @@ int HB_SYS_Free(uint64_t u64PhyAddr, void *pVirAddr);
 > None
 
 【Reference Code】
-> Refer to HB_SYS_Alloc|   非0  | 失败 |
+> Refer to HB_SYS_Alloc
 
-【注意事项】
-> 无
+### HB_SYS_CacheInvalidate
+**Function Declaration**
+```c
+int HB_SYS_CacheInvalidate(uint64_t pu64PhyAddr, void *pVirAddr, uint32_t u32Len);
+```
+**Function Description**
+> Invalidates the cache for the given memory region with cache.
 
-【参考代码】
-> 无|   非0  |   Failed  |
+**Parameter Descriptions**
 
-【Notes】
+| Parameter Name | Description | Input/Output |
+| :------------: | :---------: | :--------: |
+| pu64PhyAddr | Physical Address | Input |
+| pVirAddr | Virtual Address Pointer | Input |
+| u32Len | Length | Input |
+
+**Return Values**
+
+| Return Value | Description |
+|:-------------:|:-----------:|
+| 0 | Success |
+| Non-zero | Failure |
+
+**Notes**
 > None
 
-【Reference Code】
+**Reference Code**
+> N/A
+
+### HB_SYS_CacheFlush
+**Function Declaration**
+```c
+int HB_SYS_CacheFlush(uint64_t pu64PhyAddr, void *pVirAddr, uint32_t u32Len);
+```
+**Function Description**
+> Flushes the cache for the given memory region with cache.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description | Input/Output |
+| :------------: | :---------: | :--------: |
+| pu64PhyAddr | Physical Address | Input |
+| pVirAddr | Virtual Address Pointer | Input |
+| u32Len | Length | Input |
+
+**Return Values**
+
+| Return Value | Description |
+|:-------------:|:-----------:|
+| 0 | Success |
+| Non-zero | Failure |
+
+**Notes**
 > None
+
+**Reference Code**
+> N/A
 
 ### HB_VP_DmaCopy
 【Function Declaration】
@@ -734,9 +817,9 @@ int HB_VP_DmaCopy(void *dstPaddr, void *srcPaddr, uint32_t len);
 【Reference Code】
 > None
 
-## Data Type
+## Data Types
 ### HB_SYS_MOD_ID_E
-【Structure Definition】
+**Struct Definition**
 ```c
 typedef enum HB_SYS_MOD_ID_E {
     HB_ID_SYS = 0,
@@ -747,39 +830,74 @@ typedef enum HB_SYS_MOD_ID_E {
     HB_ID_AIN,
     HB_ID_AOT,
     HB_ID_VENC,
-```> 定义了VIN和VPS之间的工作模式。
+    HB_ID_VDEC,
+    HB_ID_AENC,
+    HB_ID_ADEC,
+    HB_ID_MAX,
+} SYS_MOD_ID_E;
+```
+**Function Description**
+> Module identifier.
 
-【成员说明】
+**Member Descriptions**
+> None.
 
-| 成员                                       | 含义                                       |
-|------------------------------------------|--------------------------------------------|
-| VIN_ONLINE_VPS_ONLINE                     | 在线模式：VIN和VPS都在线                    |
-| VIN_ONLINE_VPS_OFFLINE                    | 在线模式：VIN在线，VPS离线                  |
-| VIN_OFFLINE_VPS_ONLINE                    | 在线模式：VIN离线，VPS在线                  |
-| VIN_OFFLINE_VPS_OFFINE                    | 离线模式：VIN和VPS都离线                    |
-| VIN_SIF_VPS_ONLINE                        | 在线模式：SIF输入，VIN在线，VPS在线          |
-| VIN_SIF_OFFLINE_ISP_OFFLINE_VPS_ONLINE    | 在线模式：SIF输入，VIN离线，ISP离线，VPS在线 |
-| VIN_SIF_ONLINE_DDR_ISP_DDR_VPS_ONLINE     | 在线模式：SIF输入，DDR输入，ISP在线，VPS在线 |
-| VIN_SIF_ONLINE_DDR_ISP_ONLINE_VPS_ONLINE  | 在线模式：SIF输入，DDR输入，ISP在线，VPS在线 |
-| VIN_FEEDBACK_ISP_ONLINE_VPS_ONLINE        | 在线模式：其它模块反馈的ISP，ISP在线，VPS在线 |
-| VIN_SIF_OFFLINE_VPS_OFFLINE               | 离线模式：SIF输入，VIN离线，VPS离线           |
-| VIN_SIF_OFFLINE                           | 离线模式：SIF输入，VIN离线                  |> 表示VIN和VPS的在线与离线模式和VIN内部的工作模式。
+### HB_SYS_MOD_S
+**Struct Definition**
+```c
+typedef struct HB_SYS_MOD_S {
+    SYS_MOD_ID_E enModId;
+    uint8_t s32DevId;
+    uint8_t s32ChnId;
+} SYS_MOD_S;
+```
+**Function Description**
+> This structure serves as an abstract index for each module.
 
-[Member Explanation]
+**Member Descriptions**
 
-| Member                                   | Meaning                                                                                   |
-| :--------------------------------------- | :------------------------------------------------------------------------------------- |
-| VIN_ONLINE_VPS_ONLINE                    | VIN_SIF and VIN_ISP are online, VIN_ISP and VPS are online                                |
-| VIN_ONLINE_VPS_OFFLINE                   | VIN_SIF and VIN_ISP are online, VIN_ISP is offline, VPS is offline                        |
-| VIN_OFFLINE_VPS_ONLINE                   | VIN_SIF and VIN_ISP are offline, VIN_ISP is online, VPS is online                         |
-| VIN_OFFLINE_VPS_OFFINE                   | VIN_SIF and VIN_ISP are offline, VIN_ISP and VPS are offline                              |
-| VIN_SIF_VPS_ONLINE                       | VIN_SIF directly sends data online to VPS                                                 |
-| VIN_SIF_OFFLINE_ISP_OFFLINE _VPS_ONLINE   | VIN_SIF and VIN_ISP are offline, VIN_ISP is online, VPS is online, VIN_ISP to DDR, generally used to dump VIN_ISP image |
-| VIN_SIF_ONLINE_DDR_ISP_DDR _VPS_ONLINE    | VIN_SIF and VIN_ISP are online, VIN_SIF to DDR, VIN_ISP is offline, VPS is online         |
-| VIN_SIF_ONLINE_DDR_ISP_ONL INE_VPS_ONLINE | VIN_SIF and VIN_ISP are online, VIN_ISP and VPS are online, VIN_SIF to DDR, generally used to dump VIN_SIF image |
-| VIN_FEEDBACK_ISP_ONLINE _VPS_ONLINE       | VIN_SIF feeds back in raw mode                                                           |
-| VIN_SIF_OFFLINE_VPS_OFFLINE              | VIN_SIF and VPS are offline, generally used for YUV to IPU                                |
-| VIN_SIF_OFFLINE                          | VIN_SIF goes directly to DDR                                                              |
+|   Member   | Meaning                                                                                   |
+| :--------: | :--------------------------------------------------------------------------------------- |
+| enModId    | Module ID number                                                                       |
+| s32DevId   | An abstract for the pipeline in multi-channel scenarios, e.g., the nth pipe in VIN, nth group in VPS |
+| s32ChnId   | Channel index number                                                                   |
+
+### HB_SYS_VIN_VPS_MODE_E
+**Struct Definition**
+```c
+typedef enum HB_SYS_VIN_VPS_MODE_E {
+    VIN_ONLINE_VPS_ONLINE,
+    VIN_ONLINE_VPS_OFFLINE,
+    VIN_OFFLINE_VPS_ONLINE,
+    VIN_OFFLINE_VPS_OFFINE,
+    VIN_SIF_VPS_ONLINE,
+    VIN_SIF_OFFLINE_ISP_OFFLINE_VPS_ONLINE,
+    VIN_SIF_ONLINE_DDR_ISP_DDR_VPS_ONLINE,
+    VIN_SIF_ONLINE_DDR_ISP_ONLINE_VPS_ONLINE,
+    VIN_FEEDBACK_ISP_ONLINE_VPS_ONLINE,
+    VIN_SIF_OFFLINE_VPS_OFFLINE,
+    VIN_SIF_OFFLINE,
+} SYS_VIN_VPS_MODE_E;
+```
+**Function Description**
+> Represents the online/offline mode of VIN and VPS, as well as the internal working mode of VIN.
+
+**Member Descriptions**
+
+| Member                              | Meaning                                                                                   |
+| :--------------------------------- | :--------------------------------------------------------------------------------------- |
+| VIN_ONLINE_VPS_ONLINE               | VIN_SIF and VIN_ISP are online, both VIN_ISP and VPS are online                                |
+| VIN_ONLINE_VPS_OFFLINE              | VIN_SIF and VIN_ISP are online, while VIN_ISP and VPS are offline                             |
+| VIN_OFFLINE_VPS_ONLINE              | VIN_SIF and VIN_ISP are offline, but both VIN_ISP and VPS are online                        |
+| VIN_OFFLINE_VPS_OFFLINE             | VIN_SIF and VIN_ISP are offline, both VIN_ISP and VPS are offline                             |
+| VIN_SIF_VPS_ONLINE                  | VIN_SIF directly sends data to VPS                                                            |
+| VIN_SIF_OFFLINE_ISP_OFFLINE_VPS_ONLINE | VIN_SIF and VIN_ISP are offline, VIN_ISP and VPS are online, with VIN_ISP dumping to DDR        |
+| VIN_SIF_ONLINE_DDR_ISP_DDR_VPS_ONLINE | VIN_SIF and VIN_ISP are online, VIN_SIF connected to DDR, while VIN_ISP is offline and VPS is online |
+| VIN_SIF_ONLINE_DDR_ISP_ONLINE_VPS_ONLINE | Same as above, but for dumping data from VIN_SIF                                              |
+| VIN_FEEDBACK_ISP_ONLINE_VPS_ONLINE   | VIN_SIF operates in feedback raw mode                                                            |
+| VIN_SIF_OFFLINE_VPS_OFFLINE          | VIN_SIF and VPS are offline, typically for YUV to IPU conversion                            |
+| VIN_SIF_OFFLINE                     | VIN_SIF directly connects to DDR                                                               |
+
 
 ### HB_VP_POOL_CONFIG_S
 [Structure Definition]
@@ -851,9 +969,9 @@ typedef struct hb_vio_buffer_s {
 | :---------: | :---------------- |
 | img_info | Image data information |
 | img_addr | Image address information |
-
+            |
 ### pym_buffer_t
-【Structure Definition】
+**Structure Definition:**
 ```c
 typedef struct pym_buffer_s {
     image_info_t pym_img_info;
@@ -861,6 +979,28 @@ typedef struct pym_buffer_s {
     address_info_t pym_roi[6][3];
     address_info_t us[6];
     char *addr_whole[HB_VIO_BUFFER_MAX_PLANES];
+    uint64_t paddr_whole[HB_VIO_BUFFER_MAX_PLANES];
+    uint32_t layer_size[30][HB_VIO_BUFFER_MAX_PLANES];
+} pym_buffer_t;
+```
+**Function Description:**
+> Pyramid buffer structure
+
+**Member Descriptions:**
+
+| Member           | Meaning                                                                                     |
+| :---------------: | :--------------------------------------------------------------------------------------------- |
+| pym_img_info      | Pyramid data information                                                                          |
+| pym               | Base-level pyramid data addresses, corresponding to s0, s4, s8, s16, s20, and s24                  |
+| pym_roi           | ROI data addresses for the base-level pyramid, e.g., pym_roi[0][0] corresponds to s0's s1, etc. |
+| us                | Addresses for the 6 US channel output data                                                           |
+| addr_whole        | Virtual address of the entire pyramid buffer's first address                                      |
+| paddr_whole       | Physical address of the entire pyramid buffer's first address                                      |
+| layer_size        | Data size for each layer of the pyramid                                                                |
+
+### image_info_t
+**Structure Definition:**
+```c
 typedef struct image_info_s {
     uint16_t sensor_id;
     uint32_t pipeline_id;
@@ -878,39 +1018,30 @@ typedef struct image_info_s {
     buffer_state_e state;
 } image_info_t;
 ```
-【Functional Description】
-> Structure for image information
+**Function Description:**
+> Image information structure
 
-【Member Description】
+**Member Descriptions:**
 
-|    Member    | Meaning                                                      |
-| :----------: | :----------------------------------------------------------- |
-|  sensor_id   | Sensor id                                                    |
-| pipeline_id  | Corresponding data channel number                            |
-|  frame_id    | Data frame number                                            |
-| time_stamp   | HW time stamp, internal hardware time in SIF, updated every FS, not related to system time, generally used for synchronization |
-|    tv        | Timeval structure                                            |
-|  buf_index   | Buffer index                                                 |
-| img_format   | Image format                                                 |
-|     fd       | File descriptor array for each plane                         |
-|    size      | Data size in each plane                                      |
-| planeCount   | Number of planes                                             |
-| dynamic_flag | Dynamic flag                                                 |
-| water_mark_line | Water mark line                                           |
-| data_type    | Enumeration type for VIO data type                           |
-|    state     | Buffer state                                                 ||       tv        | System time of getting buffer in hal, the system time when sif is triggered in framestart      |
-|    buf_index    | Index of the obtained buffer                                           |
-|   img_format    | Image format                                                     |
-|       fd        | Ion buffer file descriptor                                                   |
-|      size       | Size of corresponding plane                                              |
-|   planeCount    | Number of planes in the image                                       |
-|  dynamic_flag   | Flag indicating dynamic size change                                             |
-| water_mark_line | Water mark line information, not supported in XJ3                                      |
-|    data_type    | Data type of the image                                             |
-|      state      | State of the buffer, user state in the user layer                              |
+| Member          | Meaning                                                                                     |
+| :--------------: | :--------------------------------------------------------------------------------------------- |
+| sensor_id        | Sensor ID                                                                                        |
+| pipeline_id      | Channel number for the corresponding data                                                                  |
+| frame_id         | Data frame number                                                                                 |
+| time_stamp       | HW timestamp (SIF internal hardware time, updated during each FS, not related to system time)   |
+| tv               | System time of HAL getting the buffer, the system time when SIF records at the start of a frame |
+| buf_index        | Index of the acquired buffer                                                                          |
+| img_format       | Image format                                                                                        |
+| fd               | ION buffer file descriptor                                                                            |
+| size             | Size of each plane                                                                                  |
+| planeCount       | Number of planes in the image                                                                         |
+| dynamic_flag     | Flag for dynamically changing size                                                                     |
+| water_mark_line | Advanced watermark line, unsupported on XJ3                                                               |
+| data_type        | Image data type                                                                                     |
+| state            | Buffer state, user state in the user layer                                                            |
 
 ### address_info_t
-【Structure Definition】
+**Structure Definition:**
 ```c
 typedef struct address_info_s {
     uint16_t width;
@@ -920,29 +1051,29 @@ typedef struct address_info_s {
     uint64_t paddr[HB_VIO_BUFFER_MAX_PLANES];
 } address_info_t;
 ```
-【Description】
-> Structure for image address information
+**Function Description:**
+> Image address information structure
 
-【Member Description】
+**Member Descriptions:**
 
-|    Member     | Description                                       |
+| Member     | Meaning                                       |
 | :---------: | :----------------------------------------- |
-|    width    | Width of the image data                               |
-|   height    | Height of the image data                               |
-| stride_size | Memory stride of the image data (actual width stored in memory) |
-|    addr     | Virtual addresses, stored according to the number of yuv planes              |
-|    paddr    | Physical addresses, stored according to the number of yuv planes              |
+| width      | Image data width                               |
+| height     | Image data height                               |
+| stride_size | Image data memory stride (width of one row in memory) |
+| addr       | Virtual addresses, stored per YUV plane         |
+| paddr      | Physical addresses, stored per YUV plane         |
 
-## Error Codes
+**Error Codes:**
 
-|   Error code   |          Macro            |          Description          |
-| :--------: | :----------------------: | :--------------------: |
-| -268500032 |    VP_INVALID_BLOCKID    |       Invalid buffer block       |
-| -268500033 |    VP_INVALID_POOLID     |       Invalid buffer pool       |
-| -268500034 |    HB_ERR_VP_NOT_PERM    |       Operation not permitted       |
-| -268500035 |    HB_ERR_VP_UNEXIST     |    Video buffer pool does not exist    |
-| -268500036 |      HB_ERR_VP_BUSY      |        Buffer pool busy        |
-| -268500037 |     HB_ERR_SYS_BUSY      |         System busy         |
-| -268500038 | HB_ERR_SYS_ILLEGAL_PARAM |    Illegal parameter of system interface    |
-| -268500039 |     HB_ERR_SYS_NOMEM     |  Failed to allocate memory in system interface  |
-| -268500040 | HB_ERR_VP_ILLEGAL_PARAM  | Invalid parameter setting for buffer pool interface |
+| Error Code | Macro Definition | Description                                                                                   |
+| :--------: | :-------------: | :----------------------------------------------------------------------------------------------- |
+| -268500032 | VP_INVALID_BLOCKID | Invalid buffer block ID                                                                       |
+| -268500033 | VP_INVALID_POOLID  | Invalid buffer pool ID                                                                        |
+| -268500034 | HB_ERR_VP_NOT_PERM | Operation not allowed                                                                           |
+| -268500035 | HB_ERR_VP_UNEXIST | Video buffer pool does not exist                                                                |
+| -268500036 | HB_ERR_VP_BUSY    | Buffer pool is busy                                                                             |
+| -268500037 | HB_ERR_SYS_BUSY   | System is busy                                                                                  |
+| -268500038 | HB_ERR_SYS_ILLEGAL_PARAM | System interface illegal parameter                                                            |
+| -268500039 | HB_ERR_SYS_NOMEM | System interface failed to allocate memory                                                      |
+| -268500040 | HB_ERR_VP_ILLEGAL_PARAM | Invalid parameter set for buffer pool interface                                                 |

@@ -45,7 +45,9 @@ The official carrier board of RDK X3 Module provides various peripheral interfac
 
 <TabItem value="ulrta" label="RDK Ultra">
 
-RDK Ultra development kit provides various peripheral interfaces such as Ethernet port, USB, HDMI, MIPI CSI, 40PIN, etc., which facilitate the functional experience and development testing of RDK Ultra development kit. The interface layout is as follows:![image-carrier-board1](./image/hardware_interface/image-rdk-ultra-interface1.jpg)
+RDK Ultra development kit provides various peripheral interfaces such as Ethernet port, USB, HDMI, MIPI CSI, 40PIN, etc., which facilitate the functional experience and development testing of RDK Ultra development kit. The interface layout is as follows:
+
+![image-carrier-board1](./image/hardware_interface/image-rdk-ultra-interface1.jpg)
 ![image-carrier-board2](./image/hardware_interface/image-rdk-ultra-interface2.jpg) 
 
 | Number | Interface Function     | Number | Interface Function       | Number | Interface Function         |

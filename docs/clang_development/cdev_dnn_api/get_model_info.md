@@ -47,9 +47,7 @@ Get a handle to a model from the list of models pointed to by ``packedDNNHandle`
 
 ## hbDNNGetInputCount()**[Function Prototype]**
 
-```cpp
-int32_t hbDNNGetInputCount(int32_t *inputCount, hbDNNHandle_t dnnHandle)
-```
+`int32_t hbDNNGetInputCount(int32_t *inputCount, hbDNNHandle_t dnnHandle)`
 
 **[Description]**
 
@@ -70,9 +68,7 @@ Get the number of input tensors for the model pointed by `dnnHandle`.
 
 **[Function Prototype]**
 
-```cpp
-int32_t hbDNNGetInputName(const char **name, hbDNNHandle_t dnnHandle, int32_t inputIndex)
-```
+`int32_t hbDNNGetInputName(const char **name, hbDNNHandle_t dnnHandle, int32_t inputIndex)`
 
 **[Description]**
 
@@ -94,9 +90,7 @@ Get the name of the input tensor for the model pointed by `dnnHandle` at the spe
 
 **[Function Prototype]**
 
-```cpp
-int32_t hbDNNGetInputTensorProperties(hbDNNTensorProperties *properties, hbDNNHandle_t dnnHandle, int32_t inputIndex)
-```
+`int32_t hbDNNGetInputTensorProperties(hbDNNTensorProperties *properties, hbDNNHandle_t dnnHandle, int32_t inputIndex)`
 
 **[Description]**
 
@@ -157,7 +151,9 @@ Get the name of the output tensor in the model pointed by ``dnnHandle``.
 
 **[Return Type]**  
 
-- Return ``0`` indicates successful execution of the API, otherwise it fails.## hbDNNGetOutputTensorProperties()
+- Return ``0`` indicates successful execution of the API, otherwise it fails.
+
+## hbDNNGetOutputTensorProperties()
 
 
 **【Function Prototype】**  

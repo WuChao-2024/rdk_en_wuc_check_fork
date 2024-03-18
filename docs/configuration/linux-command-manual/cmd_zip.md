@@ -46,7 +46,9 @@ zip [-options] [-b path] [-t mmddyyyy] [-n suffixes] [zipfile list] [-xi list]
 - `-v`: Detailed operation, prints version information.
 - `-X`: Excludes additional file attributes.
 - `-y`: Directly saves symbolic links instead of the files they point to. This parameter is only effective on systems like UNIX.
-- `-z`: Adds a comment to the compressed file.## Common Commands
+- `-z`: Adds a comment to the compressed file.
+
+## Common Commands
 
 Pack all files and folders under the `/app` directory into a `app.zip` file in the current directory:
 

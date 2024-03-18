@@ -22,31 +22,33 @@ RDK Ultra does **not** support `H264` encoding and decoding.
 
 ## sp_init_decoder_module
 
-**[Function Prototype]**
+**【Function Prototype】**
 
 `void *sp_init_decoder_module()`
 
-**[Description]**
+**【Description】**
 
 Initialize the decoder module object. The operation handle needs to be obtained when using the decoder module. It supports video bitstreams in H264, H265, and Mjpeg formats.
 
-**[Parameters]**
+**【Parameters】**
 
 None.
 
-**[Return Type]**
+**【Return Type】**
 
 Returns the `DECODER` object on success and NULL on failure.
 
 ## sp_release_decoder_module
 
-**[Function Prototype]**
+**【Function Prototype】**
 
 `void sp_release_decoder_module(void *obj)`
 
-**[Description]**
+**【Description】**
 
-Destroy the decoder module object.**【Parameters】**
+Destroy the decoder module object.
+
+**【Parameters】**
 
  - `obj`: Object pointer obtained when calling the initialization interface.
 
@@ -94,7 +96,9 @@ Close the decoding channel.
 
 Returns 0 on success and -1 on failure.
 
-## sp_decoder_get_image**【Function Prototype】**
+## sp_decoder_get_image
+
+**【Function Prototype】**
 
 `int32_t sp_decoder_get_image(void *obj, char *image_buffer)`
 

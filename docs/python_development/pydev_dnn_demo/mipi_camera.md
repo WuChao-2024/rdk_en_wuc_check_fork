@@ -48,7 +48,8 @@ Please refer to [MIPI Camera AI Inference](/first_application/mipi_camera) for h
     print(len(models[0].outputs))
     for output in models[0].outputs:
         print_properties(output.properties)
-```- Data Preprocessing
+    ```
+- Data Preprocessing
 
     Call the `get_cam` interface of the `srcampy.Camera` class to obtain the real-time image from the MIPI camera and resize the image to fit the size of the model's input tensor.
     
@@ -97,7 +98,8 @@ Please refer to [MIPI Camera AI Inference](/first_application/mipi_camera) for h
     ```python
     # do postprocess
     prediction_bbox = postprocess(outputs, input_shape, origin_img_shape=(1080,1920))
-    ```- Visualization of Detection Results
+    ```
+- Visualization of Detection Results
 
     The example renders the algorithm results and the original video stream and outputs them through the HDMI interface. Users can preview the effects in real time on a display. The display part uses the Display function of the hobot_vio module, for more detailed information about this module, please refer to the [Display section](../pydev_multimedia_api_x3/object_display.md).
 
@@ -193,29 +195,29 @@ async def web_service(websocket, path):
         FrameMessage = x3_pb2.FrameMessage()
         # set frame solution and format
         FrameMessage.img_.height_ = 1080
-```FrameMessage.img_.width_ = 1920
-            FrameMessage.img_.type_ = "JPEG"
-    
-            # get camera image for inference
-            img = cam.get_img(2, 512, 512)
-            img = np.frombuffer(img, dtype=np.uint8)
-            outputs = models[0].forward(img)
-            # do postprocess
-            prediction_bbox = postprocess(outputs, input_shape, origin_img_shape=(1080, 1920))
-            print(prediction_bbox)
+        FrameMessage.img_.width_ = 1920
+        FrameMessage.img_.type_ = "JPEG"
 
-            # get camera image for render
-            origin_image = cam.get_img(2, 1920, 1080)
-            # encode image to mjpeg
-            enc.encode_file(origin_image)
-            FrameMessage.img_.buf_ = enc.get_img()
-            FrameMessage.smart_msg_.timestamp_ = int(time.time())
-            # serialize data
-            prot_buf = serialize(FrameMessage, prediction_bbox)
-            # send data
-            await websocket.send(prot_buf)
-        cam.close_cam()
-    ```
+        # get camera image for inference
+        img = cam.get_img(2, 512, 512)
+        img = np.frombuffer(img, dtype=np.uint8)
+        outputs = models[0].forward(img)
+        # do postprocess
+        prediction_bbox = postprocess(outputs, input_shape, origin_img_shape=(1080, 1920))
+        print(prediction_bbox)
+
+        # get camera image for render
+        origin_image = cam.get_img(2, 1920, 1080)
+        # encode image to mjpeg
+        enc.encode_file(origin_image)
+        FrameMessage.img_.buf_ = enc.get_img()
+        FrameMessage.smart_msg_.timestamp_ = int(time.time())
+        # serialize data
+        prot_buf = serialize(FrameMessage, prediction_bbox)
+        # send data
+        await websocket.send(prot_buf)
+    cam.close_cam()
+```
 
 - View the display effect on the web
 

@@ -45,7 +45,9 @@ Model.inputs(tuple(pyDNNTensor))
 | ---------- | ---------- |
 | index | Index of the input tensor. |
 
-<font color='Blue'>[Usage]</font>```python
+<font color='Blue'>[Usage]</font>
+
+```python
 def print_properties(pro):
     print("tensor type:", pro.tensor_type)
     print("data type:", pro.dtype)
@@ -95,13 +97,15 @@ Model.outputs(tuple(pyDNNTensor))
 ```python
 def print_properties(pro):
     print("tensor type:", pro.tensor_type)print("data type:", pro.dtype)
-print("layout:", pro.layout)
-print("shape:", pro.shape)
+    print("layout:", pro.layout)
+    print("shape:", pro.shape)
 
-models = dnn.load('../models/fcos_512x512_nv12.bin')
-output = models[0].outputs[0]
+    models = dnn.load('../models/fcos_512x512_nv12.bin')
+    output = models[0].outputs[0]
 
-print_properties(output.properties)```
+    print_properties(output.properties)
+
+```
 
 <font color='Blue'>【Return Value】</font>  
 
@@ -143,6 +147,7 @@ Model.forward(args &args, kwargs &kwargs)
 ```python
 img = cam.get_img(2, 512, 512)img = np.frombuffer(img, dtype=np.uint8)
 outputs = models[0].forward(img)
+```
 
 <font color='Blue'>【Return Value】</font>  
 

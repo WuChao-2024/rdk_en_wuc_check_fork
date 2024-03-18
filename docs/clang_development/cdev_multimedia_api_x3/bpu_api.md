@@ -16,58 +16,64 @@ The `BPU` API provides the following interfaces:
 
 ## sp_init_bpu_module
 
-**[Function Prototype]**
+**【Function Prototype】**
 
 `bpu_module *sp_init_bpu_module(const char *model_file_name)`
 
-**[Description]**
+**【Description】**
 
 Open the algorithm model specified by `model_file_name` and initialize an algorithm inference task.
 
-**[Parameters]**
+**【Parameters】**
 
 - `model_file_name`: Algorithm model file, which needs to be converted by Horizon AI algorithm toolchain or trained fixed-point model.
 
-**[Return Type]**
+**【Return Type】**
 
 AI algorithm inference task object.
 
 ## sp_bpu_start_predict
 
-**[Function Prototype]**
+**【Function Prototype】**
 
 `int32_t sp_bpu_start_predict(bpu_module *bpu_handle, char *addr)`
 
-**[Description]**
+**【Function Description】**
 
-Pass in the image data to complete the AI algorithm inference and return the algorithm result.
+Passes in image data to complete AI algorithm inference and returns the algorithm result.
 
-**[Parameters]**
+**【Parameters】**
 
-- `bpu_handle`: Algorithm inference task object
-- `addr`: Image data input请注意，函数原型中的参数`hbDNNTensor`和`bpu_module`是根据上下文和领域知识进行推测的，翻译时请根据实际情况进行调整。
+- `bpu_handle`: Object for the AI inference task.
+- `addr`: Input address of the image data.
 
-**【函数原型】**  
-```cpp
-int32_t sp_init_bpu_tensors(bpu_module *bpu_handle, hbDNNTensor *output_tensors)
-```
+**【Return Type】**
 
-**【功能描述】**  
-Initialize and allocate memory for the input `tensor`.
+None.
 
-**【参数】**
-- `bpu_handle`: Algorithm inference task object
-- `output_tensors`: Address of the `tensor`
+## sp_init_bpu_tensors
 
-**【返回类型】**  
+**【Function Prototype】**
+
+`int32_t sp_init_bpu_tensors(bpu_module *bpu_handle, hbDNNTensor *output_tensors)`
+
+**【Function Description】**
+
+Initializes and allocates memory for the passed-in `tensor`.
+
+**【Parameters】**
+
+- `bpu_handle`: Object for the AI inference task.
+- `output_tensors`: Address of the `tensor`.
+
+**【Return Type】**
+
 None.
 
 ## sp_deinit_bpu_tensor 
 
 **【函数原型】**  
-```cpp
-int32_t sp_deinit_bpu_tensor(hbDNNTensor *tensor, int32_t len)
-```
+`int32_t sp_deinit_bpu_tensor(hbDNNTensor *tensor, int32_t len)`
 
 **【功能描述】**  
 Release and reclaim memory for the input `tensor`.
@@ -82,9 +88,7 @@ None.
 ## sp_release_bpu_module  
 
 **【函数原型】**  
-```cpp
-int32_t sp_release_bpu_module(bpu_module *bpu_handle)
-```
+`int32_t sp_release_bpu_module(bpu_module *bpu_handle)`
 
 **【功能描述】**  
 Release the BPU module.

@@ -47,7 +47,9 @@ scp [option] file_source file_target
 - -P port: Specifies the port to connect to on the remote host. Note that this option uses uppercase 'P' because lowercase '-p' is already reserved for preserving the modification time and mode of files.
 - -S program: Specifies the program to use for the encrypted connection. The program must understand ssh(1) options.
 
-## Common Commands**Copying from local to remote**
+## Common Commands
+
+**Copying from local to remote**
 
 Command format:
 

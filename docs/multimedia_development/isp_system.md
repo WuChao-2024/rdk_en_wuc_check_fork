@@ -88,7 +88,11 @@ In most cases, standard colors may not provide the best image quality. Depending
 
 The module applies linear color correction to the input {R, G, B} or {R, G, B, Ir} pixel values. The coefficient matrix is calculated as follows: ![](./image/isp_system/8d9c2a42362a495faa03dc054781802a.png)
 
-In1, In2, In3, and In4 are the inputs (corresponding to R, G, B, and Ir, respectively), and A11 to A34 are the configurable matrix coefficients. The coefficients are 13-bit values in the s4.8 fixed-point format, with the MSbit (12 bits) as the sign bit. The MSbit (12 bits) for negative values is set to 1.### Sinter
+In1, In2, In3, and In4 are the inputs (corresponding to R, G, B, and Ir, respectively), and A11 to A34 are the configurable matrix coefficients. The coefficients are 13-bit values in the s4.8 fixed-point format, with the MSbit (12 bits) as the sign bit. The MSbit (12 bits) for negative values is set to 1.
+
+> Note: If the CFA pattern is RGGB, the IR coefficient and the IR channel offset must be set to zero.
+
+### Sinter
 
 Sinter® is an advanced spatial noise reduction module that combines a set of algorithms to suppress sensor noise. The filter operates in the RAW data domain and effectively reduces the noise perceived by the human eye in the image while maintaining texture and details, resulting in more natural-looking processed images.
 
@@ -134,7 +138,9 @@ Radial shading is a correction method for lens shading that corresponds to mesh 
 
 The radial shading coefficients are stored in a 32-bit, 4x129 entry LUT, with coefficients in x.12 format where the lower 12 bits represent the decimal portion. For each color plane, the coefficients are stored from the center to the outer edge.
 
-### Color Space ConversionThis module converts the input {R, G, B} pixel values to {Y, U, V} values using standard 3x3 matrix multiplication and vector offset. If the conversion is not activated, the ISP outputs pixel in RGB format. ![](./image/isp_system/349a1fb120a6478e02d6ae647f8b43b5.png)
+### Color Space Conversion
+
+This module converts the input {R, G, B} pixel values to {Y, U, V} values using standard 3x3 matrix multiplication and vector offset. If the conversion is not activated, the ISP outputs pixel in RGB format. ![](./image/isp_system/349a1fb120a6478e02d6ae647f8b43b5.png)
 
 If needed, the parameters can be modified to provide different conversions. Taking BT.709 as an example, the formula is as follows: ![](./image/isp_system/31ead51a2003c093e39a8660d535adde.png)
 
@@ -224,7 +230,9 @@ The statistical information accumulated for each region is shown in the followin
 
 The AF region data is stored in the following format:
 
-In addition to the region statistics, AF also accumulates the normalized fourth edge sum, which is stored in a 32-bit register.#### Auto Level Statistics
+In addition to the region statistics, AF also accumulates the normalized fourth edge sum, which is stored in a 32-bit register.
+
+#### Auto Level Statistics
 
 1024-bin statistics data provided by the iridix module. ![](./image/isp_system/51b1c86929ebf73752bf1803d437a06c.png)
 
@@ -316,7 +324,9 @@ Interface Description:
 |-------------------|-----------------------------------------------------------------------------------------------------------|
 | init_func         | Algorithm initialization function                                                                         |
 | proc_func         | Actual algorithm implementation. Called by ISP Firmware when the AWB statistical data for each frame is ready. The proc_func passes the input parameters and the parameters to be passed out. See [Structural Description](#_2_HB_ISP_AWB_FUNC_S) for details. |
-| deinit_func       | Algorithm deinitialization function                                                                       |#### AF Algorithm Registration
+| deinit_func       | Algorithm deinitialization function                                                                       |
+
+#### AF Algorithm Registration
 
 AF registers callback functions to ISP Firmware:
 
@@ -407,6 +417,7 @@ pr_info("done");
 return 0;
 
 }
+```
 
 ## API Reference
 
@@ -562,7 +573,8 @@ Starts, stops writing to I2C bus.
 ### HB_ISP_SendI2CData
 
 【Function Declaration】
-```cint HB_ISP_SendI2CData(ISP_I2C_DATA_S data);
+```c
+int HB_ISP_SendI2CData(ISP_I2C_DATA_S data);
 ```
 【Function Description】
 
@@ -657,7 +669,9 @@ ISP_AF_FUNC_S *pstAFFunc);
 ```
 【Function description】
 
-Register the AF algorithm library.【参数描述】
+Register the AF algorithm library.
+
+【Parameter description】
 
 | Parameter Name | Description                                 | Input/Output |
 |----------------|---------------------------------------------|--------------|
@@ -665,48 +679,52 @@ Register the AF algorithm library.【参数描述】
 | name           | Library name, fixed-copy 20 characters long | Input        |
 | pstAFFunc      | AF algorithm callback function pointer       | Input        |
 
-【返回值】
+【Return value】
 
 | Return Value | Description |
 |--------------|-------------|
 | 0            | Success     |
 | Non-zero     | Failure     |
 
-【注意事项】
+【Caution】
 
 HB_VIN_StartPipe will start the ISP algorithm, and algorithm registration needs to be done before calling HB_VIN_StartPipe function.
 
 
-【参考代码】See [Algorithm Registration Example](#_Algorithm Registration Example)
+【Reference code】
+
+See [Algorithm Registration Example](#_Algorithm Registration Example)
 
 ### HB_ISP_AELibUnRegCallback
 
-【函数声明】
+【Function Declaration】
 ```c
 int HB_ISP_AELibUnRegCallback(uint8_t pipeId);
 ```
-【功能描述】
+【Description】
 
 Unregister AE algorithm library.
 
-【参数描述】
+【Description】
 
 | Parameter Name | Description       | Input/Output |
 |----------------|-------------------|--------------|
 | pipeId         | Pipeline index number | Input        |
 
-【返回值】
+【Return Value】
 
 | Return Value | Description |
 |--------------|-------------|
 | 0            | Success     |
 | Non-zero     | Failure     |
 
-【注意事项】
+【Caution】
 
-【参考代码】
+【Reference code】
 
-### HB_ISP_AWBLibUnRegCallback【Function Declaration】
+### HB_ISP_AWBLibUnRegCallback
+
+【Function Declaration】
 
 ```c
 int HB_ISP_AWBLibUnRegCallback(uint8_t pipeId);
@@ -758,7 +776,17 @@ Unregister the AF algorithm library.
 | 0            | Success     |
 | Non-zero     | Failure     |
 
-【Notes】### HB_ISP_GetSetInit/HB_ISP_GetSetExit
+【Notes】
+
+【Reference Code】
+
+Note:
+
+1. If using the default 3A algorithm, there is no need to concern yourself with the interfaces in this chapter.
+
+2. Zoom and aperture control algorithms are not included. Users can implement their own and provide output parameters to modify the ISP (Image Signal Processor) firmware for adaptation.
+
+### HB_ISP_GetSetInit/HB_ISP_GetSetExit
 
 【Function Declaration】
 ```c
@@ -891,7 +919,8 @@ Set black level attributes.
 
 | Parameter Name    | Description         | Input/Output |
 |-------------------|---------------------|--------------|
-| pipeId            | Pipeline index number| Input        || pstBlackLevelAttr | Pointer to black level parameter | Input |
+| pipeId            | Pipeline index number| Input        |
+| pstBlackLevelAttr | Pointer to black level parameter | Input |
  
 [Return Values]
 
@@ -940,7 +969,9 @@ Set demosaic module attributes.
 | 0            | Success     |
 | Non-zero     | Failure     |
 
-[Note]### HB_ISP_SetSharpenAttr/HB_ISP_GetSharpenAttr
+[Note]
+
+### HB_ISP_SetSharpenAttr/HB_ISP_GetSharpenAttr
 
 【Function declaration】
 ```c
@@ -1035,7 +1066,9 @@ Set Iridix module attributes.
 
 ### HB_ISP_SetIridixStrengthLevel/HB_ISP_GetIridixStrengthLevel
 
-【Function Declaration】```c
+【Function Declaration】
+
+```c
 int HB_ISP_SetIridixStrengthLevel(uint8_t pipeId, uint16_t level);
 
 int HB_ISP_GetIridixStrengthLevel(uint8_t pipeId, uint16_t *level);
@@ -1084,7 +1117,8 @@ Set the chroma noise reduction module attributes.
 【Return Value】
 
 | Return Value | Description |
-|--------------|-------------|| 0      | Success |
+|--------------|-------------|
+| 0      | Success |
 | Non-zero | Failure |
 
 【Notes】
@@ -1180,7 +1214,9 @@ Set the properties of the Mesh Shading module.
 | 0            | Success     |
 | Non-zero     | Failure     |
 
-【Notes】### HB_ISP_SetMeshShadingLUT/HB_ISP_GetMeshShadingLUT
+【Notes】
+
+### HB_ISP_SetMeshShadingLUT/HB_ISP_GetMeshShadingLUT
 
 【Function Declaration】
 ```c
@@ -1277,7 +1313,9 @@ Set the LUT table for Radial Shading module.
 
 ### HB_ISP_SetCSCAttr/HB_ISP_GetCSCAttr
 
-【Function Declaration】```c
+【Function Declaration】
+
+```c
 int HB_ISP_SetCSCAttr(uint8_t pipeId, const ISP_CSC_ATTR_S *pstCSCAttr);
 
 int HB_ISP_GetCSCAttr(uint8_t pipeId, ISP_CSC_ATTR_S *pstCSCAttr);
@@ -1323,7 +1361,9 @@ Set the scene modes.
 | pipeId               | Pipeline index       | Input        |
 | pstSceneModesAttr    | Pointer to scene mode parameters | Input   |
 
-【Return Value】Translate the Chinese parts in the following content into English while preserving the original format and content:
+【Return Value】
+Translate the Chinese parts in the following content into English while preserving the original format and content:
+
 | Return Value | Description |
 |--------------|-------------|
 | 0            | Success     |
@@ -1419,7 +1459,9 @@ Access/Set AE 5bin zones information.
 | 0            | Success     |
 | Non-zero     | Failure     |
 
-[Notes]### HB_ISP_SetAfKernelInfo/HB_ISP_GetAfKernelInfo
+[Notes]
+
+### HB_ISP_SetAfKernelInfo/HB_ISP_GetAfKernelInfo
 
 【Function Declaration】
 ```c
@@ -1453,49 +1495,95 @@ This interface is mainly used for applications to obtain or modify current af st
 
 ### HB_ISP_SetAeParam/HB_ISP_GetAeParam
 
-【Function Declaration】
+**Function Declaration**
 ```c
 int HB_ISP_SetAeParam(uint8_t pipeId, const ISP_AE_PARAM_S *pstAeParam);
 
 int HB_ISP_GetAeParam(uint8_t pipeId, ISP_AE_PARAM_S *pstAeParam);
 ```
-【Description】
+**Function Description**
 
-Set/Get AE parameter information, line and total_gain.
+Sets/gets AE parameter information, including line and total gain.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name | Description              | Input/Output |
-|----------------|--------------------------|--------------|| 参数名称         | 描述                           | 输入/输出 |
-|------------------|--------------------------------|-----------|
-| pipeId           | Pipeline索引号                 | 输入      |
-| awbStatAreaAttr  | 白平衡统计区域信息参数         | 输出      |【Function Declaration】
-```c
-int HB_ISP_GetAwbStatAreaAttr(uint8_t pipeId, ISP_AWB_STAT_AREA_ATTR_S *pstAwbStatAreaAttr);
+| Parameter Name | Description | Input/Output |
+|---------------|-------------|-------------|
+| pipeId        | Pipeline index | Input       |
+| pstAeParam    | Pointer to AE parameter structure | Input       |
 
-int HB_ISP_SetAwbStatAreaAttr(uint8_t pipeId, ISP_AWB_STAT_AREA_ATTR_S *pstAwbStatAreaAttr);
-```
-【Description】
-
-Set the range of AWB statistical data area.
-
-【Parameter Description】
-
-| Parameter Name    | Description              | Input/Output |
-|-------------------|--------------------------|--------------|
-| pipeId            | Pipeline index number     | Input        |
-| pstAwbStatAreaAttr | Statistical data range    | Output       |
-
-【Return Value】
+**Return Values**
 
 | Return Value | Description |
 |--------------|-------------|
 | 0            | Success     |
 | Non-zero     | Failure     |
 
-【Notes】
+**Cautionary Notes**
 
-【Reference Code】Not applicable
+**Reference Code**: None
+
+### HB_ISP_SetAeRoiInfo/HB_ISP_GetAeRoiInfo
+
+**Function Declaration**
+```c
+int HB_ISP_SetAeRoiInfo(uint8_t pipeId, ISP_AE_ROI_ATTR_S aeRoiInfo);
+
+int HB_ISP_GetAeRoiInfo(uint8_t pipeId, ISP_AE_ROI_ATTR_S *aeRoiInfo);
+```
+**Function Description**
+
+Sets the ROI (Region of Interest) weight area for AE, allowing dynamic calls.
+
+**Parameter Descriptions**
+
+| Parameter Name  | Description           | Input/Output |
+|----------------|-----------------------|-------------|
+| pipeId          | Pipeline index         | Input       |
+| aeRoiInfo       | ROI attribute structure | Output      |
+
+**Return Values**
+
+| Return Value | Description  |
+|--------------|-------------|
+| 0            | Success     |
+| Non-zero     | Failure     |
+
+**Cautionary Note**
+
+The ROI region setting is independent from the 3A-AE ROI weighting setup. Only one of these functions can be used at any given time. 
+
+**Reference Code**: None
+
+### HB_ISP_SetAwbStatAreaAttr / HB_ISP_GetAwbStatAreaAttr
+
+**Function Declaration**
+```c
+int HB_ISP_GetAwbStatAreaAttr(uint8_t pipeId, ISP_AWB_STAT_AREA_ATTR_S *pstAwbStatAreaAttr);
+
+int HB_ISP_SetAwbStatAreaAttr(uint8_t pipeId, ISP_AWB_STAT_AREA_ATTR_S *pstAwbStatAreaAttr);
+```
+**Function Description**
+
+Sets or retrieves the AWB statistical data area range.
+
+**Parameter Descriptions**
+
+| Parameter Name        | Description                            | Input/Output |
+|-----------------------|----------------------------------------|-------------|
+| pipeId                | Pipeline index number                   | Input       |
+| pstAwbStatAreaAttr    | Statistical data area range parameters | Output      |
+
+**Return Values**
+
+| Return Value | Description                        |
+|--------------|------------------------------------|
+| 0            | Success                            |
+| Non-zero     | Failure                            |
+
+**Cautionary Notes**
+
+**Reference Code:** None provided (since this is a function description rather than actual code)
 
 ### HB_ISP_GetAeFullHist
 
@@ -1516,8 +1604,7 @@ Get AE statistical data.
 
 【Return Value】
 
-| Return Value | Description |You are a professional and excellent translation expert.
-
+| Return Value | Description |
 |--------|------|
 | 0      | Success |
 | Non-zero    | Failure |
@@ -1663,6 +1750,7 @@ ISP_ZONE_ATTR_S afZoneInfo;
 memset(af_data, 0, sizeof(af_data));
 
 af.zones_stats = (uint32_t *)&af_data;HB_ISP_GetAfZoneHist(ctx_idx, &af);
+```
 
 ### HB_ISP_GetMeteringData
 
@@ -1710,7 +1798,8 @@ Get ISP FRAME_START or FRAME_END information.
 
 【Parameter Description】
 
-| Parameter Name | Description                        | Input/Output ||----------|--------------------------------------|-----------|
+| Parameter Name | Description   | Input/Output |
+|----------|--------------------------------------|-----------|
 | pipeId   | Pipeline index                       | Input      |
 | vdt_type | Select for getting ISP frame_start or frame_end | Input      |
 | timeout  | Timeout return time                         | Input      |
@@ -1759,7 +1848,9 @@ Get the mean and variance of LUMVAR statistical information.
 
 ### HB_ISP_SetAEControl/ HB_ISP_GetAEControl
 
-【Function Declaration】```c
+【Function Declaration】
+
+```c
 int HB_ISP_SetAEControl(uint8_t pipeId, const ISP_AE_CONTROL *pstAeControl);
 
 int HB_ISP_GetAEControl(uint8_t pipeId, ISP_AE_CONTROL *pstAeControl);
@@ -1807,7 +1898,8 @@ Set/Get AE correction information
 
 【Return Value】
 
-| Return Value | Description ||--------|------|
+| Return Value | Description |
+|--------|------|
 | 0      | Success |
 | non-0  | Failed |
 
@@ -1854,7 +1946,9 @@ Set/Get the 5bin statistical information of AE
 int HB_ISP_SetExposureRatioAdjustment(uint8_t pipeId, const ISP_EXP_RATIO_ADJ *pstExpRatioAdj);
 
 int HB_ISP_GetExposureRatioAdjustment(uint8_t pipeId, ISP_EXP_RATIO_ADJ *pstExpRatioAdj);
-```【Function Description】
+```
+
+【Function Description】
 
 Set/Get Exposure Ratio Adjustment
 
@@ -1903,7 +1997,9 @@ Set/Get LUT information for exposure partition
 | Return Value | Description |
 |--------------|-------------|
 | 0            | Success     |
-| non-zero     | Failure     |【注意事项】
+| non-zero     | Failure     |
+
+【注意事项】
 
 【参考代码】无
 
@@ -2094,7 +2190,9 @@ Set/Get the Gamma Ev2 property.
 int HB_ISP_SetGammaThreshold(uint8_t pipeId, const ISP_GAMMA_THRESHOLD *pstGammaThd);
 
 int HB_ISP_GetGammaThreshold(uint8_t pipeId, ISP_GAMMA_THRESHOLD *pstGammaThd);
-```【Function Description】
+```
+
+【Function Description】
 
 Set/Get Gamma threshold
 
@@ -2191,7 +2289,8 @@ Set AWB average coefficients
 
 【Parameter description】
 
-| Parameter name | Description                | Input/Output ||--------|-----------------------------|
+| Parameter name | Description                | Input/Output |
+|--------|-----------------------------|
 | pipeId | Pipeline index              |
 | Coeff  | Pointer to AWB average coefficients, smaller values result in fewer convergence steps, larger values result in more convergence steps          |
 
@@ -2240,9 +2339,13 @@ Set MIX LIGHT attributes
 
 ### HB_ISP_SetSkyCtrlAttr/ HB_ISP_GetSkyCtrlAttr
 
-【Function declaration】int HB_ISP_SetSkyCtrlAttr(uint8_t pipeId, const ISP_SKY_PARAM_S *pstSkyCtrlAttr);
+【Function declaration】
+
+```c
+int HB_ISP_SetSkyCtrlAttr(uint8_t pipeId, const ISP_SKY_PARAM_S *pstSkyCtrlAttr);
 
 int HB_ISP_GetSkyCtrlAttr(uint8_t pipeId, ISP_SKY_PARAM_S *pstSkyCtrlAttr);
+```
 
 【Function Description】
 
@@ -2382,7 +2485,11 @@ Setting/Getting AWB LS weight attribute
 | 0            | Success     |
 | Non-zero     | Failure     |
 
-【Notes】【Function Declaration】
+【Notes】
+
+### HB_ISP_GetAwbDefultParmAttr/ HB_ISP_SetAwbDefultParmAttr
+
+【Function Declaration】
 ```c
 int HB_ISP_GetAwbDefultParmAttr(uint8_t pipeId, ISP_AWB_DEFAULT_PARAM_S
 *pstAwbAttr);
@@ -2432,6 +2539,7 @@ Set/Get the CALIBRATION_MESH_COLOR_TEMPERATURE attribute
 | pstWeightAttr  | Pointer to the weight table for color temperature | Input      |
 
 【Return Value】
+
 | Return Value | Description |
 |--------------|-------------|
 | 0            | Success     |
@@ -2516,6 +2624,7 @@ CT_BG_POS_CALC
 int HB_ISP_GetWdrOffsetAttr(uint8_t pipeId, ISP_WDR_OFFSET_S *pstWdrOffsetAttr);
 
 int HB_ISP_SetWdrOffsetAttr(uint8_t pipeId, ISP_WDR_OFFSET_S *pstWdrOffsetAttr);【Function Description】
+```
 
 Set/Get WDR Offset Attribute
 
@@ -2660,7 +2769,8 @@ Set af mode
 ### HB_ISP_SetFlickerStatus/HB_ISP_GetFlickerStatus
 
 【Function Declaration】
-```cint HB_ISP_SetFlickerStatus(uint8_t pipeId, uint32_t flicker_enable, uint32_t flicker_frequency);
+```c
+int HB_ISP_SetFlickerStatus(uint8_t pipeId, uint32_t flicker_enable, uint32_t flicker_frequency);
 
 int HB_ISP_GetFlickerStatus(uint8_t pipeId, uint32_t *flicker_enable, uint32_t flicker_frequency);
 ```
@@ -2803,7 +2913,9 @@ Get awb temperature information.
 
 【Notes】
 
-【Reference Code】None### HB_ISP_SetAwbTolerance
+【Reference Code】None
+
+### HB_ISP_SetAwbTolerance
 
 【Function Declaration】
 
@@ -2903,12 +3015,14 @@ int HB_ISP_SetAfSpeed(uint8_t pipeId, uint32_t speed);
 【Description】Set AF focus steps
 
 【Parameter Description】
+
 | Parameter Name | Description | Input/Output |
 |------------|-------------------|-----------|
 | pipeId | Pipeline index number | Input |
 | speed | AF focus steps | Input |
 
 【Return Value】
+
 | Return Value | Description |
 |--------|------|
 | 0 | Success |
@@ -2936,6 +3050,7 @@ typedef enum HB_ISP_FW_STATE_E {
 【Function Description】
 
 【Member Explanation】
+
 | Member | Meaning |
 |--------|---------|
 | ISP_FW_STATE_RUN | Firmware is running normally |
@@ -2998,25 +3113,82 @@ uint64_t u64Value;
                 uint64_t bitBypassDemosaicRGB		: 1 ;
 【Structure Definition】
 ```c
-typedef struct HB_ISP_I2C_DATA_S {
+typedef union HB_ISP_MODULE_CTRL_U {
 
-        uint8_t u8DevId;
+        uint64_t u64Value;
 
-        uint8_t u8IntPos;
+        struct {
 
-        uint8_t u8Update;
+                uint64_t bitBypassVideoTestGen      : 1 ;
 
-        uint8_t u8DelayFrameNum;
+                uint64_t bitBypassInputFormatter        : 1 ;
 
-        uint32_t u32RegAddr;
+                uint64_t bitBypassDecompander       : 1 ;
 
-        uint32_t u32AddrByteNum;
+                uint64_t bitBypassSensorOffsetWDR   : 1 ;
 
-        uint32_t u32Data;
+                uint64_t bitBypassGainWDR       : 1 ;
 
-        uint32_t u32DataByteNum;
+                uint64_t bitBypassFrameStitch       : 1 ;
 
-} ISP_I2C_DATA_S;
+                uint64_t bitBypassDigitalGain       : 1 ;
+
+                uint64_t bitBypassFrontendSensorOffset  : 1 ;
+
+                uint64_t bitBypassFeSqrt        : 1 ;
+
+                uint64_t bitBypassRAWFrontend       : 1 ;
+
+                uint64_t bitBypassDefectPixel       : 1 ;
+
+                uint64_t bitBypassSinter        : 1 ;
+
+                uint64_t bitBypassTemper        : 1 ;
+
+                uint64_t bitBypassCaCorrection      : 1 ;
+
+                uint64_t bitBypassSquareBackend     : 1 ;
+
+                uint64_t bitBypassSensorOffsetPreShading: 1 ;
+
+                uint64_t bitBypassRadialShading     : 1 ;
+
+                uint64_t bitBypassMeshShading       : 1 ;
+
+                uint64_t bitBypassWhiteBalance      : 1 ;
+
+                uint64_t bitBypassIridixGain        : 1 ;
+
+                uint64_t bitBypassIridix        : 1 ;
+
+                uint64_t bitBypassMirror        : 1 ;
+
+                uint64_t bitBypassDemosaicRGB       : 1 ;
+
+                uint64_t bitBypassPfCorrection      : 1 ;
+
+                uint64_t bitBypassCCM           : 1 ;
+
+                uint64_t bitBypassCNR           : 1 ;
+
+                uint64_t bitBypass3Dlut         : 1 ;
+
+                uint64_t bitBypassNonequGamma       : 1 ;
+
+                uint64_t bitBypassFrCrop        : 1 ;
+
+                uint64_t bitBypassFrGammaRGB        : 1 ;
+
+                uint64_t bitBypassFrSharpen     : 1 ;
+
+                uint64_t bitBypassFrCsConv      : 1 ;
+
+                uint64_t bitBypassRAW           : 1 ;
+
+                uint64_t bitRsv             : 31 ;
+        };
+
+} ISP_MODULE_CTRL_U;
 ```
 
 【Description】This structure defines the bit fields for controlling the bypass of different modules.
@@ -3044,7 +3216,9 @@ typedef struct HB_ISP_I2C_DATA_S {
         uint32_t u32DataByteNum;
 
 } ISP_I2C_DATA_S;
-```【Function Description】
+```
+
+【Function Description】
 
 【Member Description】
 
@@ -3085,73 +3259,71 @@ Define the callback function structure of AE algorithm library.
 | proc_func   | Description: AE algorithm processing. Parameters: ae_ctx input parameter, which is the return value of init_func and corresponds to an instance. stats input parameter, corresponding to AE statistical data. input input parameter, parameters passed to the algorithm by ISP Firmware. output output parameter, output result of AE algorithm that will be configured to ISP Firmware. Returns: 0 on success, non-zero on failure. |
 | deinit_func | Description: Deinitialization of AE. Parameters: ae_ctx input parameter, which is the return value of init_func and corresponds to an instance. Returns: 0 on success, non-zero on failure. |
 
+
+
 ### ae_stats_data_t
 
-【Structure Definition】
+**Struct Definition:**
 ```c
 typedef struct _ae_stats_data_ {
-
-        uint32_t *fullhist;
-```    typedef struct _ae_acamera_input_ {
-
-        int32_t exp_time;
-
-        int32_t lens_pos;
-
-        int32_t awb_gain_r;
-
-        int32_t awb_gain_b;
-
-        int32_t dgain;
-
-        int32_t exposure_log2;
-
-        int32_t global_gain;
-
-        int32_t again;
-
-        int32_t vcm_drive;
-
-        int32_t isp_dgain;
-
-} ae_acamera_input_t;
+    uint32_t *fullhist;
+    uint32_t fullhist_size;
+    uint32_t fullhist_sum;
+    uint16_t *zone_hist;
+    uint32_t zone_hist_size;
+} ae_stats_data_t;
 ```
-【功能描述】
+**Function Description:**
 
-定义AE算法需要用到的参数结构体。
+This defines the structure for AE (Automatic Exposure) statistical data. For more details on the statistics, refer to the section on "[AE Statistics Information](#_AE_Statistics_Information)."
 
-【成员说明】
+**Member Descriptions:**
 
-| 成员           | 含义                 |
-|----------------|----------------------|
-| exp_time       | 曝光时间             |
-| lens_pos       | 镜头位置             |
-| awb_gain_r     | 白平衡红色增益       |
-| awb_gain_b     | 白平衡蓝色增益       |
-| dgain          | 数字增益             |
-| exposure_log2  | 曝光值               |
-| global_gain    | 全局增益             |
-| again          | 模拟增益             |
-| vcm_drive      | VCM驱动电压          |
-| isp_dgain      | ISP数字增益          |```c
+| Member           | Meaning                                             |
+|------------------|-----------------------------------------------------|
+| fullhist         | Pointer to global statistics                        |
+| fullhist_size    | Size of the statistics buffer                       |
+| fullhist_sum     | Number of points included in the statistics          |
+| zone_hist        | Pointer to area statistics                          |
+| zone_hist_size   | Size of the area statistics buffer                   |
+
+### ae_input_data_t
+
+**Struct Definition:**
+```c
+typedef struct _ae_input_data_ {
+    void *custom_input;
+    void *acamera_input;
+} ae_input_data_t;
+```
+**Function Description:**
+
+This defines the structure for input parameters to the AE algorithm.
+
+**Member Descriptions:**
+
+| Member          | Meaning                                              |
+|-----------------|------------------------------------------------------|
+| custom_input    | No specific meaning                                  |
+| acamera_input   | AE algorithm input, actually of type `ae_acamera_input_t` |
+
+### ae_acamera_input_t
+
+**Struct Definition:**
+```c
 typedef struct _ae_acamera_input_ {
-
-        ae_balanced_param_t *ae_ctrl;
-
-        ae_misc_info_t misc_info;
-
-        ae_calibration_data_t cali_data;
-
-        ae_5bin_info_t ae_5bin_data;
-
-        uint32_t ctx_id;
-
+    ae_balanced_param_t *ae_ctrl;
+    ae_misc_info_t misc_info;
+    ae_calibration_data_t cali_data;
+    ae_5bin_info_t ae_5bin_data;
+    uint32_t ctx_id;
 } ae_acamera_input_t;
 ```
-【Function Description】
-The parameters passed to the AE algorithm.
+**Function Description:**
 
-It includes the following structures:
+This contains the parameters passed to the AE algorithm, including nested structures:
+
+Nested Structures:
 ```c
 typedef struct _ae_balanced_param_t {
 
@@ -3182,19 +3354,20 @@ typedef struct _ae_misc_info_ {
         int32_t total_gain;
 
         int32_t max_exposure_log2;
-```uint32_t global_max_exposure_ratio;
 
-uint32_t iridix_contrast;
+        uint32_t global_max_exposure_ratio;
 
-uint32_t global_exposure;
+        uint32_t iridix_contrast;
 
-uint8_t global_ae_compensation;
+        uint32_t global_exposure;
 
-uint8_t global_manual_exposure;
+        uint8_t global_ae_compensation;
 
-uint8_t global_manual_exposure_ratio;
+        uint8_t global_manual_exposure;
 
-uint8_t global_exposure_ratio;
+        uint8_t global_manual_exposure_ratio;
+
+        uint8_t global_exposure_ratio;
 
 } ae_misc_info_t;
 
@@ -3230,184 +3403,195 @@ typedef struct _ae_5bin_info_ {
 
         uint16_t threshold1_2;
 
-        uint16_t threshold3_4;uint16_t threshold4_5;
+        uint16_t threshold3_4;
 
-uint16_t normal_bin0;
+        uint16_t threshold4_5;
 
-uint16_t normal_bin1;
+        uint16_t normal_bin0;
 
-uint16_t normal_bin3;
+        uint16_t normal_bin1;
 
-uint16_t normal_bin4;
+        uint16_t normal_bin3;
+
+        uint16_t normal_bin4;
 
 } ae_5bin_info_t;
-
-modulation_entry_t definition:
-```c
-typedef struct _modulation_entry_t {
-    uint16_t x, y;
-} modulation_entry_t;
 ```
+modulation_entry_t define: 
+```c
+typedef struct _modulation_entry_t {  
+    uint16_t x, y;  
+} modulation_entry_t;
+```
+
 ### ae_output_data_t
 
-【Structure Definition】
+**Struct Definition:**
 ```c
 typedef struct _ae_output_data_ {
     void *custom_output;
     void *acamera_output;
 } ae_output_data_t;
 ```
-【Functional Description】
+**Function Description:**
 
-Defines the structure of AE algorithm output parameters.
+This defines the structure for output parameters from the AE algorithm.
 
-【Member Description】
+**Member Descriptions:**
 
-| Member         | Description                                                             |
-| -------------- | ----------------------------------------------------------------------- |
-| custom_output  | No meaning                                                              |
-| acamera_output | The output result of the AE algorithm, type-casted as ae_acamera_output_t in the code |
+| Member           | Meaning                                            |
+|------------------|----------------------------------------------------|
+| custom_output    | No specific meaning                                 |
+| acamera_output   | AE algorithm's output, forcibly cast to `ae_acamera_output_t` |
+
+
 
 ### ae_acamera_output_t
 
-【Structure Definition】
+**Structure Definition:**
 ```c
 typedef struct _ae_acamera_output_ {
     int32_t exposure_log2;
-```Define the structure for the output of the AE algorithm.
+    uint32_t exposure_ratio;
+    uint8_t ae_converged;
+    uint16_t sensor_ctrl_enable;
+    ae_out_info_t ae_out_info;
+    ae_1024bin_weight_t ae_1024bin_weight;
+} ae_acamera_output_t;
+```
+**Function Description:**
 
-【Member Description】
+This defines the structure for the output of the AE algorithm.
 
-| Member            | Description                                                     |
-|-------------------|-----------------------------------------------------------------|
-| exposure_log2     | exposure target range [0, uint32_t]                             |
-| exposure_ratio    | exposure ratio range [0, 64]                                    |
-| ae_converged      | State of the AE algorithm, whether it has converged or is ongoing. 1: converged, 0: ongoing |
-| sensor_ctrl_enable | Sensor control enable. 1: enable, 0: disable                    |
-| ae_out_info       | AE related control information                                 |
-| ae_1024bin_weight | Global statistical information weight                          |
+**Member Descriptions:**
+
+| Member                | Meaning                                                                                           |
+|-----------------------|---------------------------------------------------------------------------------------------------|
+| exposure_log2         | Exposure target range [0, uint32_t]                                                                |
+| exposure_ratio        | Exposure ratio range [0, 64]                                                                       |
+| ae_converged          | AE algorithm status, converged (1) or in progress (0)                                                  |
+| sensor_ctrl_enable    | Sensor control enable, 1 enabled, 0 disabled                                                            |
+| ae_out_info           | AE-related control information                                                                     |
+| ae_1024bin_weight     | Global statistical information weights                                                            |
 
 ### ae_out_info_t
 
-【Struct Definition】
+**Structure Definition:**
 ```c
 typedef struct _ae_out_info_ {
-
-        uint32_t line[4];
-
-        uint32_t line_num;
-
-        uint32_t sensor_again[4];
-
-        uint32_t sensor_again_num;
-
-        uint32_t sensor_dgain[4];
-
-        uint32_t sensor_dgain_num;
-
-        uint32_t isp_dgain;
-
+    uint32_t line[4];
+    uint32_t line_num;
+    uint32_t sensor_again[4];
+    uint32_t sensor_again_num;
+    uint32_t sensor_dgain[4];
+    uint32_t sensor_dgain_num;
+    uint32_t isp_dgain;
 } ae_out_info_t;
 ```
-【Functional Description】Definition of AE control parameter structure.
+**Function Description:**
 
-[Member Description]
+This defines the structure for AE control parameters.
+
+**Member Descriptions:**
+
+| Member            | Meaning                                             |
+|-------------------|-----------------------------------------------------|
+| line[4]           | Sensor shutter values (lines)                        |
+| line_num          | Number of shutter values (1 to 4)                     |
+| sensor_again[4]   | Sensor again parameters (0 to 255)                    |
+| sensor_again_num  | Number of sensor again parameters (1 to 4)             |
+| sensor_dgain[4]   | Sensor dgain parameters (0 to 255)                    |
+| sensor_dgain_num  | Number of sensor dgain parameters (1 to 4)             |
+| isp_dgain         | ISP dgain parameter (0 to 255)                        |
+
+### ae_1024bin_weight_t
+
+**Structure Definition:**
+```c
+typedef struct _ae_1024bin_weight_ {
+    uint32_t zones_size;
+    uint8_t zones_weight[ISP_METERING_ZONES_AE5_V * ISP_METERING_ZONES_AE5_H];
+} ae_1024bin_weight_t;
+```
+**Function Description:**
+
+This defines the structure for AE statistical weight parameters.
+
+**Member Descriptions:**
 
 | Member            | Meaning                                      |
 |-------------------|----------------------------------------------|
-| line[4]           | Sensor shutter parameter in units of lines.   |
-| line_num          | Number of sensor shutter parameters. Range: [1,4] |
-| sensor_again[4]   | Sensor again parameter. Range: [0,255]        |
-| sensor_again_num  | Number of sensor again parameters. Range: [1,4] |
-| sensor_dgain[4]   | Sensor dgain parameter. Range: [0,255]        |
-| sensor_dgain_num  | Number of sensor dgain parameters. Range: [1,4] |
-| isp_dgain         | Isp dgain parameter. Range: [0,255]           |
+| zones_size        | Number of statistical blocks (0 to 1089)       |
+| zones_weight      | Weight for each block (0 to 15)               |
 
-ae_1024bin_weight_t
+### HB_ISP_AWB_FUNC_S
 
-[Structure Definition]
-```c
-typedef struct _ae_1024bin_weight_ {
-
-        uint32_t zones_size;
-
-        uint8_t zones_weight[ISP_METERING_ZONES_AE5_V * ISP_METERING_ZONES_AE5_H];
-
-} ae_1024bin_weight_t;
-```
-[Function Description]
-
-Definition of AE statistical weight parameter structure.
-
-[Member Description]
-
-| Member        | Meaning                              |
-|---------------|--------------------------------------|
-| zones_size    | Number of statistical blocks. Range: [0,1089] |
-| zones_weight  | Weight of each block. Range: [0,15]   |
-
-HB_ISP_AWB_FUNC_S
-
-[Structure Definition]
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_AWB_FUNC_S {
-
-        void * (*init_func)(uint32_t ctx_id);
-
-        int32_t (*proc_func)(void *awb_ctx, awb_stats_data_t *stats, awb_input_data_t *input, awb_output_data_t *output);
-
-        int32_t (*deinit_func)(void *awb_ctx);
-
-```c
-typedef struct _ISP_AWB_FUNC_S {
-    void *(*init_func)(int ctx_id);
-    int (*proc_func)(void *awb_ctx, const awb_stats_data_t *stats, const isp_awb_input_t *input, isp_awb_output_t *output);
-    int (*deinit_func)(void *awb_ctx);
+    void* (*init_func)(uint32_t ctx_id);
+    int32_t (*proc_func)(void* awb_ctx, awb_stats_data_t* stats, awb_input_data_t* input, awb_output_data_t* output);
+    int32_t (*deinit_func)(void* awb_ctx);
 } ISP_AWB_FUNC_S;
+```
+**Function Description:**
 
-/* Function Description */
-/* Defines the callback function structure for the AWB algorithm library */
+This defines the callback function structure for the AWB algorithm library.
 
-/* Member Description */
-/* | Member       | Description                                                                                                                            |
-   |--------------|----------------------------------------------------------------------------------------------------------------------------------------|
-   | init_func    | Description: Initialization of the AWB algorithm   Parameters: ctx_id: input, corresponding to different instances   Returns: pointer to the instance |
-   | proc_func    | Description: AWB algorithm processing   Parameters: awb_ctx: input, the return value of init_func, corresponding to an instance   stats: input, AWB statistical data   input: input, parameters passed to the algorithm by ISP Firmware   output: output, the output result of the AWB algorithm, will be configured to the isp firmware   Returns: 0 for success, non-zero for failure |
-   | deinit_func  | Description: De-initialization of AWB   Parameters: awb_ctx: input, the return value of init_func, corresponding to an instance   Returns: 0 for success, non-zero for failure |
-*/
+**Member Descriptions:**
 
+| Member            | Meaning                                                                                     |
+|-------------------|--------------------------------------------------------------------------------------------|
+| init_func         | Description: Initializes the AWB algorithm. Input: ctx_id (context identifier). Output: Pointer to instance. |
+| proc_func         | Description: Processes the AWB algorithm. Input: awb_ctx (instance pointer), stats (statistics), input, output. Return: 0 on success, non-zero on failure. |
+| deinit_func       | Description: Deinitializes the AWB algorithm. Input: awb_ctx (instance pointer). Return: 0 on success, non-zero on failure. |
+
+
+
+### awb_stats_data_t
+
+**Struct Definition:**
+```c
 typedef struct _awb_stats_data_ {
     awb_zone_t *awb_zones;
     uint32_t zones_size;
 } awb_stats_data_t;
+```
+**Function Description:**
 
-/* Function Description */
-/* Defines the structure for AWB statistical data. For detailed description of AWB statistical data, please refer to the [Statistical Information](#_AWB Statistics) section */
+This defines the structure for AWB statistical data. For more details on the AWB statistics, refer to the [Statistical Information](#_AWB_Statistics) section.
 
-/* Member Description */
-/* | Member      | Description                        |
-   |-------------|------------------------------------|
-   | awb_zones   | Pointer to the statistical information of a block |
-   | zones_size  | Number of regions                   |
-*/
+**Member Descriptions:**
 
+| Member         | Meaning                               |
+|---------------|---------------------------------------|
+| awb_zones      | Pointer to an array of zone statistics |
+| zones_size     | Number of zones                        |
+
+### awb_zone_t
+
+**Struct Definition:**
+```c
 typedef struct _awb_zone_t {
     uint16_t rg;
     uint16_t bg;
     uint32_t sum;
 } awb_zone_t;
 ```
-【Function Description】
+**Function Description:**
 
-Defines the structure of AWB block statistical information.
+This defines the structure for AWB zone statistical information.
 
-【Member Description】
+**Member Descriptions:**
 
-| Member | Meaning                                |
-|--------|----------------------------------------|
-| rg     | Weighted average of R/G or G/R in area  |
-| bg     | Weighted average of B/G or G/B in area  |
-| sum    | Total number of pixels involved in statistics |
+| Member | Meaning                          |
+|--------|----------------------------------|
+| rg     | Weighted average R/G or G/R mean    |
+| bg     | Weighted average B/G or G/B mean    |
+| sum    | Total number of pixels included in the statistics |
+
+
+
 
 ### awb_input_data_t
 
@@ -3465,7 +3649,7 @@ typedef struct _awb_misc_info_ {
 
 } awb_misc_info_t;
 
-typedef unsigned short(*calibration_light_src_t)[2];
+typedef unsigned short ( *calibration_light_src_t )[2];
 
 typedef struct _awb_calibration_data_ {
 
@@ -3493,368 +3677,469 @@ typedef struct _awb_calibration_data_ {
 
         uint32_t cali_bg_pos_len;
 
-        uint16_t *cali_color_temp;```c
+        uint16_t *cali_color_temp;
+
+        uint32_t cali_color_temp_len;
+
+        uint16_t *cali_ct_rg_pos_calc;
+
+        uint32_t cali_ct_rg_pos_calc_len;
+
+        uint16_t *cali_ct_bg_pos_calc;
+
+        uint32_t cali_ct_bg_pos_calc_len;
+
+        modulation_entry_t *cali_awb_bg_max_gain;
+
+        uint32_t cali_awb_bg_max_gain_len;
+
+        uint16_t *cali_mesh_ls_weight;
+
+        uint16_t *cali_mesh_rgbg_weight;
+
+        uint8_t *cali_evtolux_probability_enable;
+
+        uint32_t *cali_awb_mix_light_param;
+
+        uint16_t *cali_ct65pos;
+
+        uint16_t *cali_ct40pos;
+
+        uint16_t *cali_ct30pos;
+
+        uint16_t *cali_sky_lux_th;
+
+        uint16_t *cali_wb_strength;
+
+        uint16_t *cali_mesh_color_temperature;
+
+        uint16_t *cali_awb_warming_ls_a;
+
+        uint16_t *cali_awb_warming_ls_d75;
+
+        uint16_t *cali_awb_warming_ls_d50;
+
+        uint16_t *cali_awb_colour_preference;
+
+} awb_calibration_data_t;
+```
+
+
+### awb_output_data_t
+
+**Structure Definition:**
+```c
 typedef struct _awb_output_data_ {
-    uint16_t rg_pos;
-    uint16_t bg_pos;
-    uint16_t ct;
-    uint32_t lux;
-    awb_gain_t gain;
+    void *custom_output;
+    void *acamera_output;
 } awb_output_data_t;
 ```
+**Function Description:**
 
-### awb_output_corrections_t
+This defines the structure for parameters output by the AWB algorithm.
 
-【结构定义】
+**Member Descriptions:**
+
+| Member        | Meaning                                             |
+|---------------|------------------------------------------------------|
+| custom_output | No specific meaning                                  |
+| acamera_output | Output result of the AWB algorithm, forcibly converted to awb_acamera_output_t type |
+
+### awb_acamera_output_t
+
+**Structure Definition:**
 ```c
-typedef struct _awb_output_corrections_ {
-   int16_t rgbg[4];
-   int16_t ccb[2];
-} awb_output_corrections_t;
-```
-
-### awb_gain_t
-
-【结构定义】
-```c
-typedef struct _awb_gain_ {
-   uint16_t r_gain;
-   uint16_t g_gain;
-   uint16_t b_gain;
-} awb_gain_t;
-```typedef struct _awb_acamera_output_ {
-        uint16_t rg_coef;
-        uint16_t bg_coef;
-        int32_t temperature_detected;
-        uint8_t p_high;
-        uint8_t light_source_candidate;
-        int32_t awb_warming[3];
-        uint8_t awb_converged;
+typedef struct _awb_acamera_output_ {
+    uint16_t rg_coef;
+    uint16_t bg_coef;
+    int32_t temperature_detected;
+    uint8_t p_high;
+    uint8_t light_source_candidate;
+    int32_t awb_warming[3];
+    uint8_t awb_converged;
 } awb_acamera_output_t;
+```
+**Function Description:**
 
-【Function Description】
-Defines the structure for the output parameters of the AWB algorithm.
+This defines the structure for the output of the AWB algorithm's results.
 
-【Member Description】
-| Member             | Meaning                                               |
-|--------------------|-------------------------------------------------------|
-| rg_coef            | R Gain                                                |
-| bg_coef            | B Gain                                                |
-| temperature_detected | Detected color temperature                         |
-| p_high             | High priority value                                   |
-| light_source_candidate | Candidate for light source                            |
-| awb_warming        | AWB warming values                                    |
-| awb_converged      | Whether AWB has converged                            || 成员        | 含义           |
-|-------------|----------------|
-| zones_stats | AF区域统计数据 |
-| zones_size  | AF区域数量     ||-------------|----------------|
-| zones_stats | AF statistics pointer |
-| zones_size  | Zone size |
+**Member Descriptions:**
+
+| Member                   | Meaning                                          |
+|--------------------------|-----------------------------------------------|
+| rg_coef                  | R Gain                                         |
+| bg_coef                  | B Gain                                         |
+| temperature_detected     | Color temperature value                        |
+| p_high                   | High color temperature threshold for CCM control |
+| light_source_candidate   | Light source indicator for CCM switching        |
+| awb_warming[3]           | CCM coefficients for R/G/B                      |
+| awb_converged            | AWB algorithm status: converged, active, or inactive |
+
+### HB_ISP_AF_FUNC_S
+
+**Structure Definition:**
+```c
+typedef struct HB_ISP_AF_FUNC_S {
+    void *(*init_func)(uint32_t ctx_id);
+    int32_t (*proc_func)(void *af_ctx, af_stats_data_t *stats, af_input_data_t *input, af_output_data_t *output);
+    int32_t (*deinit_func)(void *af_ctx);
+} ISP_AF_FUNC_S;
+```
+**Function Description:**
+
+This defines the callback function structure for the AF algorithm library.
+
+**Member Descriptions:**
+
+| Member        | Meaning                                                                                           |
+|---------------|--------------------------------------------------------------------------------------------------|
+| init_func     | Description: Initializes the AF algorithm. Input: ctx_id (instance ID). Output: Pointer to instance context. |
+| proc_func     | Description: Processes the AF algorithm. Input: af_ctx (context from init_func), stats, input, and output. |
+| deinit_func   | Description: Deinitializes the AF algorithm. Input: af_ctx (context from init_func). Output: Success/failed. |
+
+### af_stats_data_t
+
+**Structure Definition:**
+```c
+typedef struct _af_stats_data_ {
+    uint32_t *zones_stats;
+    uint32_t zones_size;
+} af_stats_data_t;
+```
+**Function Description:**
+
+This defines the structure for AF statistical data. Detailed descriptions of AF statistics can be found in the [Statistical Information](#_AF_Statistical_Information) section.
+
+**Member Descriptions:**
+
+| Member        | Meaning           |
+|---------------|------------------|
+| zones_stats   | Pointer to AF stats |
+| zones_size    | Size of zones     |
 
 ### af_input_data_t
 
-【Structure Definition】
+**Structure Definition:**
 ```c
 typedef struct _af_input_data_ {
-
-        void *custom_input;
-
-        void *acamera_input;
-
+    void *custom_input;
+    void *acamera_input;
 } af_input_data_t;
 ```
-【Description】
+**Function Description:**
 
-Defines the structure of input parameters for AF algorithm.
+This defines the structure for input parameters to the AF algorithm.
 
-【Member Description】
+**Member Descriptions:**
 
-| Member        | Description                                                |
-|---------------|------------------------------------------------------------|
-| custom_input  | Parameters required by the AF algorithm                     |
-| acamera_input | Parameters required by the AF algorithm, of type af_acamera_input_t |
+| Member          | Meaning                                            |
+|----------------|----------------------------------------------------|
+| custom_input   | Parameters used by the AF algorithm                |
+| acamera_input  | Input used by the AF algorithm, actual type: af_acamera_input_t |
+
+
 
 ### af_acamera_input_t
 
-【Structure Definition】
+**Structure Definition**
 ```c
 typedef struct _af_acamera_input_ {
 
-        af_info_t af_info;
+    af_info_t af_info;
 
-        af_misc_info_t misc_info;
+    af_misc_info_t misc_info;
 
-        af_calibration_data_t cali_data;
+    af_calibration_data_t cali_data;
 
 } af_acamera_input_t;
 ```
-【Description】
+**Function Description**
 
 Parameters passed to the AF algorithm.
 
-It includes the following structures:
+Contains the following structs:
 ```c
 typedef struct _af_lms_param_t {
 
-        uint32_t pos_min_down;        uint32_t pos_min;
+    uint32_t pos_min_down;
+    uint32_t pos_min;
+    uint32_t pos_min_up;
+    uint32_t pos_inf_down;
+    uint32_t pos_inf;
+    uint32_t pos_inf_up;
+    uint32_t pos_macro_down;
+    uint32_t pos_macro;
+    uint32_t pos_macro_up;
+    uint32_t pos_max_down;
+    uint32_t pos_max;
+    uint32_t pos_max_up;
+    uint32_t fast_search_positions;
+    uint32_t skip_frames_init;
+    uint32_t skip_frames_move;
+    uint32_t dynamic_range_th;
+    uint32_t spot_tolerance;
+    uint32_t exit_th;
+    uint32_t caf_trigger_th;
+    uint32_t caf_stable_th;
+    uint32_t print_debug;
 
-        uint32_t pos_min_up;
-
-        uint32_t pos_inf_down;
-
-        uint32_t pos_inf;
-
-        uint32_t pos_inf_up;
-
-        uint32_t pos_macro_down;
-
-        uint32_t pos_macro;
-
-        uint32_t pos_macro_up;
-
-        uint32_t pos_max_down;
-
-        uint32_t pos_max;
-
-        uint32_t pos_max_up;
-
-        uint32_t fast_search_positions;
-
-        uint32_t skip_frames_init;
-
-        uint32_t skip_frames_move;
-
-        uint32_t dynamic_range_th;
-
-        uint32_t spot_tolerance;
-
-        uint32_t exit_th;
-
-        uint32_t caf_trigger_th;
-
-        uint32_t caf_stable_th;
-
-        uint32_t print_debug;
-
-    } af_lms_param_t;
-
-    typedef struct _af_info_ {
-
-        uint8_t af_mode;
-
-        uint8_t refocus_required;
-
-        uint8_t zones_horiz;uint8_t zones_vert; (uint8_t表示无符号8位整数)
-uint32_t roi; (uint32_t表示无符号32位整数)
-uint32_t af_pos_manual; (uint32_t表示无符号32位整数)
-uint32_t zoom_step_info; (uint32_t表示无符号32位整数)
+} af_lms_param_t;
 
 typedef struct _af_info_ {
-    int16_t accel_angle; (int16_t表示有符号16位整数)
-    uint16_t lens_min_step; (uint16_t表示无符号16位整数)
+
+    uint8_t af_mode;
+    uint8_t refocus_required;
+    uint8_t zones_horiz;
+    uint8_t zones_vert;
+    uint32_t roi;
+    uint32_t af_pos_manual;
+    uint32_t zoom_step_info;
+
+} af_info_t;
+
+typedef struct _af_misc_info_ {
+
+    int16_t accel_angle;
+    uint16_t lens_min_step;
+
 } af_misc_info_t;
 
 typedef struct _af_calibration_data_ {
-    af_lms_param_t *af_param; (af_lms_param_t表示af的lms参数)
-    uint16_t *af_zone_width_height_h; (uint16_t表示无符号16位整数，af_zone_width_height_h表示af区域宽度和高度的数组)
-    uint32_t af_zone_width_height_h_len; (uint32_t表示无符号32位整数，af_zone_width_height_h_len表示af区域宽度和高度数组的长度)
-    uint16_t *af_zone_width_height_v; (uint16_t表示无符号16位整数，af_zone_width_height_v表示af区域宽度和高度的数组)
-    uint32_t af_zone_width_height_v_len; (uint32_t表示无符号32位整数，af_zone_width_height_v_len表示af区域宽度和高度数组的长度)
-} af_calibration_data_t;
 
+    af_lms_param_t *af_param;
+    uint16_t *af_zone_whgh_h;
+    uint32_t af_zone_whgh_h_len;
+    uint16_t *af_zone_whgh_v;
+    uint32_t af_zone_whgh_v_len;
+
+} af_calibration_data_t;
+```
 ### af_output_data_t
 
-【Structure Definition】
+**Structure Definition**
 ```c
 typedef struct _af_output_data_ {
+
     void *custom_output;
+
     void *acamera_output;
+
 } af_output_data_t;
 ```
+**Function Description**
 
-【Function Description】
+Defines the structure for the AF algorithm output parameters.
 
-Defines the structure for AF algorithm output parameters.
+**Member Descriptions**
 
-【Member Description】| Member         | Meaning                                                |
-|----------------|--------------------------------------------------------|
-| custom_output  | No meaning                                             |
-| acamera_output | Output result of AF algorithm, forcibly converted to af_acamera_output_t type in the code |
+| Member          | Meaning                                                                                           |
+|-----------------|--------------------------------------------------------------------------------------------------|
+| custom_output   | No specific meaning                                                                               |
+| acamera_output  | Output result of the AF algorithm, forced to be converted to `af_acamera_output_t` type in code |
 
 ### af_acamera_output_t
 
-【Structure Definition】
+**Structure Definition**
 ```c
 typedef struct _af_acamera_output_ {
 
-        uint16_t af_lens_pos;
-
-        int32_t af_sharp_val;
-
-        af_state_t state;
+    uint16_t af_lens_pos;
+    int32_t af_sharp_val;
+    af_state_t state;
 
 } af_acamera_output_t;
 ```
-【Functional Description】
+**Function Description**
 
-Defines the structure for the output result of the AF algorithm.
+Structure defining the output of the AF algorithm.
 
-【Member Description】
+**Member Descriptions**
 
-| Member        | Meaning                                                                                         |
-|---------------|-------------------------------------------------------------------------------------------------|
-| af_lens_pos   | Lens position                                                                                   |
-| af_sharp_val  | Sharpness value                                                                                 |
-| state         | typedef enum af_state { AF_STATE_INACTIVE, AF_STATE_SCAN, AF_STATE_FOCUSED, AF_STATE_UNFOCUSED } af_state_t; |
+| Member        | Meaning                                                                                              |
+|---------------|-------------------------------------------------------------------------------------------------------|
+| af_lens_pos   | Lens position                                                                                        |
+| af_sharp_val  | Sharpness value                                                                                       |
+| state         | Enum type: `af_state_t` { AF_STATE_INACTIVE, AF_STATE_SCAN, AF_STATE_FOCUSED, AF_STATE_UNFOCUSED } |
 
 ### HB_ISP_OP_TYPE_E
 
-【Enum Definition】
+**Structure Definition**
 ```c
 typedef enum HB_ISP_OP_TYPE_E {
 
-	OP_TYPE_AUTO = 0,
+    OP_TYPE_AUTO = 0,
 
-	OP_TYPE_MANUAL,
+    OP_TYPE_MANUAL,
 
 } ISP_OP_TYPE_E;
 ```
-【Member Description】
+**Member Descriptions**
 
-| Member           | Meaning     |
-|------------------|-------------|
-| OP_TYPE_AUTO     | Auto mode   |
-| OP_TYPE_MANUAL   | Manual mode |### HB_ISP_AE_ATTR_S
+| Member     | Meaning                        |
+|------------|--------------------------------|
+| OP_TYPE_AUTO | Auto mode                      |
+| OP_TYPE_MANUAL | Manual mode                    |
 
-【Structure Definition】
+
+
+### HB_ISP_AE_ATTR_S
+
+**Structure Definition:**
 
 ```c
 typedef struct HB_ISP_AE_ATTR_S {
-
-	uint32_t u32MaxExposureRatio;
-
-	uint32_t u32MaxIntegrationTime;
-
-	uint32_t u32MaxSensorAnalogGain;
-
-	uint32_t u32MaxSensorDigitalGain;
-
-	uint32_t u32MaxIspDigitalGain;
-
-	uint32_t u32Exposure;
-
-	uint32_t u32ExposureRatio;
-
-	uint32_t u32IntegrationTime;
-
-	uint32_t u32SensorAnalogGain;
-
-	uint32_t u32SensorDigitalGain;
-
-	uint32_t u32IspDigitalGain;
-
-	ISP_OP_TYPE_E enOpType;
-
+    uint32_t u32MaxExposureRatio;
+    uint32_t u32MaxIntegrationTime;
+    uint32_t u32MaxSensorAnalogGain;
+    uint32_t u32MaxSensorDigitalGain;
+    uint32_t u32MaxIspDigitalGain;
+    uint32_t u32Exposure;
+    uint32_t u32ExposureRatio;
+    uint32_t u32IntegrationTime;
+    uint32_t u32SensorAnalogGain;
+    uint32_t u32SensorDigitalGain;
+    uint32_t u32IspDigitalGain;
+    ISP_OP_TYPE_E enOpType;
 } ISP_AE_ATTR_S;
 ```
 
-【Function Description】
+**Function Description:**
 
-The index is converted to the actual ratio: y = 2^(x/32); For example, if the gain value is 96, the actual applied ratio is 2^(96/32) = 8x.
+The index-to-actual multiplier conversion relationship is: y = 2^(x/32); for example, setting the gain value to 96 results in an actual amplification factor of 2^(96/32) = 8x.
 
-【Member Description】
+**Member Descriptions:**
 
-| Member                 | Meaning                                                                                                                                                                                                             |
-|------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| u32Exposure            | 控制曝光时间参数 (Control the exposure time parameter)                                                                                                                                                                             |
-| u32ExposureRatio       | 控制曝光比例参数 (Control the exposure ratio parameter)                                                                                                                                                                            |
-| u32IntegrationTime     | 控制积分时间参数 (Control the integration time parameter)                                                                                                                                                                        |
-| u32SensorAnalogGain    | 控制传感器模拟增益参数 Values: [0-255] (Control the sensor analog gain parameter Values: [0-255])                                                                                                                                                          |
-| u32SensorDigitalGain   | 控制传感器数字增益参数 Values: [0-255] (Control the sensor digital gain parameter Values: [0-255])                                                                                                                                                         |
-| u32IspDigitalGain      | 控制ISP数字增益参数 Values: [0-255] (Control the isp digital gain parameter Values: [0-255])                                                                                                                                                        |
-| u32MaxExposureRatio    | 控制最大曝光比例参数 (Control the max exposure ratio parameter)                                                                                                                                                                           || u32MaxIntegrationTime   | 控制最大积分时间参数                                                                                                                                                          |
-| u32MaxSensorAnalogGain  | 控制最大传感器模拟增益参数值：[0-255]                                                                                                      |
-| u32MaxSensorDigitalGain | 控制最大传感器数字增益参数值：[0-255]                                                                                                      |
-| u32MaxIspDigitalGain    | 控制最大ISP数字增益参数值：[0-255]                                                                                                         |
-| enOpType                | See values in [ISP_OP_TYPE_E](#_HB_ISP_OP_TYPE_E) structure definition. Because there is no 'Auto' parameter, for the Set interface, setting 'Auto' will change the mode to 'Auto', setting 'Manual' will change the mode to 'Manual' and set the manual parameters; for the Get interface, setting 'Auto' or 'Manual' will retrieve the parameter values under different modes; |
+| Member                  | Meaning                                                                                                                                                |
+|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| u32Exposure             | Controls the exposure time parameter                                                                                                                    |
+| u32ExposureRatio        | Controls the exposure ratio parameter                                                                                                                  |
+| u32IntegrationTime      | Controls the integration time parameter                                                                                                                 |
+| u32SensorAnalogGain     | Controls the sensor analog gain parameter. Values: [0-255]                                                                                               |
+| u32SensorDigitalGain    | Controls the sensor digital gain parameter. Values: [0-255]                                                                                             |
+| u32IspDigitalGain       | Controls the ISP digital gain parameter. Values: [0-255]                                                                                              |
+| u32MaxExposureRatio     | Controls the maximum exposure ratio parameter                                                                                                           |
+| u32MaxIntegrationTime   | Controls the maximum integration time parameter                                                                                                         |
+| u32MaxSensorAnalogGain  | Controls the maximum sensor analog gain parameter. Values: [0-255]                                                                                   |
+| u32MaxSensorDigitalGain | Controls the maximum sensor digital gain parameter. Values: [0-255]                                                                                    |
+| u32MaxIspDigitalGain    | Controls the maximum ISP digital gain parameter. Values: [0-255]                                                                                       |
+| enOpType                | See the ISP_OP_TYPE_E structure definition below. Since there is no Auto mode, for the Set interface, setting Auto changes the mode to Auto, and setting Manual changes the mode to Manual while setting the Manual parameter; for the Get interface, setting Auto or Manual retrieves the parameter values for different modes. |
+
+
 
 ### HB_ISP_AF_ATTR_S
 
-【Structure Definition】
+**Structure Definition:**
 
 ```c
 typedef struct HB_ISP_AF_ATTR_S {
-
-        uint32_t u32ZoomPos;
-
-        ISP_OP_TYPE_E enOpType;
-
+    uint32_t u32ZoomPos;
+    ISP_OP_TYPE_E enOpType;
 } ISP_AF_ATTR_S;
 ```
 
-【Function Description】
+**Function Description:**
 
-【Member Description】
+**Member Descriptions:**
 
-| Member              | Description                                                                   |
-|---------------------|-------------------------------------------------------------------------------|
-| uint32_t u32ZoomPos | Control the zoom parameter Values: [10-80]                                    |
-| enOpType            | Reserved, no use                                                              |
+| Member                 | Meaning                                                                                   |
+|-------------------------|-------------------------------------------------------------------------------------------|
+| uint32_t u32ZoomPos      | Controls the zoom parameter. Values: [10-80]                                                 |
+| enOpType                | Reserved, not used                                                                       |
 
 ### HB_ISP_AWB_ATTR_S
 
-【Structure Definition】
+**Structure Definition:**
+
 ```c
 typedef struct HB_ISP_AWB_ATTR_S {
-
-        uint32_t u32RGain;
-
-        uint32_t u32BGain;
-
-        ISP_OP_TYPE_E enOpType;
-
+    uint32_t u32RGain;
+    uint32_t u32BGain;
+    ISP_OP_TYPE_E enOpType;
 } ISP_AWB_ATTR_S;
 ```
 
-【Function Description】
+**Function Description:**
 
-【Member Description】
+**Member Descriptions:**
 
-| Member       | Description                                                                                                                                                      |
-|--------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|| u32FcSlope | Control the slope of color correction. Values: [0-255] format: unsigned 8-bit fixed-point |
-| u32FcAliasSlope | Control the slope of color aliasing suppression. Values: [0-255] format: unsigned 8-bit fixed-point |
-| u32FcAliasThresh | Control the threshold of color aliasing suppression. Values: [0-65535] format: unsigned 16-bit fixed-point |
-| VhParam | Control the VH parameters of Demosaic. It is defined in ISP_CTRL_PARAM_ATTR_S structure. |ISP_CTRL_PARAM_ATTR_S AaParam;
-ISP_CTRL_PARAM_ATTR_S VaParam;
-ISP_CTRL_PARAM_ATTR_S UuParam;
-ISP_CTRL_PARAM_ATTR_S UuShParam;
-ISP_CTRL_PARAM_ATTR_S SharpLumaLowD;
-ISP_CTRL_PARAMA_ATTR_S SharpLumaHighD;
-ISP_CTRL_PARAM_ATTR_S SharpLumaLowUD;
-ISP_CTRL_PARAMA_ATTR_S SharpLumaHighUD;
-uint32_t u32MinDstrength;
-uint32_t u32MinUDstrength;
-uint32_t u32MaxDstrength;
-uint32_t u32MaxUDstrength;
-uint16_t u16NpOffset[ISP_AUTO_ISO_STRENGTH_NUM][2];
+| Member         | Meaning                                                                                     |
+|----------------|----------------------------------------------------------------------------------------------|
+| u32RGain       | Controls the awb_red_gain parameter. Values: [0-4096] format: unsigned 4.8 bit fixed-point         |
+| u32BGain       | Controls the awb_blue_gain parameter. Values: [0-4096] format: unsigned 4.8 bit fixed-point         |
+| enOpType       | See the ISP_OP_TYPE_E structure definition. No Auto parameter; for Set, Auto changes to Auto, Manual changes to Manual with Manual value. For Get, Auto or Manual retrieves parameters for respective modes. |
+
+### HB_ISP_BLACK_LEVEL_ATTR_S
+
+**Structure Definition:**
+
+```c
+typedef struct HB_ISP_BLACK_LEVEL_ATTR_S {
+    uint32_t u32OffsetR;
+    uint32_t u32OffsetGr;
+    uint32_t u32OffsetGb;
+    uint32_t u32OffsetB;
+    ISP_OP_TYPE_E enOpType;
+} ISP_BLACK_LEVEL_ATTR_S;
+```
+
+**Function Description:**
+
+Black level parameters.
+
+**Member Descriptions:**
+
+| Member        | Meaning                                                                                     |
+|---------------|---------------------------------------------------------------------------------------------|
+| u32OffsetR    | Black offset subtraction for each channel in linear domain: Channel 00 (R). Values: [0-1048575] |
+| u32OffsetGr   | Black offset subtraction for each channel in linear domain: Channel 01 (Gr). Values: [0-1048575]  |
+| u32OffsetGb   | Black offset subtraction for each channel in linear domain: Channel 10 (Gb). Values: [0-1048575]  |
+| u32OffsetB    | Black offset subtraction for each channel in linear domain: Channel 11 (B). Values: [0-1048575]  |
+| enOpType      | See the ISP_OP_TYPE_E structure definition. No Auto parameter; for Set, Auto changes to Auto, Manual changes to Manual with Manual parameter. For Get, Auto or Manual retrieves parameters based on the mode. |
+
+
+
+### HB_ISP_DEMOSAIC_ATTR_S
+
+**Structure Definition**
+```c
+typedef struct HB_ISP_DEMOSAIC_ATTR_S {
+    uint32_t u32FcSlope;               // Slope (strength) of false color correction
+    uint32_t u32FcAliasSlope;          // Slope (strength) of false color correction after blending with saturation value in 2.6 unsigned format
+    uint32_t u32FcAliasThresh;         // Threshold of false color correction after blending with saturation value in 0.8 unsigned format
+    ISP_CTRL_PARAM_ATTR_S VhParam;      // Vertical/Horizontal blending parameters: Slope, Threshold, and Offset
+    ISP_CTRL_PARAM_ATTR_S AaParam;      // Angular (45/135) blending parameters: Slope, Threshold, and Offset
+    ISP_CTRL_PARAM_ATTR_S VaParam;      // Vertical gradient blending parameters: Slope, Threshold, and Offset
+    ISP_CTRL_PARAM_ATTR_S UuParam;      // Horizontal gradient blending parameters: Slope, Threshold, and Offset
+    ISP_CTRL_PARAM_ATTR_S UuShParam;    // Horizontal gradient blending for shadows: Slope, Threshold, and Offset
+    uint32_t u32SharpLumaLowD;         // Low sharpness threshold for luma component (directional)
+    ISP_CTRL_PARAMA_ATTR_S SharpLumaHighD; // High sharpness threshold for luma component (directional)
+    uint32_t u32SharpLumaLowUD;        // Low sharpness threshold for luma component (uniform)
+    ISP_CTRL_PARAMA_ATTR_S SharpLumaHighUD; // High sharpness threshold for luma component (uniform)
+    uint32_t u32MinDstrength;          // Minimum destination strength
+    uint32_t u32MinUDstrength;         // Minimum uniform direction strength
+    uint32_t u32MaxDstrength;          // Maximum destination strength
+    uint32_t u32MaxUDstrength;         // Maximum uniform direction strength
+    uint16_t u16NpOffset[ISP_AUTO_ISO_STRENGTH_NUM][2]; // Noise profile offsets for different ISO strengths
 } ISP_DEMOSAIC_ATTR_S;
 
 typedef struct HB_ISP_CTRL_PARAM_ATTR_S {
-    uint32_t u32Offset;
-    uint32_t u32Thresh;
-    uint32_t u32Slope;
+    uint32_t u32Offset;                // Parameter offset
+    uint32_t u32Thresh;                // Parameter threshold
+    uint32_t u32Slope;                 // Parameter slope
 } ISP_CTRL_PARAM_ATTR_S;
 
 typedef struct HB_ISP_CTRL_PARAMA_ATTR_S {
-    uint32_t u32Thresh;
-    uint32_t u32Slope;
+    uint32_t u32Thresh;                // Parameter threshold
+    uint32_t u32Slope;                 // Parameter slope
 } ISP_CTRL_PARAMA_ATTR_S;
+```
+**Function Description**
 
-【Description】
+**Member Descriptions**
 
-【Member Explanation】\#define ISP_AUTO_ISO_STRENGTH_NUM   16
+#define ISP_AUTO_ISO_STRENGTH_NUM 16
 
-| 成员             | 含义                                                         |
+| Member              | Meaning                                                                                     |
 | ---------------- | ------------------------------------------------------------ |
 | u32FcSlope       | Slope  (strength) of false color correction                  |
 | u32FcAliasSlope  | Slope  (strength) of false color correction after blending with saturation value in  2.6 unsigned format |
@@ -3876,1122 +4161,1149 @@ typedef struct HB_ISP_CTRL_PARAMA_ATTR_S {
 
 ### HB_ISP_SHARPEN_ATTR_S
 
-【结构定义】
+【Structure Definition】
+
 ```c
 typedef struct HB_ISP_SHARPEN_AUTO_ATTR_S {
-
-        uint16_t u16SharpFR[ISP_AUTO_ISO_STRENGTH_NUM][2];
-
-        uint16_t u16SharpAltD[ISP_AUTO_ISO_STRENGTH_NUM][2];
-
-        uint16_t u16SharpAltDU[ISP_AUTO_ISO_STRENGTH_NUM][2];
-
-        uint16_t u16SharpAltUD[ISP_AUTO_ISO_STRENGTH_NUM][2];
-
+    uint16_t u16SharpFR[ISP_AUTO_ISO_STRENGTH_NUM][2];
+    uint16_t u16SharpAltD[ISP_AUTO_ISO_STRENGTH_NUM][2];
+    uint16_t u16SharpAltDU[ISP_AUTO_ISO_STRENGTH_NUM][2];
+    uint16_t u16SharpAltUD[ISP_AUTO_ISO_STRENGTH_NUM][2];
 } ISP_SHARPEN_AUTO_ATTR_S;
 
 typedef struct HB_ISP_SHARPEN_MANUAL_ATTR_S {
+    uint32_t u32Strength;
+    uint32_t u32SharpAltD;
+    uint32_t u32SharpAltUd;
+    uint32_t u32SharpAltLd;
+    uint32_t u32SharpAltLdu;
+    uint32_t u32SharpAltLu;
+} ISP_SHARPEN_MANUAL_ATTR_S;
 
-        uint32_t u32Strength;
+typedef struct HB_ISP_CTRL_PARAM_ATTR_S {
+    uint32_t u32Offset;
+    uint32_t u32Thresh;
+    uint32_t u32Slope;
+} ISP_CTRL_PARAM_ATTR_S;
 
-        uint32_t u32SharpAltD;
-
-        uint32_t u32SharpAltUd;
-
-        uint32_t u32SharpAltLd;
-
-        uint32_t u32SharpAltLdu;
-
+typedef struct HB_ISP_SHARPEN_ATTR_S {
+    ISP_CTRL_PARAM_ATTR_S LumaLow;
+    ISP_CTRL_PARAM_ATTR_S LumaHigh;
+    uint32_t u32ClipStrMax;
+    uint32_t u32ClipStrMin;
+    uint32_t u32AlphaUndershoot;
+    uint32_t u32SadAmp;
+    ISP_SHARPEN_MANUAL_ATTR_S stManual;
+    ISP_SHARPEN_AUTO_ATTR_S stAuto;
+    ISP_OP_TYPE_E enOpType;
+} ISP_SHARPEN_ATTR_S;
+```
 【Function Description】
 
-【Member Description】
+【Member Descriptions】
 
-| Member              | Description                                                                                |
-|---------------------|--------------------------------------------------------------------------------------------|
-| u16SharpFR          | Controls strength of sharpening effect. u5.4                                               |
-| u16SharpAltD        | Sharpen strength for L_Ld in unsigned 4.4 format                                           |
-| u16SharpAltDU       | Sharpen strength for L_Ldu in unsigned 4.4 format                                          |
-| u16SharpAltUD       | Sharpen strength for L_Lu in unsigned 4.4 format                                           |
-| Member              | Description                                                                                |
-| u32Strength;        | sharpen strength                                                                            |
-| u32SharpAltD;       | Directional sharp mask strength in signed 4.4 format Values: [0- 255]                      |
-| u32SharpAltUd;      | Non-directional sharp mask strength in signed 4.4 format Values: [0- 255]                  || 成员          | 含义                                             |
-|---------------|--------------------------------------------------|
-| enOpType      | 自动/手动模式选择                                |
-| stAuto        | 自动模式参数                                     |
-| stManual      | 手动模式参数                                     |
-| u32BlackLevel | 黑电平值                                         |
-| u32WhiteLevel | 白电平值                                         |
-| u32Svariance  | 饱和度方差值                                     |
+| Member                | Meaning                                                                                   |
+|---------------------|---------------------------------------------------------------------------------------------|
+| u16SharpFR            | Controls the strength of the sharpening effect. u5.4 value.                                      |
+| u16SharpAltD         | Sharpness strength for L_Ld in unsigned 4.4 format. Range: [0-255].                             |
+| u16SharpAltDU        | Sharpness strength for L_Ldu in unsigned 4.4 format. Range: [0-255].                            |
+| u16SharpAltUD        | Sharpness strength for L_Lu in unsigned 4.4 format. Range: [0-255].                            |
+| Member               | Meaning                                                                                   |
+| u32Strength          | Sharpen intensity.                                                                          |
+| u32SharpAltD         | Signed 4.4 format directional sharp mask strength. Range: [-255, 255].                     |
+| u32SharpAltUd        | Signed 4.4 format non-directional sharp mask strength. Range: [-255, 255].                  |
+| u32SharpAltLd        | Sharpness strength for L_Ld in unsigned 4.4 format. Range: [0-255].                            |
+| u32SharpAltLdu       | Sharpness strength for L_Ldu in unsigned 4.4 format. Range: [0-255].                         |
+| u32SharpAltLu        | Sharpness strength for L_Lu in unsigned 4.4 format. Range: [0-255].                          |
+| Member               | Meaning                                                                                   |
+| LumaLow              | Control parameters for low luminance areas (offset, thresh, slope).                        |
+| LumaHigh             | Control parameters for high luminance areas (offset, thresh, slope).                       |
+| u32ClipStrMax        | Maximum threshold for clipping. Values range from 0 to 16383.                               |
+| u32ClipStrMin        | Minimum threshold for clipping. Values range from 0 to 16383.                              |
+| u32AlphaUndershoot   | Undershoot/overshoot parameter. 0 means only undershoot, 255 means only overshoot. Range: [0-255].
+| u32SadAmp            | High-frequency fusion parameter in demosaicing and sharpening.                            |
+| stManual             | Manual mode parameters.                                                                      |
+| stAuto               | Auto mode parameters.                                                                       |
+| enOpType             | Selection between auto and manual modes.                                                       |
 
-### ISP_WDR_ATTR_S
 
-【结构定义】
+
+### ISP_GAMMA_ATTR_S
+
+**Structure Definition**
 ```c
-typedef struct HB_ISP_WDR_ATTR_S {
-
-        ISP_OP_TYPE_E enOpType;
-
-        ISP_WDR_AUTO_ATTR_S stAuto;
-
-        ISP_WDR_MANUAL_ATTR_S stManual;
-
-} ISP_WDR_ATTR_S;
+typedef struct HB_ISP_GAMMA_ATTR_S {
+    uint16_t au16Gamma[129];
+} ISP_GAMMA_ATTR_S;
 ```
-【功能描述】
+**Function Description**
 
-【成员说明】
+**Member Descriptions**
 
-| 成员      | 含义      |
-|-----------|-----------|
-| enOpType  | 自动/手动模式选择 |
-| stAuto    | 自动模式参数   |
-| stManual  | 手动模式参数   |typedef struct HB_ISP_IRIDIX_MANUAL_ATTR_S {
+| Member         | Meaning                                                                                   |
+| -------------- | ----------------------------------------------------------------------------------------- |
+| au16Gamma      | Array containing the 129 gamma correction look-up table (LUT) values, typically for color correction |
 
-        uint32_t u32RoiHorStart;
+### ISP_IRIDIX_ATTR_S
 
-        uint32_t u32RoiHorEnd;
+**Structure Definition**
+```c
+typedef struct HB_ISP_IRIDIX_ATTR_S {
+    ISP_OP_TYPE_E enOpType;
+    ISP_IRIDIX_AUTO_ATTR_S stAuto;
+    ISP_IRIDIX_MANUAL_ATTR_S stManual;
+    uint32_t u32BlackLevel;
+    uint32_t u32WhiteLevel;
+    uint32_t u32Svariance;
+    uint32_t u32Bright_pr;
+    uint32_t u32Contrast;
+    uint32_t u32IridixOn;
+    uint32_t u32FilterMux;
+    uint32_t u32VarianceSpace;
+    uint32_t u32VarianceIntensity;
+    uint32_t u32SlopeMax;
+    uint32_t u32SlopeMin;
+    uint32_t u32FwdPerceptCtrl;
+    uint32_t u32RevPerceptCtrl;
+    uint32_t u32FwdAlpha;
+    uint32_t u32RevAlpha;
+    uint32_t u32GtmSelect;
+} ISP_IRIDIX_ATTR_S;
 
-        uint32_t u32RoiVerStart;
+typedef struct HB_ISP_IRIDIX_AUTO_ATTR_S {
+    uint8_t u8AvgCoef;
+    uint32_t au32EvLimNoStr[2];
+    uint32_t u32EvLimFullStr;
+    uint32_t au32StrengthDkEnhControl[15];
+} ISP_IRIDIX_AUTO_ATTR_S;
 
-        uint32_t u32RoiVerEnd;
+typedef struct HB_ISP_IRIDIX_MANUAL_ATTR_S {
+    uint32_t u32RoiHorStart;
+    uint32_t u32RoiHorEnd;
+    uint32_t u32RoiVerStart;
+    uint32_t u32RoiVerEnd;
+    uint32_t u32StrengthInRoi;
+    uint32_t u32StrengthOutRoi;
+    uint32_t u32DarkEnh;
+} ISP_IRIDIX_MANUAL_ATTR_S;
+```
+**Function Description**
 
-} ISP_IRIDIX_MANUAL_ATTR_S;uint16_t u16UvDelta12Slope[ISP_AUTO_ISO_STRENGTH_NUM][2];
+**Member Descriptions**
 
-} ISP_CNR_ATTR_S;
-
-【Description】
-
-【Member Description】
-
-| Member                                | Description                                                         |
-| ----------------------------------- | ------------------------------------------------------------ |
-| enOpType                            | See value definition in structure [ISP_OP_TYPE_E](#_HB_ISP_OP_TYPE_E).          |
+| Member                                | Meaning                                                                                         |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------- |
+| enOpType                            | Enum for operation type; see [ISP_OP_TYPE_E](#_HB_ISP_OP_TYPE_E) structure definition.              |
 | u8AvgCoef                           | The average coefficient value for Iridix                     |
 | au32EvLimNoStr                      | The Expose Value maximum value, in terms of EV_log2 without Strength |
 | u32EvLimFullStr                     | The Expose Value maximum value, in terms of EV_log2 with Strength |
-| au32StrengthDkEnhControl            | strength and dark enhancememt control:  [0] - dark_prc [1] - bright_prc [2] - min_dk: minimum dark enhancement [3] - max_dk: maximum dark enhancement [4] - pD_cut_min: minimum intensity cut for dark regions in which dk_enh will be applied [5] - pD_cut_max: maximum intensity cut for dark regions in which dk_enh will be applied [6] - dark contrast min [7] - dark contrast max [8] - min_str: iridix strength in percentage [9] - max_str: iridix strength in percentage: 50 = 1x gain. 100 = 2x gain [10] - dark_prc_gain_target: target in histogram (percentage) for dark_prc after iridix is applied [11] - contrast_min: clip factor of strength for LDR scenes. [12] - contrast_max: clip factor of strength for HDR scenes. [13] - max iridix gain [14] - print debug |
+| au32StrengthDkEnhControl            | Strength and dark enhancement control: [0] - dark_prc [1] - bright_prc [2] - min_dk: minimum dark enhancement [3] - max_dk: maximum dark enhancement [4] - pD_cut_min: minimum intensity cut for dark regions where dk_enh will be applied [5] - pD_cut_max: maximum intensity cut for dark regions where dk_enh will be applied [6] - dark contrast min [7] - dark contrast max [8] - min_str: iridix strength in percentage [9] - max_str: iridix strength in percentage: 50 = 1x gain, 100 = 2x gain [10] - dark_prc_gain_target: target in histogram (percentage) for dark_prc after iridix application [11] - contrast_min: clip factor of strength for LDR scenes. [12] - contrast_max: clip factor of strength for HDR scenes. [13] - Maximum Iridix gain [14] - Debug print |
 | u32RoiHorStart                      | Horizontal starting point of ROI Values: [0-65535]           |
 | u32RoiHorEnd                        | Horizontal ending point of ROI Values: [0-65535]             |
 | u32RoiVerStart                      | Vertical starting point of ROI Values: [0-65535]             |
 | u32RoiVerEnd                        | Vertical ending point of ROI Values: [0-65535]               |
-| u32StrengthInRoi                    | Manual Strength value for inside of ROI Values: [0-65535], such as 8.8 fixed-point，256 is 1x gain，512 is 2x gain.In u32StrengthInRoi there is controlled strategy, while u32StrengthOutRoi doesn't take control.Recommend setting u32StrengthInRoi for the entire area, and set u32StrengthOutRoi to a default value.The maximum strength is 1023, and it will be flipped when set to 1024 |
+| u32StrengthInRoi                    | Manual Strength value for inside of ROI Values: [0-65535], e.g., 8.8 for 256x intensity (1x), 512x intensity (2x). u32StrengthInRoi employs controlled strategy, while u32StrengthOutRoi does not. Suggest setting u32StrengthInRoi for the entire region and leaving u32StrengthOutRoi at default. Max intensity is 1023; setting it to 1024 flips the effect. |
 | u32StrengthOutRoi                   | Manual Strength value for outside of ROI Values: [0-65535]   |
 | u32DarkEnh                          | Manual Dark Enhance value to control Iridix core Values: [0-65535] |
 | u32BlackLevel                       | Iridix black level. Values below this will not be affected by Iridix. |
 | u32WhiteLevel                       | Iridix white level. Values above this will not be affected by Iridix. |
-| u32Svariance                        | Iridix8 transform sensitivity to different areas of image    |
+| u32Svariance                        | Iridix8 transform sensitivity to different areas of the image    |
 | u32Bright_pr                        | Manual Bright_Preserve value to control Iridix core          |
 | u32Contrast                         | Iridix8 contrast control parameter                           |
-| u32IridixOn                         | Iridix enable: 0=off 1=on                                    |
-| u32FilterMux                        | Selects between Iridix8 and Iridix7, 1=Iridix8 and 0=Iridix7 |
-| u32VarianceSpace                    | Sets the degree of spatial sensitivity of the algorithm(Irdx7F) |
-| u32VarianceIntensity                | Sets the degree of luminance sensitivity of the algorithm(Irdx7F) |
-| u32SlopeMax u32SlopeMin             | Restricts the maximum/minimum slope (gain) which can be generated by the adaptive algorithm |
-| u32FwdPerceptCtrl u32RevPerceptCtrl | Iridix gamma processing select: 0=pass through 1=gamma_dl 2=sqrt 3=gamma_lut. |
-| u32FwdAlpha u32RevAlpha             | alpha for gamma_dl                                           |
-| u32GtmSelect                        | Global Tone map select : 0 : Local TM 1: Full Global TM     |
+| u32IridixOn                         | Iridix enable: 0=off, 1=on                                    |
+| u32FilterMux                        | Selects between Iridix8 and Iridix7: 1 for Iridix8, 0 for Iridix7 |
+| u32VarianceSpace                    | Sets the degree of spatial sensitivity in Irdx7F algorithm     |
+| u32VarianceIntensity                | Sets the degree of luminance sensitivity in Irdx7F algorithm     |
+| u32SlopeMax, u32SlopeMin           | Limits the maximum and minimum slope (gain) generated by the adaptive algorithm |
+| u32FwdPerceptCtrl, u32RevPerceptCtrl | Iridix gamma processing selection: 0=pass through, 1=gamma_dl, 2=sqrt, 3=gamma_lut. |
+| u32FwdAlpha, u32RevAlpha            | Alpha for gamma_dl                                          |
+| u32GtmSelect                        | Global Tone map selection: 0 - local TM, 1 - full global TM      |
+
+
+
+
 
 ### HB_ISP_CNR_ATTR_S
 
-【Structure Definition】
+**Structure Definition**
 ```c
 typedef struct HB_ISP_CNR_ATTR_S {
-
-        uint16_t u16UvDelta12Slope[ISP_AUTO_ISO_STRENGTH_NUM][2];
-
+    uint16_t u16UvDelta12Slope[ISP_AUTO_ISO_STRENGTH_NUM][2];
 } ISP_CNR_ATTR_S;
-```【Function Description】
+```
+**Function Description**
 
-【Member Description】
+**Member Descriptions**
 
-| Member            | Meaning                          |
-|-------------------|----------------------------------|
-| u16UvDelta12Slope | Strength of color noise reduction |
+| Member              | Meaning                                          |
+|---------------------|--------------------------------------------------|
+| u16UvDelta12Slope | Strength values for color noise reduction in 12 steps |
 
 ### HB_ISP_SINTER_ATTR_S
 
-【Structure Definition】
+**Structure Definition**
 ```c
 typedef struct HB_ISP_SINTER_AUTO_ATTR_S {
-
-        uint16_t aau16Strength[ISP_AUTO_ISO_STRENGTH_NUM][2];
-
-        uint16_t aau16Strength1[ISP_AUTO_ISO_STRENGTH_NUM][2];
-
-        uint16_t aau16Strength4[ISP_AUTO_ISO_STRENGTH_NUM][2];
-
-        uint16_t aau16Thresh1[ISP_AUTO_ISO_STRENGTH_NUM][2];
-
-        uint16_t aau16Thresh4[ISP_AUTO_ISO_STRENGTH_NUM][2];
-
+    uint16_t aau16Strength[ISP_AUTO_ISO_STRENGTH_NUM][2];
+    uint16_t aau16Strength1[ISP_AUTO_ISO_STRENGTH_NUM][2];
+    uint16_t aau16Strength4[ISP_AUTO_ISO_STRENGTH_NUM][2];
+    uint16_t aau16Thresh1[ISP_AUTO_ISO_STRENGTH_NUM][2];
+    uint16_t aau16Thresh4[ISP_AUTO_ISO_STRENGTH_NUM][2];
 } ISP_SINTER_AUTO_ATTR_S;
 
 typedef struct HB_ISP_SINTER_MANUAL_PARAM_ATTR_S {
+    uint32_t u32GlobalStrength;
+    uint32_t u32Thresh1h;
+    uint32_t u32Thresh4h;
+    uint32_t u32Thresh1v;
+    uint32_t u32Thresh4v;
+    uint32_t u32Strength1;
+    uint32_t u32Strength4;
+    uint32_t u32NoiseLevel0;
+    uint32_t u32NoiseLevel1;
+    uint32_t u32NoiseLevel2;
+    uint32_t u32NoiseLevel3;
+    uint32_t u32IntConfig;
+    uint32_t u32SadFiltThresh;
+} ISP_SINTER_MANUAL_PARAM_ATTR_S;
 
-        uint32_t u32GlobalStrength;
-
-        uint32_t u32Thresh1h;
-
-        uint32_t u32Thresh4h;
-
-        uint32_t u32Thresh1v;
-
-        uint32_t u32Thresh4v;
-
-        uint32_t u32Strength1;
-
-        uint32_t u32Strength4;
-
-        uint32_t u32NoiseLevel0;
-
-        uint32_t u32NoiseLevel1;
-
-        uint32_t u32NoiseLevel2;
-
-        uint32_t u32NoiseLevel3;typedef struct HB_ISP_TEMPER_ATTR_S {
-
-        uint32_t u32IntConfig;
-
-        uint32_t u32SadFiltThresh;
-
-} ISP_TEMPER_MANUAL_PARAM_ATTR_S;
-
-typedef struct HB_ISP_TEMPER_ATTR_S {
-
-        ISP_OP_TYPE_E enOpType;
-
-        ISP_TEMPER_AUTO_ATTR_S stAuto;
-
-        ISP_TEMPER_MANUAL_PARAM_ATTR_S stManual;
-
-} ISP_TEMPER_ATTR_S;
+typedef struct HB_ISP_SINTER_ATTR_S {
+    ISP_OP_TYPE_E enOpType;
+    ISP_SINTER_AUTO_ATTR_S stAuto;
+    ISP_SINTER_MANUAL_PARAM_ATTR_S stManual;
+} ISP_SINTER_ATTR_S;
 ```
+**Function Description**
 
-【Function Description】
+**Member Descriptions**
 
-【Member Description】
+| Member               | Meaning                                                                                     |
+|-----------------------|-----------------------------------------------------------------------------------------------|
+| aau16Strength         | Global offset for noise reduction                                                            |
+| aau16Strength1        | Effect of noise reduction on high spatial frequencies                                         |
+| aau16Strength4        | Effect of noise reduction on low spatial frequencies                                          |
+| aau16Thresh1          | Noise threshold for high horizontal/vertical spatial frequencies                             |
+| aau16Thresh4          | Noise threshold for low horizontal/vertical spatial frequencies                            |
+| u32GlobalStrength    | Global fundamental noise reduction intensity, with each frequency band's noise reduction on top of this intensity. |
+| u32Thresh1h           | Horizontal high-frequency noise threshold                                                       |
+| u32Thresh4h           | Horizontal low-frequency noise threshold                                                        |
+| u32Thresh1v           | Vertical high-frequency noise threshold                                                       |
+| u32Thresh4v           | Vertical low-frequency noise threshold                                                        |
+| u32Strength1         | High-frequency noise reduction strength                                                       |
+| u32Strength4         | Low-frequency noise reduction strength                                                       |
+| u32NoiseLevel0        | VS frame noise level                                                                       |
+| u32NoiseLevel1        | S frame noise level                                                                       |
+| u32NoiseLevel2        | M frame noise level                                                                       |
+| u32NoiseLevel3        | L frame noise level                                                                       |
+| u32IntConfig         | Fusion intensity                                                                          |
+| u32SadFiltThresh     | Block matching differential filter threshold                                                   |
+| enOpType             | Selection between auto and manual modes (auto/manual)                                        |
+| stAuto               | Auto mode parameters                                                                      |
+| stManual             | Manual mode parameters                                                                     |
 
-| Member               | Description                                                    |
-|--------------------|------------------------------------------------------------------|
-| aau16Strength      | A global offset                                                  |
-| aau16Strength1     | Noise reduction effect for high spatial frequencies              |
-| aau16Strength4     | Noise reduction effect for low spatial frequencies               |
-| aau16Thresh1       | Noise threshold for high horizontal/vertical spatial frequencies |
-| aau16Thresh4       | Noise threshold for low horizontal/vertical spatial frequencies  |
-| u32GlobalStrength  | Global basic noise reduction strength, with noise reduction in each frequency band added to this strength |
-| u32Thresh1h        | Horizontal high-frequency noise reduction threshold             |
-| u32Thresh4h        | Horizontal low-frequency noise reduction threshold              |
-| u32Thresh1v        | Vertical high-frequency noise reduction threshold               |
-| u32Thresh4v        | Vertical low-frequency noise reduction threshold                |
-| u32Strength1       | High-frequency noise reduction strength                          |
-| u32Strength4       | Low-frequency noise reduction strength                           |
-| u32NoiseLevel0     | VS frame noise level                                            |
-| u32NoiseLevel1     | S frame noise level                                             |
-| u32NoiseLevel2     | M frame noise level                                             |
-| u32NoiseLevel3     | L frame noise level                                             |
-| u32IntConfig       | Fusion strength                                                 |
-| u32SadFiltThresh   | Block matching difference filter threshold                      |
-| Member               | Description                                                    |
-| enOpType           | auto/manual mode selection                                      |
-| stAuto             | auto mode parameters                                            |
-| stManual           | manual mode parameters                                          |
+
 
 ### HB_ISP_TEMPER_ATTR_S
 
-【Structure Definition】
-```ctypedef struct HB_ISP_TEMPER_ATTR_S {
-
-        uint16_t aau16strength[16][2];
-
-        uint32_t u32RecursionLimit;
-
-        uint32_t u32LutEnable;
-
+**Structure Definition**
+```c
+typedef struct HB_ISP_TEMPER_ATTR_S {
+    uint16_t aau16strength[16][2];
+    uint32_t u32RecursionLimit;
+    uint32_t u32LutEnable;
 } ISP_TEMPER_ATTR_S;
-
 ```
-【Function Description】
+**Function Description**
 
+**Member Descriptions**
 
-【Member Description】
-
-
-| Member             | Meaning                                                                                                                  |
-|-------------------|-----------------------------------------------------------------------------------------------------------------------|
-| aau16strength     | Noise reduction effect for temporal frequencies                                                                       |
-| u32RecursionLimit | Controls length of filter history. Low values result in longer history and stronger temporal filtering Range: [0, 16] |
-| u32LutEnable      | Choose from LUT or exp_mask Range: [0, 3]                                                                             |
+| Member             | Meaning                                                                                     |
+|--------------------|----------------------------------------------------------------------------------------------|
+| aau16strength      | Noise reduction effect for temporal frequencies                                                   |
+| u32RecursionLimit  | Controls the filter history length; low values result in a longer history and stronger temporal filtering. Range: [0, 16] |
+| u32LutEnable       | Chooses between LUT or exp_mask. Range: [0, 3]                                                       |
 
 ### HB_MESH_SHADING_ATTR_S
 
-【Structure Definition】
+**Structure Definition**
 ```c
 typedef struct HB_MESH_SHADING_ATTR_S {
-
-        uint32_t u32Enable;
-
-        uint32_t u32MeshScale;
-
-        uint32_t u32MeshAlphaMode;
-
-        uint32_t u32MeshWidth;
-
-        uint32_t u32MeshHeight;
-
-        uint32_t u32ShadingStrength;
-
+    uint32_t u32Enable;
+    uint32_t u32MeshScale;
+    uint32_t u32MeshAlphaMode;
+    uint32_t u32MeshWidth;
+    uint32_t u32MeshHeight;
+    uint32_t u32ShadingStrength;
 } MESH_SHADING_ATTR_S;
 ```
-【Function Description】
+**Function Description**
+
+**Member Descriptions**
+
+| Member            | Meaning                                                                                         |
+|--------------------|-------------------------------------------------------------------------------------------------|
+| u32Enable          | Enables lens mesh shading correction: 0=off, 1=on.                                                                                   |
+| u32MeshScale       | Selects mesh shading correction precision and gain range; higher values result in increased precision and gain. Range: 00 -\> 0..2 to 07 -\> 1..9 (float). |
+| u32MeshAlphaMode   | Sets alpha blending between mesh shading tables; 0 = no blending, 1 = 2 banks (odd/even bytes), 2 = 4 banks per dword.                  |
+| u32MeshWidth       | Number of horizontal nodes; valid values: [0-63]                                                                                      |
+| u32MeshHeight      | Number of vertical nodes; valid values: [0-63]                                                                                       |
+| u32ShadingStrength | Mesh strength in 4.12 format, e.g., 0 = no correction, 4096 = correction to match mesh data. Can adjust shading based on AE. Range: [0-4096] |
 
 
-【Member Description】
-
-
-| Member                | Meaning                                                                                                                                                                                                 |
-|--------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| u32Enable          | Lens mesh shading correction enable: 0=off, 1=on.                                                                                                                                                    |
-| u32MeshScale       | Selects the precision and maximal gain range of mesh shading correction Gain range: 00 -\> 0..2; 01 -\> 0..4; 02 -\> 0..8; 03 -\> 0..16; 04 -\> 1..2; 05 -\> 1..3; 06 -\> 1..5; 07 -\> 1..9 (float). |
-| u32MeshAlphaMode   | Sets alpha blending between mesh shading tables. 0 = no alpha blending; 1 = 2 banks (odd/even bytes) 2 = 4 banks (one per 8-bit lane in each dword).                                                 |
-| u32MeshWidth       | Number of horizontal nodes Values: [0-63]                                                                                                                       || u32MeshHeight      | Number of vertical nodes Values: [0-63]                                                                                                                                                              |
-| u32ShadingStrength | Mesh strength in 4.12 format, e.g. 0 = no correction, 4096 = correction to match mesh data. Can be used to reduce shading correction based on AE. Values: [0-4096]                                   |
 
 ### HB_MESH_SHADING_LUT_S
 
-【Structure Definition】
+**Structure Definition**
 ```c
 typedef struct HB_MESH_SHADING_LUT_S {
-
-        uint8_t au8LsAR[1024];
-
-        uint8_t au8LsAG[1024];
-
-        uint8_t au8LsAB[1024];
-
-        uint8_t au8LsTl84R[1024];
-
-        uint8_t au8LsTl84G[1024];
-
-        uint8_t au8LsTl84B[1024];
-
-        uint8_t au8LsD65R[1024];
-
-        uint8_t au8LsD65G[1024];
-
-        uint8_t au8LsD65B[1024];
-
+    uint8_t au8LsAR[1024];
+    uint8_t au8LsAG[1024];
+    uint8_t au8LsAB[1024];
+    uint8_t au8LsTl84R[1024];
+    uint8_t au8LsTl84G[1024];
+    uint8_t au8LsTl84B[1024];
+    uint8_t au8LsD65R[1024];
+    uint8_t au8LsD65G[1024];
+    uint8_t au8LsD65B[1024];
 } MESH_SHADING_LUT_S;
 ```
-【Description】
+**Function Description**
 
-【Member Description】
+**Member Descriptions**
 
-| Member      | Description                            |
-|------------|---------------------------------|
-| au8LsAR    | R correction table for mesh shading under A light     |
-| au8LsAG    | G correction table for mesh shading under A light     |
-| au8LsAB    | B correction table for mesh shading under A light    |
-| au8LsTl84R | R correction table for mesh shading under TL84 light   |
-| au8LsTl84G | G correction table for mesh shading under TL84 light |
-| au8LsTl84B | B correction table for mesh shading under TL84 light |
-| au8LsD65R  | R correction table for mesh shading under D65 light  |
-| au8LsD65G  | G correction table for mesh shading under D65 light  |
-| au8LsD65B  | B correction table for mesh shading under D65 light  |
+| Member       | Meaning                                      |
+|--------------|-----------------------------------------------|
+| au8LsAR      | Mesh shading R correction table under 'a' light |
+| au8LsAG      | Mesh shading G correction table under 'a' light |
+| au8LsAB      | Mesh shading B correction table under 'a' light |
+| au8LsTl84R   | Mesh shading R correction table under TL84 light |
+| au8LsTl84G   | Mesh shading G correction table under TL84 light |
+| au8LsTl84B   | Mesh shading B correction table under TL84 light |
+| au8LsD65R    | Mesh shading R correction table under D65 light |
+| au8LsD65G    | Mesh shading G correction table under D65 light |
+| au8LsD65B    | Mesh shading B correction table under D65 light |
 
 ### HB_RADIAL_SHADING_ATTR_S
 
-【Structure Definition】
+**Structure Definition**
 ```c
-typedef struct HB_RADIAL_SHADING_ATTR_S {【Function Description】
+typedef struct HB_RADIAL_SHADING_ATTR_S {
+    uint32_t u32Enable;
+    uint32_t u32CenterRX;
+    uint32_t u32CenterRY;
+    uint32_t u32CenterGX;
+    uint32_t u32CenterGY;
+    uint32_t u32CenterBX;
+    uint32_t u32CenterBY;
+    uint32_t u32OffCenterMultRX;
+    uint32_t u32OffCenterMultRY;
+    uint32_t u32OffCenterMultGX;
+    uint32_t u32OffCenterMultGY;
+    uint32_t u32OffCenterMultBX;
+    uint32_t u32OffCenterMultBY;
+} RADIAL_SHADING_ATTR_S;
+```
+**Function Description**
 
-【Member Description】
+**Member Descriptions**
 
-| Member              | Description                                                                                                                                                                                                                     |
-|---------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| u32Enable           | 设置为1以启用径向阴影校正。                                                                                                                                                                                                    |
-| u32CenterRX         | R通道径向校正图的中心x坐标。值范围：[0-65535]                                                                                                                                                                                    |
-| u32CenterRY         | R通道径向校正图的中心y坐标。值范围：[0-65535]                                                                                                                                                                                    |
-| u32CenterGX         | G通道径向校正图的中心x坐标。值范围：[0-65535]                                                                                                                                                                                    |
-| u32CenterGY         | G通道径向校正图的中心y坐标。值范围：[0-65535]                                                                                                                                                                                    |
-| u32CenterBX         | B通道径向校正图的中心x坐标。值范围：[0-65535]                                                                                                                                                                                    |
-| u32CenterBY         | B通道径向校正图的中心y坐标。值范围：[0-65535]                                                                                                                                                                                    |
-| u32OffCenterMultRX  | 将R、G、B径向表缩放至图像边缘的归一化X/Y因子。计算公式为231/R2，其中R为距离中心坐标到图像边缘最远处的像素数。值范围：[0-65535]                                                                                                          |
-| u32OffCenterMultRY  |                                                                                                                                                                                                                               |
-| u32OffCenterMultGX  |                                                                                                                                                                                                                               |
-| u32OffCenterMultGY  |                                                                                                                                                                                                                               |
-| u32OffCenterMultBX  |                                                                                                                                                                                                                               |
-| u32OffCenterMultBY  |                                                                                                                                                                                                                               |
+| Member               | Meaning                                                                                       |
+|----------------------|------------------------------------------------------------------------------------------------|
+| u32Enable            | Set to 1 to enable radial shading correction.                                                           |
+| u32CenterRX          | X coordinates for R shading map center. Values: [0-65535]                                             |
+| u32CenterRY          | Y coordinates for R shading map center. Values: [0-65535]                                             |
+| u32CenterGX          | X coordinates for G shading map center. Values: [0-65535]                                             |
+| u32CenterGY          | Y coordinates for G shading map center. Values: [0-65535]                                             |
+| u32CenterBX          | X coordinates for B shading map center. Values: [0-65535]                                             |
+| u32CenterBY          | Y coordinates for B shading map center. Values: [0-65535]                                             |
+| u32OffCenterMultRX   | Scaling factor for R, G, B radial table to image edge. Calculated as 2^31 / (R^2), where R is the max distance to edge in pixels. Values: [0-65535] |
+| u32OffCenterMultRY   |                                                                                                   |
+| u32OffCenterMultGX   |                                                                                                   |
+| u32OffCenterMultGY   |                                                                                                   |
+| u32OffCenterMultBX   |                                                                                                   |
+| u32OffCenterMultBY   |                                                                                                   |
 
-### HB_RADIAL_SHADING_LUT_S【Structure Definition】
+
+
+### HB_RADIAL_SHADING_LUT_S
+
+**Structure Definition**
 ```c
 typedef struct HB_RADIAL_SHADING_LUT_S {
-
-        uint16_t au16RGain[129];
-
-        uint16_t au16GGain[129];
-
-        uint16_t au16BGain[129];
-
+    uint16_t au16RGain[129];
+    uint16_t au16GGain[129];
+    uint16_t au16BGain[129];
 } RADIAL_SHADING_LUT_S;
 ```
-【Description】
+**Function Description**
 
-【Member Description】
+**Member Descriptions**
 
-| Member      | Meaning              |
-|-----------|-------------------|
-| au16Rgain | corrective R gain |
-| au16Ggain | corrective G gain |
-| au16Bgain | corrective B gain |
+| Member         | Meaning                                                                                     |
+|---------------|----------------------------------------------------------------------------------------------|
+| au16Rgain      | Corrective R gain array                                                                 |
+| au16Ggain      | Corrective G gain array                                                                 |
+| au16Bgain      | Corrective B gain array                                                                  |
 
 ### HB_ISP_CSC_ATTR_S
 
-【Structure Definition】
+**Structure Definition**
 ```c
 typedef struct HB_ISP_CSC_ATTR_S {
-
-        uint32_t u32ClipMinY;
-
-        uint32_t u32ClipMaxY;
-
-        uint32_t u32ClipMinUV;
-
-        uint32_t u32ClipMaxUV;
-
-        uint32_t u32MaskRY;
-
-        uint32_t u32MaskGU;
-
-        uint32_t u32MaskBV;
-
-        uint16_t aau16Coefft[12];
-
+    uint32_t u32ClipMinY;
+    uint32_t u32ClipMaxY;
+    uint32_t u32ClipMinUV;
+    uint32_t u32ClipMaxUV;
+    uint32_t u32MaskRY;
+    uint32_t u32MaskGU;
+    uint32_t u32MaskBV;
+    uint16_t aau16Coefft[12];
 } ISP_CSC_ATTR_S;
 ```
-【Description】
+**Function Description**
 
-【Member Description】| Member           | Meaning                                                                                                                  |
-|------------------|--------------------------------------------------------------------------------------------------------------------------|
-| u32ClipMinY      | Minimal value for Y. Values below this value are clipped. Values: [0-1023]                                              |
-| u32ClipMaxY      | Maximal value for Y. Values above this value are clipped. Values: [0-1023]                                              |
-| u32ClipMinUV     | Minimal value for Cb, Cr. Values below this value are clipped. Values: [0-1023]                                         |
-| u32ClipMaxUV     | Maximal value for Cb, Cr. Values above this value are clipped. Values: [0-1023]                                         |
-| u32MaskRY        | Data mask for channel 1 (R or Y). Bit-wise and of this value and video data. Values: [0-1023]                          |
-| u32MaskGU        | Data mask for channel 2 (G or U). Bit-wise and of this value and video data. Values: [0-1023]                          |
-| u32MaskBV        | Data mask for channel 3 (B or V). Bit-wise and of this value and video data. Values: [0-1023]                          |
-| aau16Coefft[12]  | Coefficients in the 3x3 conversion matrix. And Offset coefficients.  Values: [0-65535] The coefficients are filled in as detailed in section 1.13, Color Space Conversion |
+**Member Descriptions**
+
+| Member            | Meaning                                                                                   |
+|-----------------|---------------------------------------------------------------------------------------------|
+| u32ClipMinY      | Minimal Y value. Values below this threshold are clipped. Range: [0-1023]                     |
+| u32ClipMaxY      | Maximal Y value. Values above this threshold are clipped. Range: [0-1023]                     |
+| u32ClipMinUV     | Minimal Cb/Cr value. Values below this threshold are clipped. Range: [0-1023]                  |
+| u32ClipMaxUV     | Maximal Cb/Cr value. Values above this threshold are clipped. Range: [0-1023]                  |
+| u32MaskRY        | Data mask for channel 1 (R or Y). Bitwise AND with video data. Range: [0-1023]                   |
+| u32MaskGU        | Data mask for channel 2 (G or U). Bitwise AND with video data. Range: [0-1023]                   |
+| u32MaskBV        | Data mask for channel 3 (B or V). Bitwise AND with video data. Range: [0-1023]                   |
+| aau16Coefft[12] | Coefficients in the 3x3 conversion matrix. Includes offset coefficients. Range: [0-65535] (Refer to Section 1.13 for coefficient details) |
 
 ### HB_ISP_SCENE_MODES_ATTR_S
 
-【Structure Definition】
+**Structure Definition**
 ```c
 typedef struct HB_ISP_SCENE_MODES_ATTR_S {
-
-        uint32_t u32ColorMode;
-
-        uint32_t u32BrightnessStrength;
-
-        uint32_t u32ContrastStrength;
-
-        uint32_t u32SaturationStrength;
-
-        uint32_t u32HueTheta;
-
+    uint32_t u32ColorMode;
+    uint32_t u32BrightnessStrength;
+    uint32_t u32ContrastStrength;
+    uint32_t u32SaturationStrength;
+    uint32_t u32HueTheta;
 } ISP_SCENE_MODES_ATTR_S;
 ```
-【Function Description】
+**Function Description**
 
-【Member Description】
+**Member Descriptions**
 
-| Member                  | Meaning                                                                                                                  |
-|-------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| u32ColorMode            | Select the color mode of the ISP. Values: {NORMAL} {BLACK_AND_WHITE} {NEGATIVE} {SEPIA} {VIVID} Default Value: {NORMAL} |
-| u32BrightnessStrength   | Control the exact brightness value. Values: [0-255] Key: 128 - Standard Brightness, \<128 - Decreased Brightness, \>128 - Increased Brightness Default Value: 128 |
-| u32ContrastStrength     | Control the exact contrast value. Values: [0-255] Key: 128 - Standard Contrast, \<128 - Decreased Contrast, \>128 - Increased Contrast Default Value: 128 |
-| u32SaturationStrength   | Control the exact saturation strength. Values: [0-255] Key: 128 - Standard Saturation, \<128 - Decreased Saturation, \>128 - Increased Saturation Default Value: 128 |
-| u32HueTheta             | Control the exact hue value.  Values: [0-360] Key: 128 - Standard  Hue, \<128 - Decreased  Hue, \>128 - Increased Hue  Default Value: 180 |
+| Member                  | Meaning                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------|
+| u32ColorMode          | Select the ISP color mode. Values: {NORMAL} {BLACK_AND_WHITE} {NEGATIVE} {SEPIA} {VIVID} Default: {NORMAL} |
+| u32BrightnessStrength | Controls exact brightness level. Range: [0-255] Key: 128 = Standard Brightness, etc. Default: 128 |
+| u32ContrastStrength   | Controls exact contrast level. Range: [0-255] Key: 128 = Standard Contrast, etc. Default: 128 |
+| u32SaturationStrength | Controls exact saturation level. Range: [0-255] Key: 128 = Standard Saturation, etc. Default: 128 |
+| u32HueTheta           | Controls exact hue angle. Range: [0-360] Key: 128 = Standard Hue, etc. Default: 180                |
+
+
 
 ### HB_ISP_STATISTICS_AWB_ZONE_ATTR_S
 
-【Structure Definition】
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_STATISTICS_AWB_ZONE_ATTR_S {
-
-        uint16_t u16Rg;
-
-        // Remaining fields omitted for brevity
-
+    uint16_t u16Rg;
+    uint16_t u16Bg;
+    uint32_t u32Sum;
 } ISP_STATISTICS_AWB_ZONE_ATTR_S;
-``````c
-typedef struct HB_ISP_AE_PARAM_S {
-
-        uint32_t u32ExpTime; // 曝光时间
-
-        uint32_t u32AeHist[64]; // AE直方图
-
-        uint32_t u32AeStat[4][4]; // AE统计
-
-        uint32_t u32AwbStat[16]; // AWB统计
-
-} ISP_AE_PARAM_S;
 ```
-【功能描述】
+**Function Description:**
 
-AE参数结构体。
+AWB zone statistics parameters.
 
-【成员说明】
+**Member Descriptions:**
 
-| 成员           | 含义             |
-|----------------|------------------|
-| u32ExpTime     | 曝光时间         |
-| u32AeHist      | AE直方图         |
-| u32AeStat      | AE统计           |
-| u32AwbStat     | AWB统计          |
+| Member   | Meaning                            |
+|----------|------------------------------------|
+| u16Rg     | Average Green/Red or Red/Green ratio |
+| u16Bg     | Average Green/Blue or Blue/Green ratio |
+| u32Sum    | Number of pixels used for AWB          |
 
-### HB_ISP_AWB_ZONE_ATTR_S
+### HB_ISP_STATISTICS_AE_5BIN_ZONE_ATTR_S
 
-【结构定义】
+**Structure Definition:**
 ```c
-typedef struct HB_ISP_AWB_ZONE_ATTR_S {
-
-        uint32_t u32ZoneAvgR;
-
-        uint32_t u32ZoneAvgGr;
-
-        uint32_t u32ZoneAvgGb;
-
-        uint32_t u32ZoneAvgB;
-
-} ISP_AWB_ZONE_ATTR_S;
+typedef struct HB_ISP_STATISTICS_AE_5BIN_ZONE_ATTR_S {
+    uint16_t u16Hist0;
+    uint16_t u16Hist1;
+    uint16_t u16Hist3;
+    uint16_t u16Hist4;
+} ISP_STATISTICS_AE_5BIN_ZONE_ATTR_S;
 ```
-【功能描述】
+**Function Description:**
 
-AWB区域属性。
+AE-5bin zone statistics.
 
-【成员说明】
+**Member Descriptions:**
 
-| 成员        | 含义                      |
-|-------------|---------------------------|
-| u32ZoneAvgR | 区域平均红色值            |
-| u32ZoneAvgGr| 区域平均Green-red差值      |
-| u32ZoneAvgGb| 区域平均Green-blue差值     |
-| u32ZoneAvgB | 区域平均蓝色值            |
-``````c
+| Member      | Meaning                           |
+|-------------|----------------------------------|
+| u16Hist0     | 5-bin histogram for hist0            |
+| u16Hist1     | 5-bin histogram for hist1            |
+| u16Hist3     | 5-bin histogram for hist3            |
+| u16Hist4     | 5-bin histogram for hist4            |
+
+### HB_ISP_AE_PARAM_S
+
+**Structure Definition:**
+```c
 typedef struct HB_ISP_AE_PARAM_S {
-
-        uint32_t u32TotalGain;
-
-        ISP_OP_TYPE_E GainOpType;
-
-        uint32_t u32IntegrationTime;
-
-        uint32_t u32ExposureRatio;
-
-        ISP_OP_TYPE_E IntegrationOpType;
-
+    uint32_t u32TotalGain;
+    ISP_OP_TYPE_E GainOpType;
+    uint32_t u32IntegrationTime;
+    uint32_t u32ExposureRatio;
+    ISP_OP_TYPE_E IntegrationOpType;
 } ISP_AE_PARAM_S;
 ```
-【Description】
+**Function Description:**
 
-【Member Description】
+**Member Descriptions:**
 
-| Member             | Description                                                                                       |
-|--------------------|---------------------------------------------------------------------------------------------------|
-| u32TotalGain       | Total exposure time of AE, total_gain = sensor_again + sensor_dgain + isp_dgain Value: [0, 765] |
-| GainOpType         | Manual/Auto selection of gain                                                                     |
-| u32IntegrationTime | Line control (in microseconds)                                                                    |
-| u32ExposureRatio   | Exposure ratio value, effective in HDR mode                                                       |
-| IntegrationOpType  | Manual/Auto selection of line                                                                     |
+| Member                 | Meaning                                                                                   |
+|------------------------|---------------------------------------------------------------------------------------------|
+| u32TotalGain           | Total exposure time (ae_total_gain = sensor_again + sensor_dgain + isp_dgain), range [0, 765] |
+| GainOpType             | Manual/Auto gain selection                                                                     |
+| u32IntegrationTime     | Line control (in microseconds)                                                                   |
+| u32ExposureRatio       | Exposure ratio value, valid in HDR mode                                                      |
+| IntegrationOpType      | Manual/Auto line selection                                                                     |
 
 ### HB_ISP_AE_ROI_ATTR_S
 
-【Structure Definition】
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_AE_ROI_ATTR_S {
-
-        uint8_t u8XStart;
-
-        uint8_t u8YStart;
-
-        uint8_t u8XEnd;
-
-        uint8_t u8YEnd;
-
+    uint8_t u8XStart;
+    uint8_t u8YStart;
+    uint8_t u8XEnd;
+    uint8_t u8YEnd;
 } ISP_AE_ROI_ATTR_S;
 ```
-【Description】
+**Function Description:**
 
-【Member Description】
+**Member Descriptions:**
 
-| Member    | Description                        |
-|-----------|------------------------------------|
-| u8XStart  | ROI area x_start Value: [0, 255]   || Member   | Meaning                 |
-|----------|-------------------------|
-| u8YStart | ROI area y_start value: [0,255] |
-| u8XEnd   | ROI area x_end value: [0,255]   |
-| u8YEnd   | ROI area y_end value: [0,255]   |
+| Member    | Meaning                         |
+|-----------|---------------------------------|
+| u8XStart  | ROI x-coordinate start, [0, 255] |
+| u8YStart  | ROI y-coordinate start, [0, 255] |
+| u8XEnd    | ROI x-coordinate end, [0, 255]   |
+| u8YEnd    | ROI y-coordinate end, [0, 255]   |
 
 ### ISP_ZONE_ATTR_S
 
-[Structure Definition]
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_ZONE_ATTR_S {
-        uint8_t u8Horiz;
-        uint8_t u8Vert;
+    uint8_t u8Horiz;
+    uint8_t u8Vert;
 } ISP_ZONE_ATTR_S;
 ```
-[Function Description]
+**Function Description:**
 
-Used to change the statistics zones for AF/AWB.
+For adjusting AF/AWB zones.
 
-[Member Description]
+**Member Descriptions:**
 
-| Member   | Meaning                          |
-|----------|----------------------------------|
-| u8Horiz  | Number of zones in horizontal direction |
-| u8Vert   | Number of zones in vertical direction   |
+| Member    | Meaning              |
+|-----------|----------------------|
+| u8Horiz   | Horizontal zones count |
+| u8Vert    | Vertical zones count  |
 
 ### HB_ISP_STATISTICS_LUMVAR_ZONE_ATTR_S
 
-[Structure Definition]
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_STATISTICS_LUMVAR_ZONE_ATTR_S {
-        uint16_t u16Var;
-        uint16_t u16Mean;
+    uint16_t u16Var;
+    uint16_t u16Mean;
 } ISP_STATISTICS_LUMVAR_ZONE_ATTR_S;
 ```
-[Function Description]
+**Function Description:**
 
-[Member Description]
+**Member Descriptions:**
 
-| Member   | Meaning                          |
-|----------|----------------------------------|
-| u16Var   | Variance of lumvar statistical information |
-| u16Mean  | Mean of lumvar statistical information     |
+| Member    | Meaning                        |
+|-----------|-------------------------------|
+| u16Var     | Luminance variance statistic |
+| u16Mean    | Luminance mean statistic      |
 
-### ISP_AWB_STAT_AREA_ATTR_S【Structure Definition】
+
+
+### ISP_AWB_STAT_AREA_ATTR_S
+
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_AWB_STAT_AREA_ATTR_S {
-
-        uint32_t u32WhiteLevel;
-
-        uint32_t u32BlackLevel;
-
-        uint32_t u32CrRefMax;
-
-        uint32_t u32CrRefMin;
-
-        uint32_t u32CbRefMax;
-
-        uint32_t u32CbRefMin;
-
-        uint32_t u32CrRefHigh;
-
-        uint32_t u32CrRefLow;
-
-        uint32_t u32CbRefHigh;
-
-        uint32_t u32CbRefLow;
-
+    uint32_t u32WhiteLevel;      // Upper limit of valid data for AWB, range: [0, 1023]
+    uint32_t u32BlackLevel;      // Lower limit of valid data for AWB, range: [0, 1023]
+    uint32_t u32CrRefMax;       // Maximum reference value for Cr channel, range: [0, 4095]
+    uint32_t u32CrRefMin;       // Minimum reference value for Cr channel, range: [0, 4095]
+    uint32_t u32CbRefMax;       // Maximum reference value for Cb channel, range: [0, 4095]
+    uint32_t u32CbRefMin;       // Minimum reference value for Cb channel, range: [0, 4095]
+    uint32_t u32CrRefHigh;      // High reference value for Cr channel, range: [0, 4095]
+    uint32_t u32CrRefLow;       // Low reference value for Cr channel, range: [0, 4095]
+    uint32_t u32CbRefHigh;      // High reference value for Cb channel, range: [0, 4095]
+    uint32_t u32CbRefLow;       // Low reference value for Cb channel, range: [0, 4095]
 } ISP_AWB_STAT_AREA_ATTR_S;
 ```
-【Function Description】
+**Function Description:**
 
-【Member Description】
+**Member Descriptions:**
 
-| Member                                                       | Meaning                                                      |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| u32WhiteLevel                                                | Upper limit  of valid data for AWB  Range: [0,1023]          |
-| u32BlackLevel                                                | Lower limit  of valid data for AWB  Range: [0,1023]          |
-| Other Members                                                | Range of statistical data, described in section [1.14.1](#_AWB statistical information)  Range: [0,4095] |
+| Member             | Meaning                                          |
+|--------------------|--------------------------------------------------|
+| u32WhiteLevel      | Maximum valid data for white balance calibration |
+| u32BlackLevel      | Minimum valid data for white balance calibration |
+| Other members       | Statistical data range, see section 1.14.1 for details | 
 
 ### HB_ISP_AE_CONTROL
 
-【Structure Definition】
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_AE_CONTROL {
-
-        uint32_t u32AeControl[9];
-
-        uint16_t u16AeControlHdrTarget[8][2];
-
+    uint32_t u32AeControl[9];   // AE control module
+    uint16_t u16AeControlHdrTarget[8][2]; // AE HDR target control, target modulated by total gain
 } ISP_AE_CONTROL;
 ```
-【Function Description】【Member Description】
+**Function Description:**
 
-| Member                 | Meaning                                                      |
+**Member Descriptions:**
+
+| Member                | Meaning                                                      |
 |------------------------|--------------------------------------------------------------|
-| u32AeControl           | AE control module                                            |
-| u16AeControlHdrTarget  | AE HDR target control. This target is modulated by totoal gain|
+| u32AeControl           | Control parameters for the AE module                           |
+| u16AeControlHdrTarget  | Target values for AE HDR control, adjusted by total gain        |
 
 ### HB_ISP_AE_CORRECTION
 
-【Structure Definition】
-
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_AE_CORRECTION {
-
-        uint8_t u8AeCorrection[12];
-
-        uint32_t u32AeEXPCorrection[12];
-
+    uint8_t u8AeCorrection[12]; // Calibration values for fine-tuning AE compensation
+    uint32_t u32AeEXPCorrection[12]; // Calibration values for fine-tuning exposure value settings
 } ISP_AE_CORRECTION;
 ```
-【Description】
+**Function Description:**
 
-【Member Description】
+**Member Descriptions:**
 
-| Member                   | Meaning                                                         |
-|--------------------------|-----------------------------------------------------------------|
-| u8AeCorrection           | Calibration values for the fine tuning parameter, which alters the strength of ae_comp |
-| u32AeEXPCorrection       | Calibration values for the fine tuning parameter, which sets the exposure value nodes |
+| Member               | Meaning                                                                                     |
+|----------------------|--------------------------------------------------------------------------------------------|
+| u8AeCorrection      | Calibration values for adjusting the strength of the AE compensation parameter                      |
+| u32AeEXPCorrection  | Calibration values for setting the exposure value nodes using fine-tuning parameters              |
 
 ### HB_ISP_5BIN_HIST
 
-【Structure Definition】
-
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_5BIN_HIST {
-
-        uint16_t u16HistThresh01;
-    
-		uint16_t u16HistThresh12;
-    
-		uint16_t u16HistThresh23;
-    
-		uint16_t u16HistThresh34;
-
+    uint16_t u16HistThresh01; // AE 5-bin histogram threshold for bin 1
+    uint16_t u16HistThresh12; // AE 5-bin histogram threshold for bin 2
+    uint16_t u16HistThresh23; // AE 5-bin histogram threshold for bin 3
+    uint16_t u16HistThresh34; // AE 5-bin histogram threshold for bin 4
 } ISP_5BIN_HIST;
 ```
+**Function Description:**
 
-【Description】
+**Member Descriptions:**
 
-【Member Description】| Member            | Meaning                            |
-| --------------- | ----------------------------- |
-| u16HistThresh01 | The value of the first bin of the AE's 5-bin statistical information |
-| u16HistThresh12 | The value of the second bin of the AE's 5-bin statistical information |
-| u16HistThresh23 | The value of the third bin of the AE's 5-bin statistical information |
-| u16HistThresh34 | The value of the fourth bin of the AE's 5-bin statistical information |
+| Member            | Meaning                            |
+| --------------- | ---------------------------------- |
+| u16HistThresh01 | Value for AE 5-bin histogram bin 1 |
+| u16HistThresh12 | Value for AE 5-bin histogram bin 2 |
+| u16HistThresh23 | Value for AE 5-bin histogram bin 3 |
+| u16HistThresh34 | Value for AE 5-bin histogram bin 4 |
 
-【Notes】
+**Note:**
 
-Note that the AE's 5-bin statistical information can be calculated from the first four values because of the hardware resource saving.
+Due to hardware resource constraints, the first four values in the 5-bin AE histogram can be used to compute the remaining bins.
 
 ### HB_ISP_EXP_RATIO_ADJ
 
-【Struct Definition】
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_EXP_RATIO_ADJ {
-
-        uint16_t u16ExpRatioAdj[4][2];
-
+    uint16_t u16ExpRatioAdj[4][2]; // Adjustments for pixel clipping in long exposures
 } ISP_EXP_RATIO_ADJ;
 ```
-【Function Description】
+**Function Description:**
+
+**Member Descriptions:**
+
+| Member           | Meaning                                                 |
+|----------------|---------------------------------------------------------|
+| u16ExpRatioAdj | Pixel clipping adjustments for long exposure scenarios |
 
 
-【Member Description】
-
-| Member           | Meaning                                                  |
-|----------------|-------------------------------------------------------|
-| u16ExpRatioAdj | Adjusts the amount of clipped pixels for long exposure |
 
 ### HB_ISP_EXP_PAT_LUTS
 
-【Struct Definition】
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_EXP_PAT_LUTS {
-
-        uint16_t u16ExpPatLuts[2][10];
-
+    uint16_t u16ExpPatLuts[2][10];
 } ISP_EXP_PAT_LUTS;
 ```
-【Function Description】
+**Function Description:**
 
+**Member Descriptions:**
 
-【Member Description】
-
-| Member          | Meaning                                                                                                                                                                                                                        |
-|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| u16ExpPatLuts | Partition lookup tables to split exposure value, also called expos corresponding to the API->TALGORITHMS->AE_SPLIT_BALANCED. NO. [10]-[19](exp_time,gain, exp_time exp_time unit: ms, gain unit:1 = 1x gain, 2 = 2x gain. |
+| Member          | Meaning                                                                                                      |
+|-----------------|--------------------------------------------------------------------------------------------------------------|
+| u16ExpPatLuts   | Partition lookup tables to split exposure value, also known as expos, corresponding to API->TALGORITHMS->AE_SPLIT_BALANCED. Range: [10]-[19] (exp_time, gain, exp_time unit: ms, gain unit: 1 = 1x gain, 2 = 2x gain.)
 
 ### HB_ISP_AWB_MAX_BGAIN
 
-【Struct Definition】```c
+**Structure Definition:**
+```c
 typedef struct HB_ISP_AWB_MAX_BGAIN {
-        uint16_t u16AwbBgMaxGain[3][2];
+    uint16_t u16AwbBgMaxGain[3][2];
 } ISP_AWB_BG_MAX_GAIN;
 ```
-【Function Description】
+**Function Description:**
 
-【Member Description】
+**Member Descriptions:**
 
-| Member           | Description                                     |
-|------------------|-------------------------------------------------|
-| u32AwbBgMaxGain  | 最大AWB背景增益，根据总增益计算                  |
+| Member            | Meaning                                          |
+|------------------|--------------------------------------------------|
+| u32AwbBgMaxGain   | Maximum AWB background gain based on total gain |
 
 ### HB_ISP_CCM_SATURA_STRENG
 
-【Structure Definition】
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_CCM_SATURA_STRENG {
-        uint16_t u16CcmSatStre[9][2];
+    uint16_t u16CcmSatStre[9][2];
 } ISP_CCM_SATURA_STRENG;
 ```
-【Function Description】
+**Function Description:**
 
-【Member Description】
+**Member Descriptions:**
 
-| Member         | Description                                      |
-|----------------|--------------------------------------------------|
-| u16CcmSatStre  | 饱和度强度查找表                                  |
+| Member          | Meaning                                       |
+|-----------------|-----------------------------------------------|
+| u16CcmSatStre   | Lookup table for Saturation Strength values |
 
 ### HB_ISP_MT_ABSOLUTE_LS
 
-【Structure Definition】
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_MT_ABSOLUTE_LS {
-        uint16_t u16AbsoluteLsACcm[9];
-        uint16_t u16AbsoluteLsD40Ccm[9];
-        uint16_t u16AbsoluteLsD50Ccm[9];
-        uint16_t u16AbsoluteLsU30Ccm[9];
+    uint16_t u16AbsoluteLsACcm[9];
+    uint16_t u16AbsoluteLsD40Ccm[9];
+    uint16_t u16AbsoluteLsD50Ccm[9];
+    uint16_t u16AbsoluteLsU30Ccm[9];
 } ISP_MT_ABSOLUTE_LS;
 ```
-【Function Description】typedef struct HB_ISP_GAMMA_EV2 {
+**Function Description:**
 
-        uint16_t u16GammaEv2[129];
+**Member Descriptions:**
 
+| Member              | Meaning                                                                                           |
+|---------------------|---------------------------------------------------------------------------------------------------|
+| u16AbsoluteLsACcm    | Calibration values for CCM under A lighting conditions                                                       |
+| u16AbsoluteLsD40Ccm  | Calibration values for CCM under D40 lighting conditions                                                      |
+| u16AbsoluteLsD50Ccm  | Calibration values for CCM under D50 lighting conditions                                                      |
+| u16AbsoluteLsU30Ccm  | Calibration values for CCM under U30 lighting conditions                                                      |
+
+### HB_ISP_CCM_ONE_GAIN_THRESHOLD
+
+**Structure Definition:**
+```c
+typedef struct HB_ISP_CCM_ONE_GAIN_THRESHOLD {
+    uint16_t u16CcmOneGainThreshold;
+} ISP_CCM_ONE_GAIN_THRESHOLD;
+```
+**Function Description:**
+
+**Member Descriptions:**
+
+| Member             | Meaning                                                 |
+|--------------------|---------------------------------------------------------|
+| u16CcmOneGainThreshold | Threshold value for a single-gain Color Correction Matrix |
+
+### HB_ISP_GAMMA_EV1
+
+**Structure Definition:**
+```c
+typedef struct HB_ISP_GAMMA_EV1 {
+    uint16_t u16GammaEv1[129];
+} ISP_GAMMA_EV1;
+```
+**Function Description:**
+
+**Member Descriptions:**
+
+| Member        | Meaning                     |
+|-------------|----------------------------|
+| u16GammaEv1 | Dynamic gamma lut-1 values |
+
+
+
+### HB_ISP_GAMMA_EV2
+
+**Structure Definition**
+```c
+typedef struct HB_ISP_GAMMA_EV2 {
+    uint16_t u16GammaEv2[129];
 } ISP_GAMMA_EV2;
 ```
-【功能描述】
+**Function Description**
 
-【成员说明】
+**Member Descriptions**
 
-| 成员        | 含义                |
-|-------------|---------------------|
-| u16GammaEv2 | Dynamic gamma lut-2 |typedef struct HB_ISP_GAMMA_EV2 {
-
-        uint16_t u16GammaEv2[129];
-
-} ISP_GAMMA_EV2;
-```
-【Function Description】
-
-【Member Description】
-
-| Member        | Meaning                |
-|-------------|---------------------|
-| u16GammaEv2 | Dynamic gamma lut-2 |
+| Member        | Meaning                                                  |
+| ------------- | -------------------------------------------------------- |
+| u16GammaEv2   | Dynamic gamma lookup table (lut-2) values                   |
 
 ### HB_ISP_GAMMA_THRESHOLD
 
-【Structure Definition】
+**Structure Definition**
 ```c
 typedef struct HB_ISP_GAMMA_THRESHOLD {
-
-        uint32_t u32GammaThreshold[3];
-
+    uint32_t u32GammaThreshold[3];
 } ISP_GAMMA_THRESHOLD;
 ```
-【Function Description】
+**Function Description**
 
-【Member Description】
+**Member Descriptions**
 
-| Member              | Meaning                                                         |
+| Member              | Meaning                                                      |
 | ----------------- | ------------------------------------------------------------ |
-| u32GammaThreshold | log2 exposure value threshold, exposure_log2 is the current exposure time = sensor_again * sensor_dgain * line * isp_dgain. The third value,0, means auto off and 1 means auto on, if the index of the array in the old version interface is only 2, it means auto off by default |
+| u32GammaThreshold | Array of log2 exposure value thresholds (exposure_log2 = sensor_gain * sensor_dgain * line * isp_dgain). Index 0 is off, 1 is on. If the interface version has only two elements, it defaults to off.
 
 ### HB_ISP_AWB_CCT_CTRL_S
 
-【Structure Definition】
+**Structure Definition**
 ```c
 typedef struct HB_ISP_AWB_CCT_CTRL_S {
-
-        uint16_t u16AwbColourPre[4];
-
-        uint16_t u16AwbWarmLsA[3];
-
-        uint16_t u16AwbWarmLsD75[3];
-
-        uint16_t u16AwbWarmLsD50[3];
-
+    uint16_t u16AwbColourPre[4];
+    uint16_t u16AwbWarmLsA[3];
+    uint16_t u16AwbWarmLsD75[3];
+    uint16_t u16AwbWarmLsD50[3];
 } ISP_AWB_CCT_CTRL_S;
 ```
-【Function Description】【Member Description】
+**Function Description**
 
-| Member           | Meaning                                                                          |
-|------------------|----------------------------------------------------------------------------------|
-| u16AwbColourPre  | 自动白平衡颜色偏好CCT的校准值                                                  |
-| u16AwbWarmLsA    | 在A光照条件下的自动白平衡校准值                                                |
-| u16AwbWarmLsD75  | 在D75光照条件下的自动白平衡校准值                                              |
-| u16AwbWarmLsD50  | 在D65光照条件下的自动白平衡校准值                                              |
+**Member Descriptions**
+
+| Member            | Meaning                                                                                     |
+|-----------------|----------------------------------------------------------------------------------------------|
+| u16AwbColourPre   | Calibration values for auto white balance color preference CCT                                      |
+| u16AwbWarmLsA     | Calibration values for auto white balance under A lighting conditions                         |
+| u16AwbWarmLsD75   | Calibration values for auto white balance under D75 lighting conditions                       |
+| u16AwbWarmLsD50   | Calibration values for auto white balance under D65 lighting conditions                       |
 
 ### HB_ISP_MIX_LIGHT_PARAM_S
 
-【Structure Definition】
+**Structure Definition**
 ```c
 typedef struct HB_ISP_MIX_LIGHT_PARAM_S {
-
-        uint32_t u32MixLightParm[8];
-
+    uint32_t u32MixLightParm[8];
 } ISP_MIX_LIGHT_PARAM_S;
 ```
-【Function Description】
+**Function Description**
 
-【Member Description】
+**Member Descriptions**
 
-| Member           | Meaning                                                                          |
-|------------------|----------------------------------------------------------------------------------|
-| u32MixLightParm  | awb混合光参数 [0] 使能/禁用 [1] 光照范围的低边界 [2] 光照范围的高边界 [3] 混合光的对比度阈值 [4] 蓝绿通道的阈值 [5] 高饱和度R-G色彩平衡曲线的最大值 [6] 高饱和度R-G色彩平衡曲线的最小值 |
+| Member            | Meaning                                                                                          |
+|-----------------|--------------------------------------------------------------------------------------------------|
+| u32MixLightParm   | Array of mix light parameters, including enable/disable, lux boundaries, contrast threshold, and LUT ranges |
 
 ### HB_ISP_SKY_PARAM_S
 
-【Structure Definition】
+**Structure Definition**
 ```c
 typedef struct HB_ISP_SKY_PARAM_S {
-
-        uint16_t u16SkyLuxTh;
-
-        uint16_t u16WbStrength[3];
-
-        uint16_t u16Ct65Pos;
-
-        uint16_t u16Ct40Pos;
-
+    uint16_t u16SkyLuxTh;
+    uint16_t u16WbStrength[3];
+    uint16_t u16Ct65Pos;
+    uint16_t u16Ct40Pos;
 } ISP_SKY_PARAM_S;
 ```
-【Function Description】
+**Function Description**
 
-【Member Description】
+**Member Descriptions**
 
-| Member          | Meaning                                                                           |
-|-----------------|-----------------------------------------------------------------------------------|
-| u16SkyLuxTh     | 天空场景的亮度阈值                                                               |### HB_TMPER_NP_LUT_S
+| Member          | Meaning                                                                                     |
+|---------------|---------------------------------------------------------------------------------------------|
+| u16SkyLuxTh     | Sky scene luminosity threshold value for detection                                          |
+| u16WbStrength   | White Balance gain adjuster strength values for sky scenes, applied to RG and BG channels       |
+| u16Ct65Pos      | Position in the color temperature array closest to 1e6/6500, in calibration_COLOR_TEMP units |
+| u16Ct40Pos      | Position in the color temperature array closest to 1e6/4000, in calibration_COLOR_TEMP units |
 
-【Structure Definition】
+
+
+### HB_TMPER_NP_LUT_S
+
+**Structure Definition:**
 ```c
 typedef struct HB_TMPER_NP_LUT_S {
-
-        uint8_t au8Np[128];
-
+    uint8_t au8Np[128];
 } TEMPER_NP_LUT_S;
 ```
-【Function Description】
+**Function Description:**
 
 NOISE_PROFILE--LUT
 
-【Member Description】
+**Member Descriptions:**
 
-| Member | Meaning                                                                                                                |
-| ------ | ---------------------------------------------------------------------------------------------------------------------- |
-| au8Np  | The lookup table for noise profile calibrations. It corresponds to the weight values of AE_ZONE_WGHT_HOR and AE_ZONE_WGHT_VER in the Dynamic calibrations section of the Control Tool. The weight value of this area is calculated as (int(ae_zone_wght_ver * ae_zone_wght_hor) / 16) - (int(ae_zone_wght_ver * ae_zone_wght_hor/16 > 1 ? 1 : 0)) (If int(ae_zone_wght_ver * ae_zone_wght_hor/16) is greater than 1, it is set to 1; otherwise, it is set to 0). |
+| Member      | Meaning                                                                                   |
+|-------------|-------------------------------------------------------------------------------------------|
+| au8Np        | The lookup table for noise profile calibrations, corresponding to Control Tool's Dynamic calibrations under AE_ZONE_WGHT_HOR, AE_ZONE_WGHT_VER. This area's weight value is calculated as (int(ae_zone_wght_ver * ae_zone_wght_hor) / 16) - (int(ae_zone_wght_ver * ae_zone_wght_hor/16 > 1 ? 1 : 0)) (where int(ae_zone_wght_ver * ae_zone_wght_hor/16 > 1) is 1 if the product is greater than 1, else 0). |
 
 ### HB_ISP_MESH_RGBG_WEIGHT_S
 
-【Structure Definition】
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_MESH_RGBG_WEIGHT_S {
-
-        uint16_t u16MeshRgbgWeight[15][15];
-
+    uint16_t u16MeshRgbgWeight[15][15];
 } ISP_MESH_RGBG_WEIGHT_S;
 ```
-【Function Description】
+**Function Description:**
 
-【Member Description】
+**Member Descriptions:**
 
-| Member              | Meaning                             |
-| ------------------- | ------------------------------------ |
-| u16MeshRgbgWeight   | Calibration LUT for AWB weighting. |
+| Member             | Meaning                                                                                     |
+|--------------------|----------------------------------------------------------------------------------------------|
+| u16MeshRgbgWeight   | Calibration LUT for AWB (Automatic White Balance) weighting.                                      |
 
-### HB\_ ISP_MESH_LS_WEIGHT_S
+### HB_ISP_MESH_LS_WEIGHT_S
 
-【Structure Definition】
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_MESH_LS_WEIGHT_S {
+    uint16_t u16MeshLsWeight[15][15];
+} ISP_MESH_LS_WEIGHT_S;
+```
+**Function Description:**
 
-        uint16_t u16MeshLsWeight[15][15];
+**Member Descriptions:**
 
-```typedef struct HB_ISP_AWB_POS_STATUS_S {
+| Member            | Meaning                                                                                     |
+|--------------------|----------------------------------------------------------------------------------------------|
+| u16MeshLsWeight   | Calibration LUT for extra light source weighting set during calibration in CALIBRATION_LIGHT_SRC. |
 
-        uint16_t u16AwBPos[64];
+### HB_ISP_AWB_DEFAULT_PARAM_S
 
+**Structure Definition:**
+```c
+typedef struct HB_ISP_AWB_DEFAULT_PARAM_S {
+    uint16_t u16Ct30Pos;
+} ISP_AWB_DEFAULT_PARAM_S;
+```
+**Function Description:**
+
+**Member Descriptions:**
+
+| Member       | Meaning                                                                                       |
+|-------------|------------------------------------------------------------------------------------------------|
+| u16Ct30Pos   | The position in the color temperature scale closest to 1e6/3000 in the CALIBRATION_COLOR_TEMP array. |
+
+### HB_ISP_MESH_COLOR_TEMP_WEIGHT_S
+
+**Structure Definition:**
+```c
+typedef struct HB_ISP_MESH_COLOR_TEMP_WEIGHT_S {
+    uint16_t u16MeshColorTempWeight[15][15];
+} ISP_MESH_COLOR_TEMP_WEIGHT_S;
+```
+**Function Description:**
+
+**Member Descriptions:**
+
+| Member                  | Meaning                                                                                      |
+|-------------------------|----------------------------------------------------------------------------------------------|
+| u16MeshColorTempWeight   | WB (White Balance) calibration values for estimating color temperatures.                             |
+
+### HB_ISP_AWB_POS_STATUS_S
+
+**Structure Definition:**
+```c
+typedef struct HB_ISP_AWB_POS_STATUS_S {
+    uint16_t u16AwbRgPos[15];
+    uint16_t u16AwbBgPos[15];
 } ISP_AWB_POS_STATUS_S;
 ```
-【功能描述】
+**Function Description:**
 
-【成员说明】
+**Member Descriptions:**
 
-| 成员       | 含义                                        |
-|------------|---------------------------------------------|
-| u16AwBPos  | Color positions for AWB estimation process |typedef struct HB_ISP_AWB_POS_STATUS_S {
-
-        uint16_t u16AwbRgPos[15];
-
-        uint16_t u16AwbBgPos[15];
-
-} ISP_AWB_POS_STATUS_S;
-```
-【Function Description】
-
-【Member Description】
-
-| Member       | Meaning                             |
-|--------------|-------------------------------------|
-| u16AwbRgPos  | The Red-Green position values        |
-| u16AwbBgPos  | The Blue-Green position values       |
+| Member        | Meaning                                                                                           |
+|-------------|---------------------------------------------------------------------------------------------------|
+| u16AwbRgPos   | Red-Green position values                                                                             |
+| u16AwbBgPos   | Blue-Green position values                                                                            |
 
 ### HB_ISP_AWB_LIGHT_SOURCE_S
 
-【Struct Definition】
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_AWB_LIGHT_SOURCE_S {
-
-        uint16_t u16ColorTemp[7];
-
-        uint16_t u16RgPosCalc[7];
-
-        uint16_t u16BgPosCalc[7];
-
+    uint16_t u16ColorTemp[7];
+    uint16_t u16RgPosCalc[7];
+    uint16_t u16BgPosCalc[7];
 } ISP_AWB_LIGHT_SOURCE_S;
 ```
-【Function Description】
+**Function Description:**
 
-【Member Description】
+**Member Descriptions:**
 
-| Member         | Meaning                                                                    |
-|----------------|----------------------------------------------------------------------------|
-| u16ColorTemp   | A table of values to set the temperature of particular light points set     |
-| u16RgPosCalc   | LUT containing R:G calibration points of light sources used for calibration |
-| u16BgPosCalc   | LUT containing B:G calibration points of light sources used for calibration |
+| Member         | Meaning                                                                                         |
+|--------------|-------------------------------------------------------------------------------------------------|
+| u16ColorTemp   | An array of values to set the temperature for specific light sources in the calibration process.      |
+| u16RgPosCalc   | LUT (Look-up Table) containing R:G calibration points for light sources used in the calibration process. |
+| u16BgPosCalc   | LUT containing B:G calibration points for light sources used in the calibration process.               |
+
+
 
 ### HB_ISP_WDR_OFFSET_S
 
-【Struct Definition】
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_WDR_OFFSET_S {
+    uint32_t u32WdrLR;      // WDR mode long frame R offset
+    uint32_t u32WdrLGr;     // WDR mode long frame Gr offset
+    uint32_t u32WdrLGb;     // WDR mode long frame Gb offset
+    uint32_t u32WdrLB;      // WDR mode long frame B offset
+    uint32_t u32WdrMR;      // WDR mode medium frame R offset
+    uint32_t u32WdrMGr;     // WDR mode medium frame Gr offset
+    uint32_t u32WdrMGb;     // WDR mode medium frame Gb offset
+    uint32_t u32WdrMB;      // WDR mode medium frame B offset
+    uint32_t u32WdrSR;      // WDR mode short frame R offset
+    uint32_t u32WdrSGr;     // WDR mode short frame Gr offset
+    uint32_t u32WdrSGb;     // WDR mode short frame Gb offset
+    uint32_t u32WdrSB;      // WDR mode short frame B offset
+    uint32_t u32WdrVsR;     // WDR mode very short frame R offset
+    uint32_t u32WdrVsGr;    // WDR mode very short frame Gr offset
+    uint32_t u32WdrVsGb;    // WDR mode very short frame Gb offset
+    uint32_t u32WdrVsB;     // WDR mode very short frame B offset
+} ISP_WDR_OFFSET_S;
+```
+**Function Description:**
 
-        uint32_t u32WdrLR;
+This structure defines the offsets for different frame types in WDR (Wide Dynamic Range) mode.
 
-        uint32_t u32WdrLGr;【Function Description】
+**Member Descriptions:**
 
-【Member Description】
-
-| Member      | Meaning                        |
-|-------------|--------------------------------|
-| u32WdrLR    | R offset of long frame in WDR mode   |
-| u32WdrLGr   | Gr offset of long frame in WDR mode  |
-| u32WdrLGb   | Gb offset of long frame in WDR mode  |
-| u32WdrLB    | B offset of long frame in WDR mode   |
-| u32WdrMR    | R offset of middle frame in WDR mode |
-| u32WdrMGr   | Gr offset of middle frame in WDR mode|
-| u32WdrMGb   | Gb offset of middle frame in WDR mode|
-| u32WdrMB    | B offset of middle frame in WDR mode |
-| u32WdrSR    | R offset of short frame in WDR mode  |
-| u32WdrSGr   | Gr offset of short frame in WDR mode |
-| u32WdrSGb   | Gb offset of short frame in WDR mode |
-| u32WdrSB    | B offset of short frame in WDR mode  |
-| u32WdrVsR   | R offset of very short frame in WDR mode || u32WdrVsGr       | Offset of the shorter frame's Gr in WDR mode              |
-| u32WdrVsGb       | Offset of the shorter frame's Gb in WDR mode              |
-| u32WdrVsB        | Offset of the shorter frame's B in WDR mode               |
+| Member      | Meaning                                      |
+|-------------|----------------------------------------------|
+| u32WdrLR     | Long frame R offset in WDR mode               |
+| u32WdrLGr    | Long frame Green (Gr) offset in WDR mode      |
+| u32WdrLGb    | Long frame Blue (Gb) offset in WDR mode       |
+| u32WdrLB     | Long frame Blue (B) offset in WDR mode        |
+| u32WdrMR     | Medium frame R offset in WDR mode             |
+| u32WdrMGr    | Medium frame Green (Gr) offset in WDR mode    |
+| u32WdrMGb    | Medium frame Blue (Gb) offset in WDR mode     |
+| u32WdrMB     | Medium frame Blue (B) offset in WDR mode      |
+| u32WdrSR     | Short frame R offset in WDR mode              |
+| u32WdrSGr    | Short frame Green (Gr) offset in WDR mode     |
+| u32WdrSGb    | Short frame Blue (Gb) offset in WDR mode      |
+| u32WdrSB     | Short frame Blue (B) offset in WDR mode       |
+| u32WdrVsR    | Very short frame R offset in WDR mode         |
+| u32WdrVsGr   | Very short frame Green (Gr) offset in WDR mode |
+| u32WdrVsGb   | Very short frame Blue (Gb) offset in WDR mode  |
+| u32WdrVsB    | Very short frame Blue (B) offset in WDR mode   |
 
 ### HB_ISP_AF_LENS_INFO_S
 
-【Structure Definition】
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_AF_LENS_INFO_S {
-
-        uint32_t pos;
-
-        uint32_t range_low;
-
-        uint32_t range_high;
-
+    uint32_t pos;           // AF_MODE position
+    uint32_t range_low;     // AF_RANGE_LOW range lower bound
+    uint32_t range_high;    // AF_RANGE_HIGH range upper bound
 } ISP_AF_LENS_INFO_S;
 ```
-【Functional Description】
+**Function Description:**
 
-【Member Description】
+This structure holds information about the autofocus lens settings.
 
-| Member         | Meaning               |
-|----------------|-----------------------|
-| pos            | AF_MODE               |
-| range_low      | AF_RANGE_LOW          |
-| range_high     | AF_RANGE_HIGH         |
+**Member Descriptions:**
+
+| Member     | Meaning                                      |
+|------------|----------------------------------------------|
+| pos        | Position of the autofocus mode setting        |
+| range_low  | Lower bound of the autofocus range            |
+| range_high | Upper bound of the autofocus range            |
 
 ### HB_ISP_AE_ATTR_EX_S
 
-【Structure Definition】
+**Structure Definition:**
 ```c
 typedef struct HB_ISP_AE_ATTR_EX_S {
-
-        uint32_t u32Compensation;
-
-        uint32_t u32Speed;
-
-        uint32_t u32Tolerance;
-    	
-    	uint32_t u32AeTarget;
-
+    uint32_t u32Compensation;  // AE_COMPENSATION_ID, default: 128, range: [0,255]
+    uint32_t u32Speed;        // Convergence speed, frames to reach target
+    uint32_t u32Tolerance;    // Tolerance level
+    uint32_t u32AeTarget;     // AE target, input range [0,255], output range [0,256]
 } ISP_AE_ATTR_EX_S;
 ```
-【Functional Description】
+**Function Description:**
 
-【Member Description】
+This structure contains extended attributes for automatic exposure control.
 
-| Member         | Meaning                                                            |
-|----------------|--------------------------------------------------------------------|| u32Compensation | AE_COMPENSATION_ID default: 128 Range: [0,255] u32Compensation value of 128 indicates no adjustment. The adjustment unit is 1, representing a factor of 2^(1/32). |
-| u32Speed        | Convergence speed, the number of frames needed to converge to the target. A higher speed results in slower exposure changes. Speed is a filtering parameter, and changing it will affect the brightness of the image. There might be a flickering process in the image. Dynamic adjustment is not recommended. |
-| u32Tolerance    | Tolerance level                                                       |
-| u32AeTarget     | AE target. Value range for HB_ISP_SetAeAttrEx: [0,255). Value range obtained from HB_ISP_GetAeAttrEx: [0,256] |
+**Member Descriptions:**
+
+| Member        | Meaning                                                                                   |
+|---------------|-------------------------------------------------------------------------------------------|
+| u32Compensation | Compensation value (default 128, adjusts by 1/32 steps), 0-255 range, with 128 indicating no adjustment |
+| u32Speed       | Speed of convergence to the target, larger values mean slower changes in exposure           |
+| u32Tolerance   | Level of tolerance for exposure adjustments                                                      |
+| u32AeTarget    | Target exposure, input range 0-255, output range is 0-256 due to potential scaling during conversion |
 
 ### HB_AE_ZONES_WEIGHT_S
 
-【Struct Definition】
+**Structure Definition:**
 ```c
 typedef struct HB_AE_ZONES_WEIGHT_S {
-
-        uint8_t au8Np[1089];
-
+    uint8_t au8Np[1089];  // Array of AE zones weights
 } AE_ZONES_WEIGHT_S;
 ```
-【Function Description】
+**Function Description:**
 
-【Member Description】
+This structure holds the weights for each area in the exposure metering zones.
 
-| Member  | Description         |
-| ------- | ------------------- |
-| au8Np   | AE zone weight table |
+**Member Descriptions:**
 
-#### Additional Information:
+| Member  | Meaning                     |
+|---------|-----------------------------|
+| au8Np    | Array of 1089 AE zone weights |
 
-The AE zone weight table is determined by AE_ZONE_WGHT_VER and AE_ZONE_WGHT_HOR.
+**Additional Information:**
 
-The lut of AE_ZONE_WGHT_HOR and AE_ZONE_WGHT_VER in control tool have a total of 32 values, each value is 16 bits. 0 indicates that the block is not counted, 1 indicates 1 count, 2 indicates 2 counts, and so on, with 15 being a special case, indicating 16 counts.
-
-AE_ZONES_WEIGHT in control tool divides the entire image into horz_zones (33) * vore_zones (33) blocks by default, with a total of 1089 values. The values of horz_zones and vore_zones can be set through an interface. The weight value of AE_ZONES_WEIGHT = (int(ae_zone_wght_ver * ae_zone_wght_hor) / 16) - (int(ae_zone_wght_ver * ae_zone_wght_hor/16 > 1 ? 1 : 0)) (int(ae_zone_wght_ver * ae_zone_wght_hor/16 > 1, if greater than 1, take 1, otherwise take 0)).
-
-AE_ZONE_WGHT_HOR represents the weight coefficient of the vertical axis rows, and one data controls a few columns related to horz_zones. The number of columns controlled by the data = 1 + int((horz_zones - 1)/(length of AE_ZONE_WGHT_HOR lut table)). For example, if horz_zones * vore_zones is 33 * 33, then one index data of AE_ZONE_WGHT_HOR controls 2 columns, and the center position (index length of AE_ZONE_WGHT_HOR lut table / 2) of AE_ZONE_WGHT_HOR lut table controls horz_zones/2 columns. For example, if index 16 of the lut table is the center point, if the index is changed to 0, it controls the 16th and 17th columns of AE_ZONES_WEIGHT, as shown in the control tool image 1 and image 2. The center point of the AE_ZONE_WGHT_HOR lut table is calculated from the center point to both sides, for example, index 15 controls the 14th and 15th columns of AE_ZONES_WEIGHT, index 17 controls the 18th and 19th columns of AE_ZONES_WEIGHT, as shown in the image 3 and image 4. Other indexes control in a similar way. Since horz_zones could be modified, the number of columns controlled by an index is calculated through the formula, and then the corresponding relationship is obtained based on the distance to the center.
+The AE (Analog Exposure) area weighting table is determined by both AE_ZONE_WGHT_VER and AE_ZONE_WGHT_HOR. These two look-up tables (LUTs), as shown in the Control Tool screenshot, consist of 32 values each, with a 16-bit precision. The values range from 0 to 15, where 0 indicates no counting for that block, 1 counts once, 2 counts twice, and so on. The value 15 has a special meaning, which counts the block 16 times.
 
 ![image-20221118175019755](./image/isp_system/image-20221118175019755.png)
 
-Image 1
+AE_ZONES_WEIGHT, also depicted in the Control Tool, divides the entire image into horz_zones (33) by vore_zones (33) blocks, resulting in a total of 1089 values. The weight for each zone can be calculated using the formula: `(int(ae_zone_wght_ver * ae_zone_wght_hor) / 16) - (int(ae_zone_wght_ver * ae_zone_wght_hor/16 > 1 ? 1 : 0))`. If `ae_zone_wght_ver * ae_zone_wgt_hor` divided by 16 is greater than 1, it returns 1; otherwise, it returns 0.
+
+![image-20221118180830337](./image/isp_system/image-20221118180830337.png)
+
+
+AE_ZONE_WGHT_HOR represents the weight coefficient for rows along the vertical axis. A data point controls a specific number of columns based on the horz_zones, which is calculated as `1 + int((horz_zones - 1) / AE_ZONE_WGHT_HOR's LUT length)`. For example, with a 33x33 grid, a single index in AE_ZONE_WGHT_HOR would control 2 columns (since 1 + int((33 - 1) / 32) = 2). The center index (half the LUT length) of AE_ZONE_WGHT_HOR's LUT controls the middle column(s). As shown in images 1-4, the indices to the left and right of the center point determine the columns they control.
+
+![image-20221118184855810](./image/isp_system/image-20221118184855810.png)
+
+Figure 1
 
 ![image-20221118183608168](./image/isp_system/image-20221118183608168.png)
 
-Image 2
+Figure 2
 
 ![image-20221118185143974](./image/isp_system/image-20221118185143974.png)
 
-Image 3
+Figure 3
 
 ![image-20221118185333583](./image/isp_system/image-20221118185333583.png)
 
-Image 4Figure 4
+Figure 4
 
-AE_ZONE_WGHT_VER represents the weighting coefficients of the columns on the horizontal axis. The calculation formula for the row index controlled by the LUT table can be found in AE_ZONE_WGHT_HOR.
+AE_ZONE_WGHT_VER follows a similar pattern for the horizontal axis, with the LUT index controlling the row count according to the same principle as AE_ZONE_WGHT_HOR.
 
-## Reference Code
 
-For example code of the ISP image system, please refer to [sample_isp](./multimedia_samples#sample_isp).
+**Sample ISP Code Reference:**
+
+The ISP (Image Signal Processor) system code reference can be found in the [sample_isp](./multimedia_samples#sample_isp) section.

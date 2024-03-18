@@ -36,17 +36,17 @@ Similar commands include egrep, fgrep, rgrep.
 **Additional parameter explanations:**
 
 
-```shell
+
 - **-a or --text**: Do not ignore binary data.
-- **-A\<num> or --after-context=\<num>**: In addition to displaying the column that matches the pattern, display the lines after that line.
+- **-A<num\> or --after-context=<num\>**: In addition to displaying the column that matches the pattern, display the lines after that line.
 - **-b or --byte-offset**: Before displaying the line that matches the pattern, indicate the number of the first character in that line.
-- **-B\<num> or --before-context=\<num>**: In addition to displaying the column that matches the pattern, display the lines before that line.
+- **-B<num\> or --before-context=<num\>**: In addition to displaying the column that matches the pattern, display the lines before that line.
 - **-c or --count**: Count the number of matching lines.
-- **-C\<num> or --context=\<num> or -\<num>**: In addition to displaying the column that matches the pattern, display the lines before and after that line.
-- **-d \<action> or --directories=\<action>**: When searching directories instead of files, this parameter must be used, otherwise the grep command will report an error and stop.
-- **-e\<pattern> or --regexp=\<pattern>**: Specify a string as the pattern for searching file contents.
+- **-C<num\> or --context=<num\> or -<num\>**: In addition to displaying the column that matches the pattern, display the lines before and after that line.
+- **-d <action\> or --directories=<action\>**: When searching directories instead of files, this parameter must be used, otherwise the grep command will report an error and stop.
+- **-e<pattern\> or --regexp=<pattern\>**: Specify a string as the pattern for searching file contents.
 - **-E or --extended-regexp**: Use extended regular expressions as the pattern.
-- **-f\<pattern_file> or --file=\<pattern_file>**: Specify a pattern file that contains one or more pattern styles for grep to search for in file contents, with one pattern style per line.
+- **-f<pattern_file\> or --file=<pattern_file\>**: Specify a pattern file that contains one or more pattern styles for grep to search for in file contents, with one pattern style per line.
 - **-F or --fixed-regexp**: Treat the pattern as a list of fixed strings.
 - **-G or --basic-regexp**: Treat the pattern as a plain representation.
 - **-h or --no-filename**: Do not display the file name before the line that matches the pattern.
@@ -64,7 +64,7 @@ Similar commands include egrep, fgrep, rgrep.
 - **-w or --word-regexp**: Only displays whole words that match the pattern.
 - **-x --line-regexp**: Only displays whole lines that match the pattern.
 - **-y**: The same effect as specifying "-i".
-```
+
 
 
 **Regular expressions:**
@@ -151,7 +151,9 @@ Use the `-P` option to use Perl-compatible regular expressions:
 
 ```shell
 grep -P "(\d{3}\-){2}\d{4}" file_name
-```Only output the matching part in the file with the **-o** option.
+```
+
+Only output the matching part in the file with the **-o** option.
 
 ```shell
 echo this is a test line. | grep -o -E "[a-z]+\."

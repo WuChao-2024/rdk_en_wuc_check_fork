@@ -47,39 +47,65 @@ The usage process should be as follows:
 ## API Reference
 ```c
 int32_t HB_RGN_Create(RGN_HANDLE Handle, const RGN_ATTR_S *pstRegion);
-```### HB_RGN_Destory
-【Function declaration】
-```c
 int32_t HB_RGN_Destory(RGN_HANDLE Handle);
+int32_t HB_RGN_GetAttr(RGN_HANDLE Handle, RGN_ATTR_S *pstRegion);
+int32_t HB_RGN_SetAttr(RGN_HANDLE Handle, const RGN_ATTR_S *pstRegion);
+int32_t HB_RGN_SetBitMap(RGN_HANDLE Handle, const RGN_BITMAP_S *pstBitmapAttr);
+int32_t HB_RGN_AttachToChn(RGN_HANDLE Handle, const RGN_CHN_S *pstChn, const RGN_CHN_ATTR_S *pstChnAttr);
+int32_t HB_RGN_DetachFromChn(RGN_HANDLE Handle, const RGN_CHN_S *pstChn);
+int32_t HB_RGN_SetDisplayAttr(RGN_HANDLE Handle, const RGN_CHN_S *pstChn, const RGN_CHN_ATTR_S *pstChnAttr);
+int32_t HB_RGN_GetDisplayAttr(RGN_HANDLE Handle, const RGN_CHN_S *pstChn, RGN_CHN_ATTR_S *pstChnAttr);
+int32_t HB_RGN_GetCanvasInfo(RGN_HANDLE Handle, RGN_CANVAS_S *pstCanvasInfo);
+int32_t HB_RGN_UpdateCanvas(RGN_HANDLE Handle);
+int32_t HB_RGN_DrawWord(RGN_HANDLE Handle, const RGN_DRAW_WORD_S *pstRgnDrawWord);
+int32_t HB_RGN_DrawLine(RGN_HANDLE Handle, const RGN_DRAW_LINE_S *pstRgnDrawLine);
+int32_t HB_RGN_DrawLineArray(RGN_HANDLE Handle,const RGN_DRAW_LINE_S astRgnDrawLine[],uint32_t u32ArraySize);
+int32_t HB_RGN_BatchBegin(RGN_HANDLEGROUP *pu32Group, uint32_t u32Num, const RGN_HANDLE handle[]);
+int32_t HB_RGN_BatchEnd(RGN_HANDLEGROUP u32Group);
+int32_t HB_RGN_SetColorMap(const RGN_CHN_S *pstChn, uint32_t color_map[15]);
+int32_t HB_RGN_SetSta(const RGN_CHN_S *pstChn, uint8_t astStaLevel[3], RGN_STA_S astStaAttr[8]);
+int32_t HB_RGN_GetSta(const RGN_CHN_S *pstChn, uint16_t astStaValue[8][4]);
+int32_t HB_RGN_AddToYUV(RGN_HANDLE Handle, hb_vio_buffer_t *vio_buffer, const RGN_CHN_ATTR_S *pstChnAttr);
+int32_t HB_RGN_SetDisplayLevel(RGN_HANDLE Handle, const RGN_CHN_S *pstChn, uint32_t osd_level);
 ```
-【Description】
-> Destroy a region;
 
-【Parameter description】
 
-|   Member   |            Description           |
-| :--------: | :------------------------------: |
-|   Handle   |    Region handle number. Range: [0, RGN_HANDLE_MAX). |
- 
-【Return value】
+### HB_RGN_Create/HB_RGN_Destroy
+**Function Declaration**
+```c
+int32_t HB_RGN_Create(RGN_HANDLE Handle, const RGN_ATTR_S *pstRegion);
+int32_t HB_RGN_Destroy(RGN_HANDLE Handle);
+```
+**Function Description**
+> Create or destroy a region.
 
-|  Return value  |           Description          |
-| :------------: | :----------------------------: |
-|       0        |            Success             |
-|     Non-zero   |    Failure, see error codes.   |
+**Parameter Descriptions**
 
-【Note】
-1. The handle is specified by the user and has the same meaning as the ID number. The handle number needs to be within the specified range;
-2. Does not support duplicate creation;
-3. The region attribute cannot be empty and the attribute needs to be valid.4. When creating a Cover type region, you only need to specify the region type. The region properties are specified when calling HB_RGN_AttachToChn;
-5. When creating a region, maximum and minimum width and height checks will be performed. For specific pixel formats, please refer to RGN_PIXEL_FORMAT_E;
+|   Member    |                   Meaning                    |
+| :---------: | :----------------------------------------: |
+|  Handle     | Region handle number. Range: [0, RGN_HANDLE_MAX). |
+| pstRegion   | Pointer to region attributes.                |
 
-HB_RGN_Destory:
+**Return Values**
+
+| Return Value |                  Description                 |
+| :---------: | :------------------------------------------: |
+|      0      | Successfully created or destroyed.            |
+| Non-zero    | Failed, refer to error codes.                |
+
+**Notes for HB_RGN_Create:**
+1. The handle is specified by the user and acts as an ID, with handle numbers within the specified range;
+2. Duplicate creation is not supported;
+3. Region attributes must not be empty and must be valid;
+4. For Cover type regions, specify only the region type; attributes are set during HB_RGN_AttachToChn call;
+5. Creation checks for maximum and minimum dimensions; supported pixel formats are detailed in RGN_PIXEL_FORMAT_E;
+
+**Notes for HB_RGN_Destroy:**
 1. The region must have been created;
-2. Before calling this interface, the region needs to be detached from the channel by calling the HB_RGN_DetachFromChn interface;
-3. During the call to this interface, it is not allowed to simultaneously call the HB_RGN_SetAttr and HB_RGN_SetBitMap interfaces;
+2. Detach from channel using HB_RGN_DetachFromChn before calling this interface;
+3. During the call, no other interfaces like HB_RGN_SetAttr or HB_RGN_SetBitMap should be used simultaneously.
 
-[Reference Code]
+**Example Code**
 ```c
     RGN_HANDLE handle = 0;
     RGN_ATTR_S stRegion;
@@ -110,6 +136,8 @@ HB_RGN_Destory:
         return ret;
     }
 ```
+
+
 
 ### HB_RGN_GetAttr/HB_RGN_SetAttr
 [Function Declaration]
@@ -217,25 +245,26 @@ int32_t HB_RGN_SetBitMap(RGN_HANDLE Handle, const RGN_BITMAP_S *pstBitmapAttr);
     stDrawLine[0].stSize = stBitmapAttr.stSize;
     stDrawLine[0].u32Color = FONT_COLOR_WHITE;
     stDrawLine[0].u32Thick = 4;
-```memcpy(&stDrawLine[1], &stDrawLine[0], sizeof(RGN_DRAW_LINE_S));
-stDrawLine[1].stEndPoint.u32Y = 200;
+    memcpy(&stDrawLine[1], &stDrawLine[0], sizeof(RGN_DRAW_LINE_S));
+    stDrawLine[1].stEndPoint.u32Y = 200;
 
-ret = HB_RGN_DrawWord(handle, &stDrawWord);
-if (ret < 0) {
-    return ret;
-}
-ret = HB_RGN_DrawLine(handle, &stDrawLine[0]);
-if (ret < 0) {
-    return ret;
-}
-ret = HB_RGN_DrawLineArray(handle, stDrawLine, 2);
-if (ret < 0) {
-    return ret;
-}
-ret = HB_RGN_SetBitMap(handle, &stBitmapAttr);
-if (ret < 0) {
-    return ret;
-}
+    ret = HB_RGN_DrawWord(handle, &stDrawWord);
+    if (ret < 0) {
+        return ret;
+    }
+    ret = HB_RGN_DrawLine(handle, &stDrawLine[0]);
+    if (ret < 0) {
+        return ret;
+    }
+    ret = HB_RGN_DrawLineArray(handle, stDrawLine, 2);
+    if (ret < 0) {
+        return ret;
+    }
+    ret = HB_RGN_SetBitMap(handle, &stBitmapAttr);
+    if (ret < 0) {
+        return ret;
+    }
+```
 
 ### HB_RGN_AttachToChn/HB_RGN_DetachFromChn
 【Function Declaration】
@@ -314,7 +343,7 @@ HB_RGN_DetachFromChn:
 【Function Declaration】
 ```c
 int32_t HB_RGN_SetDisplayAttr(RGN_HANDLE Handle, const RGN_CHN_S *pstChn, const RGN_CHN_ATTR_S *pstChnAttr);
-```int32_t HB_RGN_GetDisplayAttr(RGN_HANDLE Handle, const RGN_CHN_S *pstChn, RGN_CHN_ATTR_S *pstChnAttr);
+int32_t HB_RGN_GetDisplayAttr(RGN_HANDLE Handle, const RGN_CHN_S *pstChn, RGN_CHN_ATTR_S *pstChnAttr);
 ```
 【Function Description】
 > Get or set the display attribute of the region on the channel.
@@ -509,7 +538,24 @@ int32_t HB_RGN_BatchEnd(RGN_HANDLEGROUP u32Group);
         return ret;
     }
     ret = HB_RGN_GetCanvasInfo(handle_batch[0], &stCanvasInfo);
-```### HB_RGN_SetColorMap
+    if (ret < 0) {
+        return ret;
+    }
+    ret = HB_RGN_GetCanvasInfo(handle_batch[1], &stCanvasInfo);
+    if (ret < 0) {
+        return ret;
+    }
+    ret = HB_RGN_GetCanvasInfo(handle_batch[2], &stCanvasInfo);
+    if (ret < 0) {
+        return ret;
+    }
+    ret = HB_RGN_BatchEnd(group);
+    if (ret < 0) {
+        return ret;
+}
+```
+
+### HB_RGN_SetColorMap
 
 【Function Declaration】
 ```c
@@ -544,23 +590,26 @@ int32_t HB_RGN_SetColorMap(const RGN_CHN_S *pstChn, uint32_t aColorMap[15]);
 ```c
     RGN_CHN_S stChn;
     stChn.s32PipelineId = 0;
-```stChn.enChnId = CHN_US;
-uint32_t aColorMap[15] = {0xFFFFFF, 0x000000, 0x808000, 0x00BFFF, 0x00FF00,
-							0xFFFF00, 0x8B4513, 0xFF8C00, 0x800080, 0xFFC0CB,
-							0xFF0000, 0x98F898, 0x00008B, 0x006400, 0x8B0000};
-int ret;
+    stChn.enChnId = CHN_US;
+    uint32_t aColorMap[15] = {0xFFFFFF, 0x000000, 0x808000, 0x00BFFF, 0x00FF00,
+                            0xFFFF00, 0x8B4513, 0xFF8C00, 0x800080, 0xFFC0CB,
+                            0xFF0000, 0x98F898, 0x00008B, 0x006400, 0x8B0000};
+    int ret;
 
-ret = HB_RGN_SetColorMap(&stChn, aColorMap);
-if (ret < 0) {
-    return ret;
-}
+    ret = HB_RGN_SetColorMap(&stChn, aColorMap);
+    if (ret < 0) {
+        return ret;
+    }
+```
 
 ### HB_RGN_SetSta/HB_RGN_GetSta
+
 【Function Declaration】
 ```c
 int32_t HB_RGN_SetSta(const RGN_CHN_S *pstChn, uint8_t astStaLevel[3], RGN_STA_S astStaAttr[8]);
 int32_t HB_RGN_GetSta(const RGN_CHN_S *pstChn, uint16_t astStaValue[8][4]);
 ```
+
 【Description】
 > Set up to 8 areas and obtain the sum of brightness of the specified region. The region needs to be attached to the channel for use;
 
@@ -593,7 +642,7 @@ stChn.enChnId = CHN_US;
 uint16_t aOsdStaBinValue[8][4];
 RGN_STA_S aOsdSta[8];
 uint8_t aStaLevel[3];
-```int ret;
+int ret;
 aStaLevel[0] = 60;
 aStaLevel[1] = 120;
 aStaLevel[2] = 180;
@@ -698,7 +747,9 @@ int32_t HB_RGN_SetDisplayLevel(RGN_HANDLE Handle, const RGN_CHN_S *pstChn, uint3
 4. Different regions on the same channel can have different display levels.
 
 【Reference Code】
-> Please refer to examples of HB_RGN_AttachToChn/HB_RGN_DetachFromChn.## Data Structure
+> Please refer to examples of HB_RGN_AttachToChn/HB_RGN_DetachFromChn.
+
+## Data Structure
 ### RGN_SIZE_S
 【Structure Definition】
 ```c
@@ -711,6 +762,7 @@ typedef struct HB_RGN_SIZE_ATTR_S {
 > Defines the structure for size information.
 
 【Member Description】
+
 | Member    | Meaning |
 | --------- | ------- |
 | u32Width  | Width   |
@@ -728,6 +780,7 @@ typedef struct HB_RGN_POINT_ATTR_S {
 > Defines the structure for coordinate information.
 
 【Member Description】
+
 | Member | Meaning  |
 | ------ | -------- |
 | u32X   | X-axis   |
@@ -792,7 +845,8 @@ typedef struct HB_RGN_ATTR_S {
 | stOverlayAttr | Attributes of the overlay region |
 
 ### RGN_CHN_S
-【Structure Definition】```c
+【Structure Definition】
+```c
 typedef struct HB_RGN_CHN_S
 {
     uint32_t s32PipelineId;
@@ -841,7 +895,9 @@ typedef struct HB_RGN_COVER_CHN_ATTR_S {
 |   Member   |                 Meaning                 |
 | :--------: | :--------------------------------------: |
 |   stRect   | Region position, width and height, with the minimum width of 32 and the minimum height of 2 |
-| u32Color   |              Region color                |### RGN_CHN_U
+| u32Color   |              Region color                |
+
+### RGN_CHN_U
 【Structure Definition】
 ```c
 typedef union HB_RGN_CHN_ATTR_U {
@@ -881,87 +937,204 @@ typedef struct HB_RGN_CANVAS_INFO_S {
 | enPixelFmt | Pixel format |
 
 
+
 ### RGN_CHN_ATTR_S
-【Structure Definition】
+**Structure Definition**
 ```c
 typedef struct HB_RGN_CHN_ATTR_S {
-    bool bShow;
-    bool bInvertEn;
-    RGN_CHN_U unChnAttr;
+    bool bShow;                     // Region visibility
+    bool bInvertEn;                 // Invert color enable
+    RGN_CHN_U unChnAttr;            // Channel display attribute
 } RGN_CHN_ATTR_S;
 ```
-【Function Description】
-> Define a structure for the display attributes of the region channel.
+**Function Description**
+> Defines the structure for region channel display attributes.
 
-【Member Description】| enFontColor |           字体颜色            |
-| enFontSize  |            字体大小            |
-|  bFlushEn   | 是否立即刷新绘制的文字到目标地址 |
+**Member Descriptions**
 
-### RGN_MASK_S
-【结构定义】
+|   Member    |       Meaning       |
+| :---------: | :------------------: |
+|   bShow    | Whether to show the region |
+| bInvertEn | Enable or disable inversion |
+| unChnAttr | Attributes for channel display |
+
+### RGN_BITMAP_S
+**Structure Definition**
 ```c
-typedef struct HB_RGN_MASK_PARAM_S {
-    void *pAddr;
-    RGN_SIZE_S stSize;
-    RGN_RECT_S stRect;
-} RGN_MASK_S;
+typedef struct HB_RGN_BITMAP_ATTR_S {
+    RGN_PIXEL_FORMAT_E enPixelFormat; // Pixel format
+    RGN_SIZE_S stSize;               // Bitmap size
+    void *pAddr;                     // Bitmap address
+} RGN_BITMAP_S;
 ```
-【功能描述】
-> 定义区域遮罩参数的结构体
+**Function Description**
+> Defines the structure for bitmap attributes.
 
-【成员说明】
+**Member Descriptions**
 
-|   成员    |      含义      |
-| :-------: | :------------: |
-|  pAddr    | 遮罩目标地址  |
-|  stSize   |  目标地址尺寸  |
-|  stRect   | 遮罩的区域位置 || Member |      Meaning       |
-| :-----: | :----------------: |
-| u8StaEn |    Enable flag     |
-| u16StartX |     Start X coordinate    |
-| u16StartY |     Start Y coordinate    |
-| u16Width |     Width    |
-| u16Height |    Height   || CHN_DS1 |                        DS1通道                         |
-| CHN_DS2 |                        DS2通道                         |
-| CHN_DS3 |                        DS3通道                         |
-| CHN_DS4 |                        DS4通道                         |
-|  CHN_GRP  |                      组通道                      |
-| CHANNEL_MAX_NUM |                    最大通道数                   ||     CHN_DS1     |                        DS1 Channel                       |
-|     CHN_DS2     |                        DS2 Channel                       |
-|     CHN_DS3     |                        DS3 Channel                       |
-|     CHN_DS4     |                        DS4 Channel                       |
-|     CHN_GRP     | GROUP Channel, if using this channel, because the group operation is done before entering the IPU, if the VPS has done zoom-in operation, the OSD will also follow the zoom-in |
-| CHANNEL_MAX_NUM |                      Number of channels                   |
+|     Member      |              Meaning              |
+| :-----------: | :--------------------------------: |
+| enPixelFormat | Bitmap pixel format             |
+|    stSize     | Size of the bitmap               |
+|     pAddr     | Address of the bitmap             |
+
+### RGN_DRAW_WORD_S
+**Structure Definition**
+```c
+typedef struct HB_RGN_DRAW_WORD_PARAM_S {
+    void *pAddr;                   // Destination address for drawing
+    RGN_SIZE_S stSize;             // Size of the destination address
+    RGN_POINT_S stPoint;           // Position of the text in the bitmap
+    uint8_t *pu8Str;               // Pointer to the string (supporting GBK characters only)
+    RGN_FONT_COLOR_E enFontColor;  // Font color
+    RGN_FONT_SIZE_E enFontSize;    // Font size
+    bool bFlushEn;                 // Flush the current address before drawing
+} RGN_DRAW_WORD_S;
+```
+**Function Description**
+> Defines the structure for parameters used to draw text.
+
+**Member Descriptions**
+
+|    Member     |                     Meaning                     |
+| :---------: | :------------------------------------------------: |
+|    pAddr    | Address where the text will be drawn to          |
+|   stSize    | Size of the destination area for the text        |
+|   stPoint   | Position of the text within the bitmap           |
+|   pu8Str    | Pointer to the string (limited to GBK encoding) |
+| enFontColor | Color of the font                                |
+| enFontSize  | Size of the font                                 |
+|  bFlushEn   | Clear the current address before drawing           |
+
+### RGN_DRAW_LINE_S
+**Structure Definition**
+```c
+typedef struct HB_RGN_DRAW_LINE_PARAM_S {
+    void *pAddr;                      // Destination address for drawing lines
+    RGN_SIZE_S stSize;                // Size of the destination address
+    RGN_POINT_S stStartPoint;         // Starting point of the line
+    RGN_POINT_S stEndPoint;           // Ending point of the line
+    uint32_t u32Thick;                // Thickness of the line
+    uint32_t u32Color;                // Color of the line
+    bool bFlushEn;                    // Flush the current address before drawing
+} RGN_DRAW_LINE_S;
+```
+**Function Description**
+> Defines the structure for parameters used to draw lines.
+
+**Member Descriptions**
+
+|     Member     |            Meaning            |
+| :----------: | :----------------------------: |
+|    pAddr     | Address for drawing the line |
+|    stSize    | Size of the destination area |
+| stStartPoint | Start position of the line  |
+|  stEndPoint  | End position of the line   |
+|   u32Thick   | Width of the line           |
+|   u32Color   | Color of the line           |
+|   bFlushEn   | Clear the current address |
+
+(When using batch drawing, only the `bFlushEn` property of the first structure in the array is effective)
+
+### RGN_STA_S
+**Structure Definition**
+```c
+typedef struct HB_RGN_STA_ATTR_S {
+    uint8_t u8StaEn;           // Enable flag for the region
+    uint16_t u16StartX;        // X coordinate of the region start
+    uint16_t u16StartY;        // Y coordinate of the region start
+    uint16_t u16Width;         // Width of the region (2-255)
+    uint16_t u16Height;        // Height of the region (2-255)
+} RGN_STA_S;
+```
+**Function Description**
+> Defines the brightness statistics region attributes.
+
+**Member Descriptions**
+
+|   Member    |              Meaning               |
+| :-------: | :---------------------------------: |
+|  u8StaEn  | Enable flag for the region          |
+| u16StartX | X-coordinate of the region start |
+| u16StartY | Y-coordinate of the region start |
+| u16Width  | Width of the region (2-255)        |
+| u16Height | Height of the region (2-255)       |
+
+### RGN_TYPE_E
+**Structure Definition**
+```c
+typedef enum HB_RGN_TYPE_PARAM_E {
+    OVERLAY_RGN, // Overlay region type
+    COVER_RGN   // Cover region type
+} RGN_TYPE_E;
+```
+**Function Description**
+> Defines the region type.
+
+**Member Descriptions**
+
+|    Member     |        Meaning         |
+| :---------: | :------------------: |
+| OVERLAY_RGN | Type for overlay regions |
+|  COVER_RGN  | Type for cover regions  |
+
+### RGN_CHN_ID_E
+**Structure Definition**
+```c
+typedef enum HB_RGN_CHN_ID_ATTR_E {
+    CHN_US,      // US channel
+    CHN_DS0,     // DS0 channel
+    CHN_DS1,     // DS1 channel
+    CHN_DS2,     // DS2 channel
+    CHN_DS3,     // DS3 channel
+    CHN_DS4,     // DS4 channel
+    CHN_GRP,     // GROUP channel (automatically scaled if VPS performs zoom)
+    CHANNEL_MAX_NUM
+} RGN_CHN_ID_E;
+```
+**Function Description**
+> Defines the channel ID.
+
+**Member Descriptions**
+
+|      Member       |                             Meaning                             |
+| :-------------: | :----------------------------------------------------------: |
+|     CHN_US      |                            US channel                            |
+|     CHN_DS0     |                           DS0 channel                            |
+|     CHN_DS1     |                           DS1 channel                            |
+|     CHN_DS2     |                           DS2 channel                            |
+|     CHN_DS3     |                           DS3 channel                            |
+|     CHN_DS4     |                           DS4 channel                            |
+|     CHN_GRP     | GROUP channel; scaled if VPS performs zoom before IPU |
+| CHANNEL_MAX_NUM |                           Maximum number of channels                           |
 
 ### RGN_FONT_SIZE_E
-【Structure Definition】
+**Structure Definition**
 ```c
-typedef enum HB_RGN_FONT_SIZE_ATTR_E
-{
-    FONT_SIZE_SMALL = 1,
+typedef enum HB_RGN_FONT_SIZE_ATTR_E {
+    FONT_SIZE_SMALL = 1, // Small font, 16x16
     FONT_SIZE_MEDIUM,
     FONT_SIZE_LARGE,
     FONT_SIZE_EXTRA_LARGE
-}RGN_FONT_SIZE_E;
+} RGN_FONT_SIZE_E;
 ```
-【Function Description】
-> Defines the font sizes
+**Function Description**
+> Defines font sizes.
 
-【Member Description】
+**Member Descriptions**
 
-|       Member       |        Description        |
-| :----------------: | :-----------------------: |
-|  FONT_SIZE_SMALL   |     Small font, 16*16     |
-|  FONT_SIZE_MEDIUM  |     Medium font, 32*32    |
-|  FONT_SIZE_LARGE   |     Large font, 48*48     |
-| FONT_SIZE_EXTRA_LARGE  | Extra large font, 64*64   |
+|         Member          |       Meaning        |
+| :-------------------: | :---------------: |
+|    FONT_SIZE_SMALL    |  Small font, 16x16  |
+|   FONT_SIZE_MEDIUM    |  Medium font, 32x32  |
+|    FONT_SIZE_LARGE    |  Large font, 48x48  |
+| FONT_SIZE_EXTRA_LARGE | Extra large font, 64x64 |
 
 ### RGN_FONT_COLOR_E
-【Structure Definition】
+**Structure Definition**
 ```c
-typedef enum HB_RGN_FONT_COLOR_ATTR_E
-{
-    FONT_COLOR_WHITE = 1,
+typedef enum HB_RGN_FONT_COLOR_ATTR_E {
+    FONT_COLOR_WHITE = 1, // White color
     FONT_COLOR_BLACK,
     FONT_COLOR_GREY,
     FONT_COLOR_BLUE,
@@ -976,32 +1149,29 @@ typedef enum HB_RGN_FONT_COLOR_ATTR_E
     FONT_COLOR_DARKBLUE,
     FONT_COLOR_DARKGREEN,
     FONT_COLOR_DARKRED,
-```FONT_KEY_COLOR = 16
-}RGN_FONT_COLOR_E;
+    FONT_KEY_COLOR = 16 // Do not overlay, use original image color
+} RGN_FONT_COLOR_E;
 ```
-【Function Description】
-> Define font colors. This enumeration becomes invalid after calling HB_RGN_SetColorMap.
+**Function Description**
+> Defines font colors; this enumeration becomes invalid after calling HB_RGN_SetColorMap;
 
-【Member Description】
+**Member Descriptions**
 
-|        Member        |       Meaning       |
-| :------------------: | :-----------------: |
-|  FONT_COLOR_WHITE    |        White        |
-|  FONT_COLOR_BLACK    |        Black        |
-|  FONT_COLOR_GREY     |         Grey        |
-|  FONT_COLOR_BLUE     |         Blue        |
-|  FONT_COLOR_GREEN    |        Green        |
-|  FONT_COLOR_YELLOW   |        Yellow       |
-|  FONT_COLOR_BROWN    |         Brown       |
-|  FONT_COLOR_ORANGE   |      Orange         |
-|  FONT_COLOR_PURPLE   |        Purple       |
-|  FONT_COLOR_PINK     |      Pink           |
-|  FONT_COLOR_RED      |        Red          |
-|  FONT_COLOR_CYAN     |         Cyan        |
-| FONT_COLOR_DARKBLUE  |      Dark blue      |
-| FONT_COLOR_DARKGREEN |     Dark green      |
-| FONT_COLOR_DARKRED   |      Dark red       |
-|   FONT_KEY_COLOR     | Not superimposed, use the original color of the image |
+|         Member         |         Meaning         |
+| :------------------: | :------------------: |
+|   FONT_COLOR_WHITE   |         White         |
+|   FONT_COLOR_BLACK   |         Black         |
+|   FONT_COLOR_GREY    |         Grey         |
+|   FONT_COLOR_BLUE    |         Blue         |
+|   FONT_COLOR_GREEN   |         Green         |
+|  FONT_COLOR_YELLOW   |         Yellow         |
+|   FONT_COLOR_BROWN   |         Brown         |
+|  FONT_COLOR_ORANGE   |        Orange        |
+|  FONT_COLOR_PURPLE   |         Purple        |
+|   FONT_COLOR_PINK    |        Pink         |
+|    FONT_COLOR_RED    |         Red
+
+
 
 ### RGN_PIXEL_FORMAT_E
 【Structure Definition】
@@ -1026,6 +1196,9 @@ typedef enum HB_PIXEL_FORMAT_ATTR_E
 【Structure Definition】
 ```c
 typedef int32_t RGN_HANDLE;
+```
+
+
 【Function Description】
 > Define the region handle.
 

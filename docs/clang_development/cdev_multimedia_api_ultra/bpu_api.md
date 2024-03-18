@@ -15,56 +15,95 @@ The `BPU` API provides the following interfaces:
 
 ## sp_init_bpu_module
 
-**[Function Prototype]**
+**【Function Prototype】**
 
 `bpu_module *sp_init_bpu_module(const char *model_file_name)`
 
-**[Description]**
+**【Description】**
 
 Open the algorithm model specified by `model_file_name` and initialize an inference task.
 
-**[Parameters]**
+**【Parameters】**
 
 - `model_file_name`: The algorithm model file, which needs to be converted by Horizon AI algorithm toolchain or trained to obtain a fixed-point model.
 
-**[Return Type]**
+**【Return Type】**
 
 AI algorithm inference task object.
 
 ## sp_bpu_start_predict
 
-**[Function Prototype]**
+**【Function Prototype】**
 
 `int32_t sp_bpu_start_predict(bpu_module *bpu_handle, char *addr)`
 
-**[Description]**
+**【Function Description】**
 
-Pass in the image data to complete AI algorithm inference and return the algorithm result.
+Inputs image data to complete AI algorithm inference and returns the algorithm results.
 
-**[Parameters]**
+**【Parameters】**
 
-- `bpu_handle`: The algorithm inference task object.
-- `addr`: Input image data.
-```## sp_release_bpu_module  
+- `bpu_handle`: Object of the algorithm inference task
+- `addr`: Input for image data
 
-**【Function Prototype】**  
+**【Return Type】**
+
+None.
+
+
+## sp_init_bpu_tensors
+
+**【Function Prototype】**
+
+`int32_t sp_init_bpu_tensors(bpu_module *bpu_handle, hbDNNTensor *output_tensors)`
+
+**【Function Description】**
+
+Initializes and allocates memory for the input `tensor`.
+
+**【Parameters】**
+
+- `bpu_handle`: Object of the algorithm inference task
+- `output_tensors`: Address of the `tensor`
+
+**【Return Type】**
+
+None.
+
+
+## sp_deinit_bpu_tensor
+
+**【Function Prototype】**
+
+`int32_t sp_deinit_bpu_tensor(hbDNNTensor *tensor, int32_t len)`
+
+**【Function Description】**
+
+Releases and recycles memory for the input `tensor`.
+
+**【Parameters】**
+
+- `tensor`: Pointer to the `tensor` to be released
+- `len`: Length or size of the `tensor` (apparent inconsistency with parameter name)
+
+**【Return Type】**
+
+None.
+
+
+## sp_release_bpu_module
+
+**【Function Prototype】**
 
 `int32_t sp_release_bpu_module(bpu_module *bpu_handle)`
 
-**【Description】**  
-Release the BPU module and free the memory.
+**【Function Description】**
+
+Closes the algorithm inference task.
 
 **【Parameters】**
 
-- `bpu_handle`: The handle of the inference task object.
-
-**【Return Type】** 
-
-None.Turn off algorithm inference task.
-
-**【Parameters】**
-
-- `bpu_handle`: Algorithm inference task object
+- `bpu_handle`: Object of the algorithm inference task
 
 **【Return Type】**
 

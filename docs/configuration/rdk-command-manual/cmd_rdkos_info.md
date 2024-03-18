@@ -47,22 +47,24 @@ Partial output is as follows:
                 cpu0: 240000    1500000 1500000
                 cpu1: 240000    1500000 1500000
                 cpu2: 240000    1500000 1500000
-                cpu3: 240000    1500000 1500000bpu status信息：
+                cpu3: 240000    1500000 1500000
+        bpu status information---->
+                     min        cur             max             ratio
+                bpu0: 400000000 1000000000      1000000000      0
+                bpu1: 400000000 1000000000      1000000000      0
 
-min               cur               max              ratio
-bpu0: 400000000 1000000000      1000000000      0
-bpu1: 400000000 1000000000      1000000000      0
+[Total Memory]:         1.9Gi
+[Used Memory]:          644Mi
+[Free Memory]:          986Mi
+[ION Memory Size]:      672MB
 
-[内存总大小]:             1.9Gi
-[已使用内存]:             644Mi
-[可用内存]:               986Mi
-[ION内存大小]:          672MB
 
-[RDK操作系统版本]:
+[RDK OS Version]:
         2.1.0
 
-[RDK内核版本]:
+[RDK Kernel Version]:
         Linux ubuntu 4.14.87 #3 SMP PREEMPT Sun Nov 26 18:38:22 CST 2023 aarch64 aarch64 aarch64 GNU/Linux
 
-[RDK Miniboot版本]:
+[RDK Miniboot Version]:
         U-Boot 2018.09-00012-g5e7d58f7-dirty (Nov 26 2023 - 18:47:14 +0800)
+```

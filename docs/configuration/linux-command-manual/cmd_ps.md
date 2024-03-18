@@ -95,7 +95,8 @@ sunrise@ubuntu:~$ ps -l
 F S   UID     PID    PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
 4 S  1000    4295    4294  8  80   0 -  3304 do_wai pts/0    00:00:00 bash
 0 R  1000    4304    4295  0  80   0 -  3504 -      pts/0    00:00:00 ps
-```- `F`: represents the flag of this program, where 4 indicates that the user is a super user.
+```
+- `F`: represents the flag of this program, where 4 indicates that the user is a super user.
 - `S`: represents the STAT (state) of this program, and the meanings of different STATs will be explained below.
   - `S`: Sleeping - the process is running.
   - `R`: Running - the process is running or ready to run.

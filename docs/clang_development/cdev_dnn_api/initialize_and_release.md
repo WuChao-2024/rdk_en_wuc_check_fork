@@ -46,7 +46,9 @@ Create and initialize ``packedDNNHandle`` from DDR. The returned ``packedDNNHand
 
 - Return ``0`` if the API is executed successfully, otherwise execution fails.
 
-## hbDNNRelease()**【Function Prototype】**
+## hbDNNRelease()
+
+**【Function Prototype】**
 
 ``int32_t hbDNNRelease(hbPackedDNNHandle_t packedDNNHandle)``
 

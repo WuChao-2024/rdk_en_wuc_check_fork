@@ -46,7 +46,12 @@ Enter the source code directory and execute the following command to compile and
 $ cd sample/get_sif_data
 $ make clean # Clean the source code to maintain a clean code environment
 $ make
-```#### Adding a new sensor
+··· ··· # log
+$ ls
+get_sif_data  main.c  main.o  Makefile  module.c  module.h  module.o  Readme.md  sensor_handle.c  sensor_handle.h  sensor_handle.o  sensors  sensors.lds
+```
+
+#### Adding a new sensor
 
 If there is a new sensor that needs to be debugged, please refer to the source code files in the "sensors" directory and add a new sensor configuration accordingly.
 
@@ -90,12 +95,56 @@ static int sensor_probe(void)
                 printf("sensor lists is full\n");
                 return -1;
         }
+        strncpy(sensor_lists[i].sensor_tag, SENSOR_TAG, 31 > strlen(SENSOR_TAG) ? strlen(SENSOR_TAG) : 31);
+        sensor_lists[i].func = set_sensor_param;
+        return 0;
+}
+
+/* Register sensor's module entry, which the main program will use when traversing the sensor */
+SENSOR_MODULE_INSTALL(sensor_probe);
+```
+### Function Usage
+
+#### Hardware Connection
+
+The RDK X3 development board connects to the `Sensor` module through the `mipi host` interface. Ensure that you correctly connect the `Sensor` module according to the model being debugged.
+
+#### Program Deployment
+
+After following the compilation process above to generate `get_sif_data`, execute the program and, based on the prompt, select the category of the sensor currently connected to the development board. For instance, if a `F37 sensor` is connected, choose option 1.
+
+Upon successful initialization, the program automatically captures and saves the first frame image (`pipe0_plane0_1920x1080_frame_001.raw`) in the directory where the program runs (you can view this by executing `ls -l pipe0_plane0_1920x1080_frame_*` after exiting the program) and prints out available user commands. The execution process looks like:
+
+```bash
+chmod +x get_sif_data
+./get_sif_data
+
+Horizon Robotics Sensor Test Tools V1.0
+
+********************** Sensor Lists *************************
+        0 -- IMX415
+        1 -- F37
+*************************************************************
+
+Please select :1 # Select the sensor
+... ... # A series of initialization logs
+normal pipe_id (0)type(9)frame_id(1)buf_index(0)w x h(1920x1080) data_type 9 img_format 0
+stride_size(2400) w x h1920 x 1080  size 2592000
+pipe(0)dump normal raw frame id(1),plane(1)size(2592000) # Captures the first frame
+filedump(pipe0_plane0_1920x1080_frame_001.raw, size(2592000) is successed
+time cost 85 ms 
+dumpToFile raw cost time 85 ms********************** Command Lists *************************
+  q     -- quit
+  g     -- get one frame
+  l     -- get a set frames
+  h     -- print help message
+
+Command: 
 ```
 
-... ...· `q`：退出程序
-· `g`：获取一帧图像并保存
-· `l`：获取多帧图像并保存
-· `h`：打印帮助信息- g: Get one frame of image, supports inputting multiple `g` to continuously acquire images, for example, input `gggg`.
+**Command Explanations:**
+
+- **g:** Acquires a single frame of the image; supports multiple consecutive acquisitions by inputting several `g`s, e.g., `gggg`.
 
 ```bash
 Command: g
@@ -107,7 +156,7 @@ time cost 67 ms
 dumpToFile raw cost time 67 ms
 ```
 
-- l: Getting 12 frames of continuous images, equivalent to inputting 12 `g`s.
+- **l:** Continuously acquires 12 frames, equivalent to entering 12 `g`s.
 
 ```bash
 Command: l
@@ -116,7 +165,7 @@ stride_size(2400) w x h1920 x 1080  size 2592000
 pipe(0)dump normal raw frame id(4588),plane(1)size(2592000)
 filedump(pipe0_plane0_1920x1080_frame_4588.raw, size(2592000) is successed
 time cost 56 ms 
-... ... # Continuous printout of frame data acquisition
+... ... # Continuous output for acquiring frame data
 dumpToFile raw cost time 56 msnormal pipe_id (0)type(9)frame_id(4609)buf_index(7)w x h(1920x1080) data_type 9 img_format 0
 stride_size(2400) w x h1920 x 1080  size 2592000
 pipe(0)dump normal raw frame id(4609),plane(1)size(2592000)
@@ -125,7 +174,8 @@ time cost 57 ms
 dumpToFile raw cost time 57 ms
 ```
 
-- q: Quit the program.
+- **q:** Exits the program
+
 
 ```
 Command: Command: q
@@ -141,8 +191,6 @@ quit
 [  256.858301] SIF close node 0
 [  256.858807] [isp_drv]: camera_sys_stream_off: camera_sys_stream_off success line 1549 dev_name port_0
 [  256.860006] [isp_drv:cam]: camera_fop_release: line 115 port 0 user_num 0  camera_cdev->start_num 0 
-```#### 翻译结果
-```
 [  256.861229] vps mipi_host1: sensor1_mclk set(1) 0 as 24000000
 [  256.861980] vps mipi_host1: sensor1_mclk set(0) 0 as 24000000
 [  256.862741] vps mipi_host0: sensor0_mclk set(2) 0 as 24000000
@@ -150,29 +198,64 @@ quit
 [  256.864241] vps mipi_host0: sensor0_mclk set(0) 0 as 24000000
 ```
 
-#### Translation
+#### Running Results Explanation
+
+After running the program, it will acquire images named similarly to `pipe0_plane0_1920x1080_frame_4609.raw` or `pipe0_1920x1080_frame_1024.yuv`. To view these images, use the [hobotplayer](http://sunrise.horizon.cc/downloads/hobotplayer/hobotplayerv.2.07.1.rar) tool with the following configuration settings:
+
+- **Viewing RAW Images:**
+
+Configure options as shown in the figure below, focusing on `pic_type`, `raw_type`, `pix_length`, `width`, and `height`. For F37, configure as (PIC_RAW, MIPI_RAW, RAW_BIT_10, 1920, 1080), and for IMX415, configure as (PIC_RAW, MIPI_RAW, RAW_BIT_12, 3840, 2160).
+
+![./image/multimedia_samples/image-20220517211101610.png](./image/multimedia_samples/image-20220517211101610.png)
+
+- **Viewing YUV Images:**
+
+Configure options as per the steps shown, paying attention to `pic_type`, `yuv_type`, `width`, and `height`. For F37, configure as (PIC_YUV, YUV_NV12, 1920, 1080), and for IMX415, configure as (YUV_NV12, 3840, 2160).
+
+![image-20220517212105959](./image/multimedia_samples/image-20220517212105959.png)
+
+## get_isp_data Usage Guide{#get_isp_data}
+
+### Functionality
+
+The following diagram illustrates the video data path for the X3M, with technical terms explained in the [Multimedia Development Overview - Terminology](./overview#terminology).
+
+![image-20220517184132422](./image/multimedia_samples/image-20220517184132422.png)
+
+The `get_isp_data` function initializes the `sensor`, `MIPI CSI`, `SIF`, and `ISP` modules, enabling the retrieval of video frame data from the `ISP` module. It supports obtaining images in YUV format from the ISP.
+
+`get_isp_data` effectively aids users in debugging sensor and X3M ISP performance. After establishing a data flow from `sensor -> SIF -> ISP`, it facilitates the testing of other module functionalities.
+
+### Programming
+
+#### Source Code Structure
+
+The source code is located at `/app/multimedia_samples/get_isp_data`.
+
 ```
-[  256.861229] vps mipi_host1: sensor1_mclk set(1) 0 as 24000000
-[  256.861980] vps mipi_host1: sensor1_mclk set(0) 0 as 24000000
-[  256.862741] vps mipi_host0: sensor0_mclk set(2) 0 as 24000000
-[  256.863491] vps mipi_host0: sensor0_mclk set(1) 0 as 24000000
-[  256.864241] vps mipi_host0: sensor0_mclk set(0) 0 as 24000000
-```├── sensor_handle.c              # sensor initialization, interface for obtaining image from isp
+.
+├── main.c                       # Main program, loads sensor list and provides command control
+├── Makefile			 # Build configuration file
+├── module.c
+├── module.h
+├── Readme.md
+├── sensor_handle.c              # Interface for sensor initialization and image retrieval from ISP
 ├── sensor_handle.h
-├── sensors                       # sensor parameter configuration, add a new file for each new sensor in this directory
+├── sensors			 # Sensor configuration, add new files for each new sensor in this directory
 │   ├── sensor_f37.c
 │   └── sensor_imx415.c
 └── sensors.lds
+```
 
 #### Compilation
 
-The current code is compiled through a Makefile. To compile and generate the `get_isp_data` program, enter the source code directory and execute the following commands:
+The current code uses a Makefile for configuration. To compile and generate the `get_isp_data` program, navigate to the source code directory and execute:
 
 ```bash
 $ cd /app/multimedia_samples/get_sif_data
-$ make clean # Clean the source code to maintain a clean code environment
+$ make clean # Clear the source code for a clean development environment
 $ make
-... ... # A long series of compilation prints
+... ... # Compilation output
 $ ls
 get_isp_data  main.c  main.o  Makefile  module.c  module.h  module.o  Readme.md  sensor_handle.c  sensor_handle.h  sensor_handle.o  sensors  sensors.lds
 ```
@@ -255,7 +338,7 @@ Horizon Robotics Sensor Test Tools V1.0
         0 -- IMX415
         1 -- F37
 *************************************************************
-```Please select: 1 # Select sensor
+Please select: 1 # Select sensor
 ... ... # A long string of initialization logs
 normal pipe_id (0)type(11)frame_id(1)buf_index(0)w x h(1920x1080) data_type 11 img_format 0
 stride_size(2400) w x h1920 x 1080 size 2073600
@@ -267,6 +350,7 @@ dumpToFile yuv cost time 63 ms********************** Command Lists *************
   g     -- get one frame
   l     -- get a set frames
   h     -- print help message
+```
 
 Command: 
 
@@ -300,7 +384,9 @@ pipe(0)dump normal yuv frame id(4609),plane(1)size(2073600)
 filedump(pipe0_1920x1080_frame_4609.yuv, size(2073600) is successed
 time cost 57 ms 
 dumpToFile yuv cost time 57 ms
-```- q: Quit the program
+```
+
+- q: Quit the program
 
 ```
 Command: Command: q
@@ -611,7 +697,7 @@ $ ls
 
 #### Program DeploymentAfter generating `sample_osd` according to the above compilation process, make sure that `1280720.yuv` exists in the current directory, and then execute `sample_osd`.
 
-#v## Running Effect Description
+### Running Effect Description
 
 The `YUV` image output by the `vps` channel after overlaying `osd` is shown in the following figure:
 
@@ -806,7 +892,7 @@ stChnAttr u32DstWidth :1920
 stChnAttr u32DstHeight :1080
 [   26.056165] iar_output_stream.
 stCrop width :1920
-```stCrop height :1080
+stCrop height :1080
 [   26.059304] channel id is 0, enable is 1, reg value is 0x14ef00f.
 framesize:3110400
 
@@ -824,6 +910,7 @@ framesize:3110400
 	720P59.94
 	720P50
 	720P29.97)
+```
 
 #### Running Effect Description
 
@@ -1047,37 +1134,53 @@ control request (entity_id 00 req 81 cs 02)
 dev->mask (0x0), entity_id(2), setup_ops((nil)), app doesn't care
 control request (entity_id 02 req 86 cs 07)
 send real error code last prepared(06)
-control request (entity_id 00 req 81 cs 02)##### src模块划分
+control request (entity_id 00 req 81 cs 02)
+
+```
+
+**Performance Explanation**
+
+By using Potplayer, select UVC Camera, set the resolution to H264 3840x2160P 60, and once the device is opened, you can play the UVC video stream. The output from the x3 side appears as shown below:
+
+![](./image/multimedia_samples/20220523-173933.png)
+
+A screenshot of the running Potplayer is as follows:
+
+![](./image/multimedia_samples/20220527131109.png)
+
+### Program Development
+
+#### Module Division
+
+| **Module**         | **Directory**     | **Description**                                                                                      |
+|--------------------|-------------------|-------------------------------------------------------------------------------------------------------|
+| Header Files       | inc               | Sensor header files, JSON header files, public utility interface header files, VIO common dependency headers |
+| VIO Source Code    | src                | Sensor source code files, JSON configuration parsing source files, public utility interface source files, system VIO common interface source files |
+| Main Program       | sample_usb_cam.cpp | Entry point for the main function                                                                      |
+
+##### Top-level Source Code Structure
 
 ```
 .
-├── json						#json配置文件解析源代码文件
-│   ├── json_reader.cpp
-│   ├── json_value.cpp
-│   └── json_writer.cpp
-├── sensor						#sensor源代码文件
-│   ├── imx415.cpp
-│   └── uvc_cam.cpp
-├── utils						#公共工具源代码文件
-│   ├── cmd_parser.cpp
-│   └── log.cpp
-└── vio						#系统vio模块的源代码文件
-    ├── cam.cpp
-    ├── common.cpp
-    ├── dev.cpp
-    ├── isp.cpp
-    ├── lane_vio.cpp
-    ├── utils.cpp
-    ├── vio.cpp
-    └── vps.cpp
-
-``````├── run_usb_cam_imx415.sh						# Program execution script
-├── sample_usb_cam.cpp							# Main program code
+├── Makefile							# CMakeLists file for the main program
+├── vin_vps_config_usb_cam.json			# IMX415 sensor configuration file
+├── inc								
+│   ├── camera									# Sensor dependency header files, modify this file for new sensors
+│   ├── json									# JSON library header files
+│   ├── utils									# Public header files for build dependencies
+│   └── vio										# X3M VIO dependency header files
+├── lib
+│   ├── jsoncpp									# Dependent JSON library
+│   ├── libguvc.so									# 4k60 USB cam dependent library
+│   ├── libimx415.so								# 4k60 sensor driver library
+│   ├── README.md									# Program documentation
+│   ├── run_usb_cam_imx415.sh						# Script to run the program
+├── sample_usb_cam.cpp							# Main program code				
 ├── src
 │   ├── camera									# Sensor driver configuration code
-│   ├── utils									# Common source code for compilation dependencies
-│   └── vio										# VIO dependency source files for x3m
-└── usb-gadget.sh								# 4k60 USB cam driver loading script
+│   ├── utils									# Public source code for build dependencies
+│   └── vio										# X3M VIO dependency source files
+└── usb-gadget.sh								# Script to load the 4k60 USB cam driver
 ```
 
 ##### Header File Structure
@@ -1085,8 +1188,8 @@ control request (entity_id 00 req 81 cs 02)##### src模块划分
 ```
 .
 ├── camera
-│   └── camera.h						# Sensor dependent header file, modify this file to add new sensor
-├── json								# Open source JSON library header files
+│   └── camera.h						# Sensor dependency header file, update for new sensors
+├── json								# Open-source JSON library header files
 │   ├── allocator.h
 │   ├── assertions.h
 │   ├── autolink.h
@@ -1099,40 +1202,39 @@ control request (entity_id 00 req 81 cs 02)##### src模块划分
 │   ├── version.h
 │   └── writer.h
 ├── utils		
-│   ├── utils.h							# Ring buffer definition, common interface for dumping images/videos to files
-│   └── yuv2yuv.h						# Standard interface for YUV format conversion using NEON acceleration
+│   ├── utils.h							# Ringbuffer definition and public interface for dumping images and videos to files
+│   └── yuv2yuv.h						# Standard interface for YUV format conversion using neon acceleration
 └── vio
-    ├── vio_cfg.h						# JSON configuration file parsing header file
-    ├── vio_cfg_type.h					# Header file for JSON configuration attribute values
-    ├── vio_log.h						# Header file for print control
-    ├── vio_sys.h						# Header file for initialization, deinitialization, and system binding interfaces for various VIO modules
-    ├── vio_venc.h						# Initialization, deinitialization, start/stop, and data input/output processing interfaces for X3 system encoding module
-    ├── vio_video.h						# Common interface for video format enumeration definition
-    ├── vio_vin.h						# Structure definition for VIN, initialization, deinitialization, start/stop, and data processing interfaces
-    └── vio_vps.h						# Initialization, deinitialization, start/stop, and data processing interfaces for VPS
+    ├── vio_cfg.h						# JSON configuration parsing header file
+    ├── vio_cfg_type.h					# JSON configuration attribute value header file
+    ├── vio_log.h						# Logging control header file
+    ├── vio_sys.h						# VP initialization, deinitialization, system VIO module binding interfaces header
+    ├── vio_venc.h						# X3 System Encoding module initialization, deinitialization, start-stop, data input/output processing interfaces
+    ├── vio_video.h						# Video format enumeration and other common interfaces
+    ├── vio_vin.h						# VIN structure definition, initialization, deinitialization, start-stop, data processing interfaces
+    └── vio_vps.h						# VPS initialization, deinitialization, start-stop, data processing interfaces
 ```
 
 ##### Source Code Structure
 
 ```
 .
-├── camera				# Source code files for sensor dependencies, add corresponding sensor source code files here for new sensors
+├── camera				# Sensor dependency source code files, add corresponding sensor source code files for new sensors
 │   ├── camera_base.c
 │   └── camera_imx415.cpp
 ├── utils
-│   ├── utils.cpp		# Source code file for common interface of dumping images/videos to files
-```│   └── yuv2yuv.c		# Source code file of the standard interface for YUV format conversion using NEON acceleration
+│   ├── utils.cpp		# Public source code file for dumping images and videos to files
+│   └── yuv2yuv.c		# Standard source code file for YUV format conversion using neon acceleration
 └── vio
-    ├── vio_cfg.cpp		# Source code file for JSON configuration file parsing
-    ├── vio_sys.cpp		# Source code file for VP initialization and deinitialization, system VIO module binding interface
-    ├── vio_venc.cpp	# Source code file for X3 system encoding module initialization and deinitialization, start and stop, data input and output processing interface
-    ├── vio_video.cpp	# Source code file for video format enumeration and other common interfaces
-    ├── vio_vin.cpp		# Source code file for VIN initialization and deinitialization, start and stop, data processing interface
-    └── vio_vps.cpp		# Source code file for VPS initialization and deinitialization, start and stop, data processing interface
-
+    ├── vio_cfg.cpp		# JSON configuration parsing source code file
+    ├── vio_sys.cpp		# VP initialization, deinitialization, system VIO module binding interfaces source code file
+    ├── vio_venc.cpp	# X3 System Encoding module initialization, deinitialization, start-stop, data input/output processing interfaces source code file
+    ├── vio_video.cpp	# Video format enumeration and other common interfaces source code file
+    ├── vio_vin.cpp		# VIN initialization, deinitialization, start-stop, data processing interfaces source code file
+    └── vio_vps.cpp		# VPS initialization, deinitialization, start-stop, data processing interfaces source code file
 ```
 
-The program startup process is shown in the following diagram:
+The flowchart of the program startup process is as follows:
 
 ![](./image/multimedia_samples/4k60usbcam.drawio.png)
 

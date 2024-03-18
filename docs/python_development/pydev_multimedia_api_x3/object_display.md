@@ -45,7 +45,9 @@ ret = disp.display(0, 1920, 1080, 0, 1)
 
 <font color='Blue'>[Note]</font> 
 
-The HDMI interface resolution on the development board is based on the EDID (Extended Display Identification Data) of the monitor. Currently, only a few resolutions are supported, including `1920x1080`, `1280x720`, `1024x600`, and `800x480`. When enabling the display module, it is necessary to configure the resolution to match the actual resolution of the monitor.## set_img
+The HDMI interface resolution on the development board is based on the EDID (Extended Display Identification Data) of the monitor. Currently, only a few resolutions are supported, including `1920x1080`, `1280x720`, `1024x600`, and `800x480`. When enabling the display module, it is necessary to configure the resolution to match the actual resolution of the monitor.
+
+## set_img
 
 <font color='Blue'>【Description】</font>
 
@@ -90,22 +92,23 @@ from hobot_vio import libsrcampy
 def test_display():
     #create display object
     disp = libsrcampy.Display()
-```# Enable display function
-ret = disp.display(0, 1920, 1080, 0, 1)
-print ("Display display 0 return:%d" % ret)
 
-fo = open("output.img", "rb")
-img = fo.read()
-fo.close()
+    # Enable display function
+    ret = disp.display(0, 1920, 1080, 0, 1)
+    print ("Display display 0 return:%d" % ret)
 
-# Send image data to display
-ret = disp.set_img(img)
-print ("Display set_img return:%d" % ret)
+    fo = open("output.img", "rb")
+    img = fo.read()
+    fo.close()
 
-time.sleep(3)
+    # Send image data to display
+    ret = disp.set_img(img)
+    print ("Display set_img return:%d" % ret)
 
-disp.close()
-print("test_display done!!!")
+    time.sleep(3)
+
+    disp.close()
+    print("test_display done!!!")
 
 test_display()
 ```
@@ -190,12 +193,13 @@ Display.set_graph_word(x, y, str, chn, flush, color, line_width)
 ```python
 #enable graph layer 2
 ret = disp.display(2)
-```print("Display display 2 return:%d" % ret)
+print("Display display 2 return:%d" % ret)
 
 # set osd string
 string = "horizon"
 ret = disp.set_graph_word(300, 300, string.encode('gb2312'), 2, 0, 0xff00ffff)
 print("Display set_graph_word return:%d" % ret)
+```
 
 <font color='Blue'>[Return Value]</font>
 
@@ -252,6 +256,7 @@ None
 This interface can bind the output and input data streams of the `Camera`, `Encoder`, `Decoder`, and `Display` modules. After binding, there is no need for user operation, and the data can automatically flow between the binding modules. For example, after binding the `Camera` and `Display`, the camera data will be automatically displayed on the screen through the display module, without the need to call additional interfaces.
 
 <font color='Blue'>【Function Declaration】</font>
+
 ```python
     libsrcampy.bind(src, dst)
 ```
@@ -286,7 +291,9 @@ print("libsrcampy bind return:%d" % ret)
 | Return value | Description |
 | ------ | ---- |
 | 0      | Success |
-| -1    | Failure |<font color='Blue'>【Notes】</font>
+| -1    | Failure |
+
+<font color='Blue'>【Notes】</font>
 
 None
 
@@ -301,6 +308,7 @@ None
 Unbind two bound modules.
 
 <font color='Blue'>【Function Declaration】</font>
+
 ```python
 libsrcampy.unbind(src, dst)
 ```
@@ -334,7 +342,9 @@ ret = libsrcampy.unbind(cam, enc)
 print("libsrcampy unbind return:%d" % ret)
 ```
 
-<font color='Blue'>【Return Value】</font>| Return Value | Description |
+<font color='Blue'>【Return Value】</font>
+
+| Return Value | Description |
 | ------ | ---- |
 | 0      | Successful |
 | -1    | Failed |

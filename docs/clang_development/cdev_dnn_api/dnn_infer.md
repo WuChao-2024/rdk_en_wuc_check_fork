@@ -144,7 +144,10 @@ Interface Limitations Explanation:
 - The original image size requirement is: :math:`1 <= W <= 4096`, :math:`16 <= stride <= 131072`, and ``stride`` must be a multiple of 16.
 - The output size requirement is: :math:`2 <= Wout`, :math:`2 <= Hout`.
 - The roi scaling factor limit is: :math:`0 <= step <= 262143`, where the step is calculated using the formula: :math:`step = ((src_len - 1)*65536 + (dst_len - 1)/2)/(dst_len - 1)`, where src_len is the W or H of the roi and dst_len is the required W or H of the model.
-- Up to 32 model tasks can exist simultaneously.## hbDNNWaitTaskDone()
+- Up to 32 model tasks can exist simultaneously.
+:::
+
+## hbDNNWaitTaskDone()
 
 **【Function prototype】**
 

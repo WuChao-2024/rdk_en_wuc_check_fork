@@ -46,7 +46,9 @@ Destroy the decoder module object.
 
 - `obj`: The object pointer obtained when calling the initialization interface.
 
-**【Return Type】**## sp_start_decode  
+**【Return Type】**
+
+## sp_start_decode  
 
 **【Function Prototype】**  
 

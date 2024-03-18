@@ -47,7 +47,8 @@ tar -zxvf xj3_ddr_stress_gcc9.3.tar.gz
 
 4. Grant permission to the xj3_ddr_stress folder
 
-```chmod 777 xj3_ddr_stress
+```
+chmod 777 xj3_ddr_stress
 ```
 
 5. Enter the directory "cd xj3_ddr_stress"
@@ -97,3 +98,7 @@ tail /userdata/bpu-stress.log
 ![image-20220324193228651](./image/driver_develop_guide/image-20220324193228651.png)
 
 12. If the last Status in /userdata/cpu-stress.log shows FAIL or if there is an "error" or "miscompare" keyword in the log, it indicates a FAIL result.13. Check the bpu test result. If keywords such as "error" or "system hung" are present in the bpu_stress.log, it means the test has failed.
+
+![image-20220324193250187](./image/driver_develop_guide/image-20220324193250187.png)
+
+13、check `bpu test result`, if  `error`, `system hung` ,etc, appeared in `bpu_stress.log`, it means the test has failed.

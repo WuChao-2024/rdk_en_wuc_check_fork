@@ -46,7 +46,9 @@ mode = GPIO.getmode()
 
 The program will output one of the results `BOARD, BCM, CVM, SOC, or None`.
 
-## Warning MessagesThe code will produce warning log outputs, but will not affect normal functionality in the following cases:
+## Warning Messages
+
+The code will produce warning log outputs, but will not affect normal functionality in the following cases:
 
 - The GPIO being attempted to use by the user is already being used by another application.
 - `GPIO.cleanup` is called to clean up the pins before setting the mode and channels.
@@ -95,7 +97,9 @@ To read the value of a channel, use:
 GPIO.input(channel)
 ```
 
-The command returns either 0 or 1. 0 represents GPIO.LOW, and 1 represents GPIO.HIGH.## Output Operation
+The command returns either 0 or 1. 0 represents GPIO.LOW, and 1 represents GPIO.HIGH.
+
+## Output Operation
 
 To set the output value of a channel, use:
 
@@ -192,7 +196,7 @@ If needed, you can also add multiple callbacks by following the same method:
 
 ```python
 def callback_one(channel):
-```print("First Callback")
+    print("First Callback")
 
 def callback_two(channel):
     print("Second Callback")

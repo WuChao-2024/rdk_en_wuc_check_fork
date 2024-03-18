@@ -46,8 +46,33 @@ root@ubuntu:~# ifconfig
 eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
         inet 192.168.1.10  netmask 255.255.255.0  broadcast 192.168.1.255
         inet6 fe80::211:22ff:feaa:7637  prefixlen 64  scopeid 0x20<link>
-        ether 00:11:22:aa:76:37  txqueuelen 1000  (Ethernet)## Network Status Confirmation
+        ether 00:11:22:aa:76:37  txqueuelen 1000  (Ethernet)
+        RX packets 767  bytes 54006 (54.0 KB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 5766  bytes 246466 (246.4 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+        device interrupt 43  base 0xa000  
 
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 3847  bytes 339115 (339.1 KB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 3847  bytes 339115 (339.1 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+wlan0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
+        ether 08:e9:f6:ae:f8:8a  txqueuelen 1000  (Ethernet)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+```
+
+## Network Status Confirmation
+<iframe src="//player.bilibili.com/player.html?aid=700903305&bvid=BV1rm4y1E73q&cid=1196554007&page=3" scrolling="no" border="0" frameborder="no" framespacing="0" width="100%" height="500" allowfullscreen="true"> </iframe>
 Before using remote login, it is necessary to ensure that the communication between the computer and the development board is normal. If it cannot be pinged, please follow the steps below to confirm:
 
 - Confirm the IP address configuration of the development board and the computer. Generally, the first three segments need to be the same. For example, the development board: `192.168.1.10` and the computer: `192.168.1.100`.
@@ -60,9 +85,13 @@ The wired Ethernet of the development board is set to use the static IP mode by 
 - Double-click to open the Internet Protocol Version 4 option.
 - Enter the corresponding network parameters in the red box in the figure below and click OK.
 
+![image-20220416110242445](./image/remote_login/image-20220416110242445.png)
+
 If you want to configure the wired network of the development board to obtain IP dynamically via DHCP mode, please refer to the [Wired Network](../configuration/network#config_ethnet) chapter for configuration.
 
 ## VNC Login
+
+<iframe src="//player.bilibili.com/player.html?aid=700903305&bvid=BV1rm4y1E73q&cid=1196553936&page=4" scrolling="no" border="0" frameborder="no" framespacing="0" width="100%" height="500" allowfullscreen="true"> </iframe>
 
 This section is for users using the Ubuntu Desktop system version, and it explains how to use "VNC Viewer" to achieve remote desktop login. "VNC Viewer" is a graphical desktop sharing software that allows you to remotely log in and control the desktop of the device on your computer. With this software, you can preview the system desktop of the development board on your computer screen and use your computer's mouse and keyboard for remote operation. By using VNC Viewer, you can achieve the same effect as local operation on the development board. You can download VNC Viewer from the following link: [VNC Viewer](https://www.realvnc.com/en/connect/download/viewer/).
 

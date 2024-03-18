@@ -51,7 +51,9 @@ Mount /dev/hda1 under /mnt:
 
 ```shell
 mount /dev/hda1 /mnt
-```Mount /dev/hda1 under /mnt in read-only mode.
+```
+
+Mount /dev/hda1 under /mnt in read-only mode.
 
 ```
 mount -o ro /dev/hda1 /mnt

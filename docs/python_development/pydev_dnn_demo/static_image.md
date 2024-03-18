@@ -47,10 +47,11 @@ cls id: 340 Confidence: 0.991851
     In this example, the input of the `mobilenetv1` model is `1x3x224x224` data with the format `NCHW`. The output is a list of 1000 data, representing the confidence of 1000 categories. The example defines the `print_properties` function to output the input and output parameters of the model:
 
     ```python
-    # print properties of input tensorprint_properties(models[0].inputs[0].properties)
-# print properties of output tensor
-print_properties(models[0].outputs[0].properties)
-```
+    # print properties of input tensor
+    print_properties(models[0].inputs[0].properties)
+    # print properties of output tensor
+    print_properties(models[0].outputs[0].properties)
+    ```
 
 - Data preprocessing
 
@@ -96,8 +97,10 @@ print_properties(models[0].outputs[0].properties)
 
     The correct result when running is:
 
-    ```shell========== Classification result ==========
-cls id: 340 Confidence: 0.991851
+    ```shell
+    ========== Classification result ==========
+    cls id: 340 Confidence: 0.991851
+    ```
 
 
 
@@ -141,7 +144,9 @@ sudo python3 ./test_yolov5.py
 ```
 
 After successful execution, it will output the object detection results and save the rendered results to the file `result.jpg`, as shown in the following figure:
-![image-20220624105432872](./image/pydev_dnn_demo/image-20220624105432872.png)## Image Segmentation Algorithm - UNet
+![image-20220624105432872](./image/pydev_dnn_demo/image-20220624105432872.png)
+
+## Image Segmentation Algorithm - UNet
 
 This example mainly implements the following functions:
 

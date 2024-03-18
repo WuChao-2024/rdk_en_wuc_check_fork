@@ -48,7 +48,9 @@ spi0: spi@0xA5004000 {
     status = "disabled";
     #address-cells = <1>;
     #size-cells = <0>;
-```File path: arch/arm64/boot/dts/hobot/hobot-x3-sdb.dts
+```
+
+File path: arch/arm64/boot/dts/hobot/hobot-x3-sdb.dts
 
 ```
 /* Configure as master */
@@ -94,7 +96,20 @@ static int hb_spi_probe(struct platform_device *pdev)
         ctlr = spi_alloc_master(&pdev->dev, sizeof(*hbspi));
         if (!ctlr) {
             dev_err(&pdev->dev, "failed to alloc spi master\n");
-```### SPI Registration
+            return -ENOMEM;
+        }
+    } else if (isslave == SLAVE_MODE) {
+        ctlr = spi_alloc_slave(&pdev->dev, sizeof(*hbspi));
+        if (!ctlr) {
+            dev_err(&pdev->dev, "failed to alloc spi slave, try master\n");
+            return -ENOMEM;
+        }
+    }
+    ...
+}
+```
+
+### SPI Registration
 
 Register SPI controller with the kernel
 
@@ -131,7 +146,7 @@ static int hb_spi_probe(struct platform_device *pdev)
                 ctrl_mode, ret);
         goto clk_dis_mclk;
     }
-``````c
+    ···
 }
 ```
 
@@ -278,7 +293,9 @@ Kernel dts enables spi0 as master mode:
 };
 ```
 
-You can observe the spidev0.0 device node```
+You can observe the spidev0.0 device node
+
+```
 # ls /dev/spidev0.0 
 /dev/spidev0.0
 ```
@@ -328,7 +345,7 @@ The spidev_tc command is a command set for testing SPI, and you can read its hel
  *
  * Cross-compile with cross-gcc -I/path/to/cross-kernel/include
  */
-```#include <stdint.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -577,54 +594,55 @@ static void print_usage(const char *prog)
             "  -L --lsb      最低有效位\n"
             "  -C --cs-high  片选信号激活高电平\n"
             "  -3 --3wire    SI/SO信号共用\n""  -v --verbose  Verbose (show tx buffer)\n" -> "-v --verbose  详细信息（显示发送缓冲区）\n"
-"  -p            Send data (e.g. \"1234\\xde\\xad\")\n" -> "  -p            发送数据（例如\"1234\\xde\\xad\"）\n"
-"  -N --no-cs    no chip select\n" -> "  -N --no-cs    不使用芯片选择\n"
-"  -R --ready    slave pulls low to pause\n" -> "  -R --ready    从机拉低以暂停\n"
-"  -2 --dual     dual transfer\n" -> "  -2 --dual     双通道传输\n"
-"  -4 --quad     quad transfer\n" -> "  -4 --quad     四通道传输\n"
-"  -S --size     transfer size\n" -> "  -S --size     传输大小\n"
-"  -I --iter     iterations\n" -> "  -I --iter     迭代次数\n"
-"  -m --rw-mode  1 read, 2 write, 3 write and read\n" -> "  -m --rw-mode  1 读取， 2 写入， 3 写入和读取\n"
-"  -e --rw-len   read or write len\n" -> "  -e --rw-len   读取或写入长度\n"
-"  -t --rw-times read or write times\n" -> "  -t --rw-times 读取或写入次数\n");
-exit(1);
+            "  -p            Send data (e.g. \"1234\\xde\\xad\")\n" -> "  -p            发送数据（例如\"1234\\xde\\xad\"）\n"
+            "  -N --no-cs    no chip select\n" -> "  -N --no-cs    不使用芯片选择\n"
+            "  -R --ready    slave pulls low to pause\n" -> "  -R --ready    从机拉低以暂停\n"
+            "  -2 --dual     dual transfer\n" -> "  -2 --dual     双通道传输\n"
+            "  -4 --quad     quad transfer\n" -> "  -4 --quad     四通道传输\n"
+            "  -S --size     transfer size\n" -> "  -S --size     传输大小\n"
+            "  -I --iter     iterations\n" -> "  -I --iter     迭代次数\n"
+            "  -m --rw-mode  1 read, 2 write, 3 write and read\n" -> "  -m --rw-mode  1 读取， 2 写入， 3 写入和读取\n"
+            "  -e --rw-len   read or write len\n" -> "  -e --rw-len   读取或写入长度\n"
+            "  -t --rw-times read or write times\n" -> "  -t --rw-times 读取或写入次数\n");
+    exit(1);
 }
 
 static void parse_opts(int argc, char *argv[])
 {
-while (1) {
-static const struct option lopts[] = {
-{ "device",  1, 0, 'D' },
-{ "speed",   1, 0, 's' },
-{ "delay",   1, 0, 'd' },
-{ "bpw",     1, 0, 'b' },
-{ "input",   1, 0, 'i' },
-{ "output",  1, 0, 'o' },
-{ "loop",    0, 0, 'l' },
-{ "cpha",    0, 0, 'H' },
-{ "cpol",    0, 0, 'O' },
-{ "lsb",     0, 0, 'L' },
-{ "cs-high", 0, 0, 'C' },
-{ "3wire",   0, 0, '3' },
-{ "no-cs",   0, 0, 'N' },
-{ "ready",   0, 0, 'R' },
-{ "dual",    0, 0, '2' },
-{ "verbose", 0, 0, 'v' },
-{ "quad",    0, 0, '4' },
-{ "size",    1, 0, 'S' },
-{ "iter",    1, 0, 'I' },
-{ "rw-mode",    1, 0, 'm' },
-{ "rw-len",    1, 0, 'e' },
-{ "rw-times",    1, 0, 't' },
-{ NULL, 0, 0, 0 },
-};
-int c;
+    while (1) {
+        static const struct option lopts[] = {
+            { "device",  1, 0, 'D' },
+            { "speed",   1, 0, 's' },
+            { "delay",   1, 0, 'd' },
+            { "bpw",     1, 0, 'b' },
+            { "input",   1, 0, 'i' },
+            { "output",  1, 0, 'o' },
+            { "loop",    0, 0, 'l' },
+            { "cpha",    0, 0, 'H' },
+            { "cpol",    0, 0, 'O' },
+            { "lsb",     0, 0, 'L' },
+            { "cs-high", 0, 0, 'C' },
+            { "3wire",   0, 0, '3' },
+            { "no-cs",   0, 0, 'N' },
+            { "ready",   0, 0, 'R' },
+            { "dual",    0, 0, '2' },
+            { "verbose", 0, 0, 'v' },
+            { "quad",    0, 0, '4' },
+            { "size",    1, 0, 'S' },
+            { "iter",    1, 0, 'I' },
+            { "rw-mode",    1, 0, 'm' },
+            { "rw-len",    1, 0, 'e' },
+            { "rw-times",    1, 0, 't' },
+            { NULL, 0, 0, 0 },
+        };
+        int c;
 
-c = getopt_long(argc, argv, "D:s:d:b:i:o:lHOLC3NR24p:vS:I:m:e:t:",
-lopts, NULL);
-//printf("optind: %d\n", optind);
-//printf("optarg: %s\n", optarg);
-//printf("option: %c\n", c);if (c == -1)
+        c = getopt_long(argc, argv, "D:s:d:b:i:o:lHOLC3NR24p:vS:I:m:e:t:",
+        lopts, NULL);
+        //printf("optind: %d\n", optind);
+        //printf("optarg: %s\n", optarg);
+        //printf("option: %c\n", c);
+        if (c == -1)
             break;
 
         switch (c) {
@@ -723,11 +741,11 @@ static void transfer_escaped_string(int fd, char *str)
     if (!rx)
         pabort("can't allocate rx buffer");
 
-size = unescape((char *)tx, str, size);
-printf("size: %d\n", size);
-transfer(fd, tx, rx, size);
-free(rx);
-free(tx);
+    size = unescape((char *)tx, str, size);
+    printf("size: %d\n", size);
+    transfer(fd, tx, rx, size);
+    free(rx);
+    free(tx);
 }
 
 static void transfer_file(int fd, char *filename)

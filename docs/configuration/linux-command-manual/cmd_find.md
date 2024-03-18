@@ -47,7 +47,9 @@ Explanation of the time parameter `n`:
 
 - `+n`: Search for files or directories older than `n` days.
 - `-n`: Search for files or directories with attribute changes within the last `n` days.
-- `n`: Search for files or directories with attribute changes on a specific day `n` days ago.## Common Commands
+- `n`: Search for files or directories with attribute changes on a specific day `n` days ago.
+
+## Common Commands
 
 List all files and folders in the current directory and subdirectories:
 
@@ -95,19 +97,20 @@ Search for files that are exactly 10KB:
 
 ```shell
 find . -type f -size 10k
-```- File size units:
+```
+  - File size units:
 
-  - **b** —— block (512 bytes)
+    - **b** —— block (512 bytes)
 
-  - **c** —— byte
+    - **c** —— byte
 
-  - **w** —— word (2 bytes)
+    - **w** —— word (2 bytes)
 
-  - **k** —— kilobyte
+    - **k** —— kilobyte
 
-  - **M** —— megabyte
+    - **M** —— megabyte
 
-  - **G** —— gigabyte
+    - **G** —— gigabyte
 
 Find files modified in /var/log directory 7 days ago
 
@@ -143,7 +146,9 @@ Find files in the current directory whose owner has read and write permissions, 
 
 ```
 find . -type f -perm 644 -exec ls -l {} \;
-```List all ordinary files in the system with a length of 0, and display their complete paths.
+```
+
+List all ordinary files in the system with a length of 0, and display their complete paths.
 
 ```
 find / -type f -size 0 -exec ls -l {} \;
@@ -241,7 +246,9 @@ Find all files with owner `root` in the current directory and change the ownersh
 
 ```shell
 find . -type f -user root -exec chown sunrise {} \;
-```In the above example, **{}** is used in combination with the **-exec** option to match all files and will be replaced with the respective file name.
+```
+
+In the above example, **{}** is used in combination with the **-exec** option to match all files and will be replaced with the respective file name.
 
 Find all the `.txt` files under the `home` directory and delete them:
 
@@ -288,7 +295,8 @@ find . -name "*.c" | xargs cat | grep -v ^$ | wc -l # Code line count, excluding
 Other examples:
 
 ```shell
-find ~ -name '*jpg' # Find all jpg files in the home directory. The -name parameter allows you to limit the results to files matching the given pattern.find ~ -iname '*jpg' # -iname is like -name, but it is case insensitive
+find ~ -name '*jpg' # Find all jpg files in the home directory. The -name parameter allows you to limit the results to files matching the given pattern.
+find ~ -iname '*jpg' # -iname is like -name, but it is case insensitive
 find ~ \( -iname 'jpeg' -o -iname 'jpg' \) # some images may have the .jpeg extension. Luckily, we can combine patterns with "or" (represented by -o)
 find ~ \( -iname '*jpeg' -o -iname '*jpg' \) -type f # What if you have directories that end with jpg? (Why you named a directory bucketofjpg instead of pictures is beyond the scope of this article.) We modify our command with the -type parameter to search for files.
 find ~ \( -iname '*jpeg' -o -iname '*jpg' \) -type d # You may also want to find those oddly named directories for future renaming.

@@ -55,6 +55,7 @@ ssh -p 22 user@ip  # Default username is the current username, default port is 2
 ssh-keygen # Generate ssh public and private keys for the current user
 ssh-keygen -f keyfile -i -m key_format -e -m key_format # key_format: RFC4716/SSH2(default) PKCS8 PEM
 ssh-copy-id user@ip:port # Copy the public key of the current user to the ~/.ssh/authorized_keys file on the server that needs SSH, enabling passwordless login
+```
 
 Connect to remote server
 

@@ -28,35 +28,37 @@ The `vio2display` example implements the functionality of capturing images from 
 
 - **Expected Results:**
    After the program runs successfully, the development board will output the real-time image captured by the `MIPI` camera to the display. The running log is as follows:
-   ```bash
-   sunrise@ubuntu:/tmp/nfs/sp_cdev/cdev_demo/vio2display$ ./vio2display -w 1920 -h 1080
-   disp_w=1920, disp_h=1080
-   2023/03/28 02:08:03.359 !INFO [x3_cam_init_param][0099]Enable mipi host0 mclk
-   2023/03/28 02:08:03.359 !INFO [x3_cam_init_param][0099]Enable mipi host1 mclk
-   Camera: gpio_num=114, active=low, i2c_bus=3, mipi_host=0
-   Camera: gpio_num=114, active=low, i2c_bus=1, mipi_host=1
-   Camera: gpio_num=114, active=low, i2c_bus=0, mipi_host=2
-   Camera 0:
-         enable: 1
-         i2c_bus: 3
-         mipi_host: 0
-   Camera 1:
-         enable: 1
-         i2c_bus: 1
-         mipi_host: 1
-   Camera 2:
-         enable: 1
-         i2c_bus: 0```mipi_host: 2
-cmd=i2ctransfer -y -f 3 w2@0x10 0x0 0x0 r1 2>&1, result=0x02
 
-Found sensor:imx219 on i2c bus 3, use mipi host 0
-Setting VPS channel-2: src_w:1920, src_h:1080; dst_w:1920, dst_h:1080;
-Setting VPS channel-1: src_w:1920, src_h:1080; dst_w:1920, dst_h:1080;
-sp_open_camera success!
-libiar: hb_disp_set_timing done!
+    ```bash
+    sunrise@ubuntu:/tmp/nfs/sp_cdev/cdev_demo/vio2display$ ./vio2display -w 1920 -h 1080
+    disp_w=1920, disp_h=1080
+    2023/03/28 02:08:03.359 !INFO [x3_cam_init_param][0099]Enable mipi host0 mclk
+    2023/03/28 02:08:03.359 !INFO [x3_cam_init_param][0099]Enable mipi host1 mclk
+    Camera: gpio_num=114, active=low, i2c_bus=3, mipi_host=0
+    Camera: gpio_num=114, active=low, i2c_bus=1, mipi_host=1
+    Camera: gpio_num=114, active=low, i2c_bus=0, mipi_host=2
+    Camera 0:
+          enable: 1
+          i2c_bus: 3
+          mipi_host: 0
+    Camera 1:
+          enable: 1
+          i2c_bus: 1
+          mipi_host: 1
+    Camera 2:
+          enable: 1
+          i2c_bus: 0
+          mipi_host: 2
+    cmd=i2ctransfer -y -f 3 w2@0x10 0x0 0x0 r1 2>&1, result=0x02
 
-Press 'q' to Exit !
-```
+    Found sensor:imx219 on i2c bus 3, use mipi host 0
+    Setting VPS channel-2: src_w:1920, src_h:1080; dst_w:1920, dst_h:1080;
+    Setting VPS channel-1: src_w:1920, src_h:1080; dst_w:1920, dst_h:1080;
+    sp_open_camera success!
+    libiar: hb_disp_set_timing done!
+
+    Press 'q' to Exit !
+    ```
 
 ## Camera Image Local Save (RDK X3)
 
@@ -95,16 +97,17 @@ The `vio_capture` example in this document realizes the function of capturing im
     capture time: 4
     capture time: 5
     capture time: 6
-    ```capture time :7
-capture time :8
-capture time :9
-sensor_name imx477, setting_size = 1
-[  701.213210]hb_isp_algo_stop@main_user.c:389 GENERIC(ERR) :g_mutex destroy.
-```
+    capture time :7
+    capture time :8
+    capture time :9
+    sensor_name imx477, setting_size = 1
+    [  701.213210]hb_isp_algo_stop@main_user.c:389 GENERIC(ERR) :g_mutex destroy.
+    ```
 
 ## Camera Image Local Saving (RDK Ultra)
 
 This `vio_capture` example demonstrates the image capture of a `MIPI` camera and provides the functionality to save the captured images locally in both `RAW` and `YUV` formats (mutually exclusive). The flowchart of the example is shown below:
+
 ![image-capture](./image/cdev_demo/image-capture.png)
 
 - **Preparation:**
@@ -239,7 +242,9 @@ This example `decoder2display` implements video file decoding and outputs it thr
     libiar: hb_disp_set_timing done!
     sp_start_display success!
     sp_open_vps success!
-    ```## RTSP Streaming Decode
+    ```
+
+## RTSP Streaming Decode
 
 This example `rtsp2display` implements the function of pulling `rtsp` stream, decoding it, and outputting the video image through HDMI, allowing users to preview the image on a monitor. The flowchart of the example is as follows:
 ![rtsp2display](./image/cdev_demo/image-rtsp_to_display.png)
@@ -286,7 +291,9 @@ This example `rtsp2display` implements the function of pulling `rtsp` stream, de
   ```
 
 - **Notes:**
-  - When using UDP protocol to transmit the stream, there may be screen flicker due to network packet loss. In this case, switching to TCP protocol can solve the problem.## VPS Scaling Example
+  - When using UDP protocol to transmit the stream, there may be screen flicker due to network packet loss. In this case, switching to TCP protocol can solve the problem.
+  
+## VPS Scaling Example
 
 This example implements video scaling functionality based on the video processing module `VPS`. Users can preview the image through a monitor.
 
@@ -336,8 +343,8 @@ This example uses the `FCOS` model to implement the object detection algorithm f
   ```bash
   sunrise@ubuntu:~$ cd /app/cdev_demo/bpu/src
   sunrise@ubuntu:/app/cdev_demo/bpu/src$ sudo makesunrise@ubuntu:/app/cdev_demo/bpu/src$ cd bin 
-sunrise@ubuntu:/app/cdev_demo/bpu/src/bin$ sudo ./sample -f /app/model/basic/fcos_512x512_nv12.bin -m 1 -i 1080p_.h264 -w 1920 -h 1080
-```
+  sunrise@ubuntu:/app/cdev_demo/bpu/src/bin$ sudo ./sample -f /app/model/basic/fcos_512x512_nv12.bin -m 1 -i 1080p_.h264 -w 1920 -h 1080
+  ```
 
 **Parameter Configuration:**
   - -f: Model file path
@@ -349,41 +356,43 @@ sunrise@ubuntu:/app/cdev_demo/bpu/src/bin$ sudo ./sample -f /app/model/basic/fco
 - **Expected Output:**
   After the program runs successfully, the video and the rendered image after algorithm detection will be output through the `HDMI` interface for user preview on a display. The running log is as follows:
 
-```bash
-sunrise@ubuntu:/app/cdev_demo/bpu/src/bin$ sudo ./sample -f /app/model/basic/fcos_512x512_nv12.bin -m 1 -i 1080p_.h264 -w 1920 -h 1080
-[BPU_PLAT]BPU Platform Version(1.3.1)!
-[HBRT] set log level as 0. version = 3.14.5
-[DNN] Runtime version = 1.9.7_(3.14.5 HBRT)
-Model info:
-model_name: fcos_512x512_nv12Input count: 1input[0]: tensorLayout: 2 tensorType: 1 validShape:(1, 3, 512, 512, ), alignedShape:(1, 3, 512, 512, )
-Output count: 15Output[0]: tensorLayout: 0 tensorType: 13 validShape:(1, 64, 64, 80, ), alignedShape:(1, 64, 64, 80, )
-Output[1]: tensorLayout: 0 tensorType: 13 validShape:(1, 32, 32, 80, ), alignedShape:(1, 32, 32, 80, )
-Output[2]: tensorLayout: 0 tensorType: 13 validShape:(1, 16, 16, 80, ), alignedShape:(1, 16, 16, 80, )
-Output[3]: tensorLayout: 0 tensorType: 13 validShape:(1, 8, 8, 80, ), alignedShape:(1, 8, 8, 80, )
-Output[4]: tensorLayout: 0 tensorType: 13 validShape:(1, 4, 4, 80, ), alignedShape:(1, 4, 4, 80, )
-Output[5]: tensorLayout: 0 tensorType: 13 validShape:(1, 64, 64, 4, ), alignedShape:(1, 64, 64, 4, )
-Output[6]: tensorLayout: 0 tensorType: 13 validShape:(1, 32, 32, 4, ), alignedShape:(1, 32, 32, 4, )
-Output[7]: tensorLayout: 0 tensorType: 13 validShape:(1, 16, 16, 4, ), alignedShape:(1, 16, 16, 4, )
-Output[8]: tensorLayout: 0 tensorType: 13 validShape:(1, 8, 8, 4, ), alignedShape:(1, 8, 8, 4, )
-Output[9]: tensorLayout: 0 tensorType: 13 validShape:(1, 4, 4, 4, ), alignedShape:(1, 4, 4, 4, )
-Output[10]: tensorLayout: 0 tensorType: 13 validShape:(1, 64, 64, 1, ), alignedShape:(1, 64, 64, 1, )
-Output[11]: tensorLayout: 0 tensorType: 13 validShape:(1, 32, 32, 1, ), alignedShape:(1, 32, 32, 1, )
-Output[12]: tensorLayout: 0 tensorType: 13 validShape:(1, 16, 16, 1, ), alignedShape:(1, 16, 16, 1, )
-Output[13]: tensorLayout: 0 tensorType: 13 validShape:(1, 8, 8, 1, ), alignedShape:(1, 8, 8, 1, )
-Output[14]: tensorLayout: 0 tensorType: 13 validShape:(1, 4, 4, 1, ), alignedShape:(1, 4, 4, 1, )
-libiar: hb_disp_set_timing done!
-dispaly init ret = 0
-vps open ret = 0
-module bind vps & display ret = 0
-display start ret = 0
-[x3_av_open_stream]:[380]:probesize: 5000000
-decode start ret = 0
-module bind decoder & vps ret = 0
-[ERROR]["vdec"][video/src/vdec_group.c:348] [8870.450264]vdec_channel_bump_thread[348]: VDEC_MODULE module try again
+  ```bash
+  sunrise@ubuntu:/app/cdev_demo/bpu/src/bin$ sudo ./sample -f /app/model/basic/fcos_512x512_nv12.bin -m 1 -i 1080p_.h264 -w 1920 -h 1080
+  [BPU_PLAT]BPU Platform Version(1.3.1)!
+  [HBRT] set log level as 0. version = 3.14.5
+  [DNN] Runtime version = 1.9.7_(3.14.5 HBRT)
+  Model info:
+  model_name: fcos_512x512_nv12Input count: 1input[0]: tensorLayout: 2 tensorType: 1 validShape:(1, 3, 512, 512, ), alignedShape:(1, 3, 512, 512, )
+  Output count: 15Output[0]: tensorLayout: 0 tensorType: 13 validShape:(1, 64, 64, 80, ), alignedShape:(1, 64, 64, 80, )
+  Output[1]: tensorLayout: 0 tensorType: 13 validShape:(1, 32, 32, 80, ), alignedShape:(1, 32, 32, 80, )
+  Output[2]: tensorLayout: 0 tensorType: 13 validShape:(1, 16, 16, 80, ), alignedShape:(1, 16, 16, 80, )
+  Output[3]: tensorLayout: 0 tensorType: 13 validShape:(1, 8, 8, 80, ), alignedShape:(1, 8, 8, 80, )
+  Output[4]: tensorLayout: 0 tensorType: 13 validShape:(1, 4, 4, 80, ), alignedShape:(1, 4, 4, 80, )
+  Output[5]: tensorLayout: 0 tensorType: 13 validShape:(1, 64, 64, 4, ), alignedShape:(1, 64, 64, 4, )
+  Output[6]: tensorLayout: 0 tensorType: 13 validShape:(1, 32, 32, 4, ), alignedShape:(1, 32, 32, 4, )
+  Output[7]: tensorLayout: 0 tensorType: 13 validShape:(1, 16, 16, 4, ), alignedShape:(1, 16, 16, 4, )
+  Output[8]: tensorLayout: 0 tensorType: 13 validShape:(1, 8, 8, 4, ), alignedShape:(1, 8, 8, 4, )
+  Output[9]: tensorLayout: 0 tensorType: 13 validShape:(1, 4, 4, 4, ), alignedShape:(1, 4, 4, 4, )
+  Output[10]: tensorLayout: 0 tensorType: 13 validShape:(1, 64, 64, 1, ), alignedShape:(1, 64, 64, 1, )
+  Output[11]: tensorLayout: 0 tensorType: 13 validShape:(1, 32, 32, 1, ), alignedShape:(1, 32, 32, 1, )
+  Output[12]: tensorLayout: 0 tensorType: 13 validShape:(1, 16, 16, 1, ), alignedShape:(1, 16, 16, 1, )
+  Output[13]: tensorLayout: 0 tensorType: 13 validShape:(1, 8, 8, 1, ), alignedShape:(1, 8, 8, 1, )
+  Output[14]: tensorLayout: 0 tensorType: 13 validShape:(1, 4, 4, 1, ), alignedShape:(1, 4, 4, 1, )
+  libiar: hb_disp_set_timing done!
+  dispaly init ret = 0
+  vps open ret = 0
+  module bind vps & display ret = 0
+  display start ret = 0
+  [x3_av_open_stream]:[380]:probesize: 5000000
+  decode start ret = 0
+  module bind decoder & vps ret = 0
+  [ERROR]["vdec"][video/src/vdec_group.c:348] [8870.450264]vdec_channel_bump_thread[348]: VDEC_MODULE module try again
 
-[draw_rect]:[137]:========point is 0,return========
-fps:55.555556,processing time:18
-```## Object Detection Algorithm - YOLOv5
+  [draw_rect]:[137]:========point is 0,return========
+  fps:55.555556,processing time:18
+  ```
+
+## Object Detection Algorithm - YOLOv5
 
 This example is based on the `YOLOv5` model and implements the camera object detection algorithm, allowing users to preview the detection results on the monitor.
 

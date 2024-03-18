@@ -47,11 +47,6 @@ pinctrl_voltage: pinctrl_voltag@0xA6003000 {
     /* rgmii 1.8v func */
         rgmii_1_8v_func: rgmii_1_8v_func {
             pinctrl-single,bits = <
-```
-
-Note: The translation provided is based on the given content. Some terms may need further context to ensure accuracy.Please translate the Chinese parts in the following content into English while preserving the original format and content:
-
-```
                 0x4 MODE_1_8V RGMII_MODE_P1
                 0x4 MODE_1_8V RGMII_MODE_P0
                 >;

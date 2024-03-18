@@ -137,7 +137,10 @@ Registers a memory range with a known physical address as a memory identifier th
 
 - Returns 0 if the API is executed successfully, otherwise it fails.
 
-## hbSysUnregisterMem()**[Function Prototype]**
+## hbSysUnregisterMem()
+
+
+**[Function Prototype]**
 
 ``int32_t hbSysUnregisterMem(hbSysMem *mem)``
 

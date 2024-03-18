@@ -47,7 +47,9 @@ ip [ -force ] -batch filename
   help: Display help information on the supported operation commands of the network object.
   ```
 
-------## Common Commands
+------
+
+## Common Commands
 
 ```shell
 ip link show                     # Show network interface information

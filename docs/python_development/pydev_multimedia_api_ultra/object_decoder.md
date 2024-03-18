@@ -1,149 +1,184 @@
 ---
 sidebar_position: 3
 ---
+
 # Decoder Object
 
-The Decoder object implements the decoding function for video data and includes several methods such as `decode`, `send_frame`, `get_frame`, `close`, etc. The detailed description is as follows:
+The Decoder object provides decoding functionality for video data, incorporating several methods such as `decode`, `send_frame`, `get_frame`, and `close`. Detailed explanations are given below:
 
 ## decode
 
-<font color='Blue'>[Description]</font>
+<font color='Blue'>【Function Description】</font>
 
-Enables the decode module and decodes the video file.
+Activates the decode module to decode a video file.
 
-<font color='Blue'>[Function Declaration]</font>  
+<font color='Blue'>【Function Declaration】</font>  
 
 ```python
 Decoder.decode(decode_type, [width, height], file)
 ```
 
-<font color='Blue'>[Parameter Description]</font>  
+<font color='Blue'>【Parameter Description】</font>  
 
-| Parameter    | Description           | Value Range                    |
-| --------- | --------------- | ------------------- |
-| file      | The name of the file to be decoded     |       N/A       |
-| decode_type | The type of video decoding  | Range 2~3, corresponding to `H265` and `MJPEG` respectively |
-| width     | The width of the input image for the decode module      | Not exceeding 4096              |
-| height    | The height of the input image for the decode module      | Not exceeding 4096              |
+| Parameter Name | Description           | Value Range                    |
+| -------------- | --------------------- | ------------------- |
+| file           | The name of the file to be decoded     |       N/A       |
+| decode_type    | Video decoding type  | Range 2~3, corresponding to `H265` and `MJPEG`, respectively |
+| width          | Image width input to the decoding module      | No more than 4096              |
+| height         | Image height input to the decoding module     | No more than 4096              |
 
-<font color='Blue'>[Usage]</font> 
+<font color='Blue'>【Usage Example】</font> 
 
 ```python
-#create decode object
+# Create a decode object
 decode = libsrcampy.Decoder()
 
-#enable decode channel 0, solution: 1080p, format: h265
-ret = dec.decode(2,[ 1920, 1080],"encode.h265")
+# Enable decode channel 0, resolution: 1080p, format: h265
+ret = dec.decode(2, [1920, 1080], "encode.h265")
 ```
 
- <font color='Blue'>[Return Value]</font>  
+<font color='Blue'>【Return Value】</font>  
 
-The return value is a `list` data with two elements.
+Returns a `list` containing 2 members.
 
-| Return Value                | Definition      |
-| ---------------- | ----------- |
+| Return Value                | Definition Description      |
+| ------------------------- | ----------- |
 | list[0] | 0: Decoding successful, -1: Decoding failed      | 
-| list[1] | The number of frames in the input bitstream file, valid when decoding is successful     |
+| list[1] | Number of frames in the input bitstream file, valid when decoding is successful |
 
-<font color='Blue'>[Note]</font><font color='Blue'>【参考代码】</font>  
+<font color='Blue'>【Notes】</font> 
 
 None
 
+<font color='Blue'>【Sample Code】</font>  
+
+Not provided.
+
 ## get_img
 
-<font color='Blue'>【功能描述】</font>
+<font color='Blue'>【Function Description】</font>
 
-Get the output results of the decoding module.
+Retrieves the output result from the decoding module.
 
-<font color='Blue'>【函数声明】</font>
+<font color='Blue'>【Function Declaration】</font>
+
 ```python
 Decoder.get_img()
 ```
 
-<font color='Blue'>【参数描述】</font>
+<font color='Blue'>【Parameter Description】</font>
 
-None
+No parameters.
 
-<font color='Blue'>【使用方法】</font>
+<font color='Blue'>【Usage Example】</font>
 
 ```python
-ret = dec.decode(2,[ 1920, 1080],"encode.h265")
+ret = dec.decode(2,[1920, 1080],"encode.h265")
 print ("Decoder return:%d frame count: %d" %(ret[0], ret[1]))
 
 img = dec.get_img()
 ```
 
-<font color='Blue'>【返回值】</font>
+<font color='Blue'>【Return Value】</font>
 
-| 返回值 | 定义描述 |
-| ------ | ----- |
-| -1      | Decoded data |
+| Return Value | Definition Description |
+| ------------ | ----- |
+| -1           | Decoded data  |
 
-<font color='Blue'>【注意事项】</font>
+<font color='Blue'>【Notes】</font>
 
-This interface needs to be used after calling `Decoder.decode()` to create a decoding channel.
+This interface should be used after creating a decoding channel by calling `Decoder.decode()`.
 
-<font color='Blue'>【参考代码】</font>
+<font color='Blue'>【Sample Code】</font>
 
 ```python
 import sys, os, time
-
 import numpy as np
 import cv2
 from hobot_vio import libsrcampy
 
-def test_decode():    #create decode object
+def test_decode():
+    # Create a decode object
     dec = libsrcampy.Decoder()
 
-    #enable decode function
-    #decode input: encode.h265, solution: 1080p, format: h265
-    ret = dec.decode(2,[ 1920, 1080],"encode.h265")
-    print ("Decoder return:%d frame count: %d" %(ret[0], ret[1]))
+    # Enable the decoding function
+    # Decode input: encode.h265, resolution: 1080p, format: h265
+    ret = dec.decode(2, [1920, 1080], "encode.h265")
+    print("Decoder return:%d frame count: %d" %(ret[0], ret[1]))
     
-    #get decoder output
+    # Get decoder output
     img = dec.get_img()
     if img is not None:
-        #save file
-        fo = open("output.img", "wb")
-        fo.write(img)
-        fo.close()
-        print("decode save img file success")
+        # Save file
+        with open("output.img", "wb") as fo:
+            fo.write(img)
+        print("Decode and save image file success")
     else:
-        print("decode save img file failed")
+        print("Decode and save image file failed")
 
     dec.close()
-    print("test_decode done!!!")| Return | Description |
-| ------ | ----------- |
-| 0      | Success     |
-| -1     | Failure     |
+    print("test_decode done!!!")
+
+test_decode()
+```
+
+## set_img
+
+<font color='Blue'>【Function Description】</font>
+
+Sends a single frame of encoded data into the decoding module for decoding.
+
+<font color='Blue'>【Function Declaration】</font>  
+
+```python
+Decoder.set_img(img, chn=0, eos=0)
+```
+
+<font color='Blue'>【Parameter Description】</font>  
+
+| Parameter Name | Definition Description | Value Range |
+| -------------- | --------------------- | ---------- |
+| img            | Encoded single frame to be decoded | N/A |
+| chn            | Decoder channel number      | Range 0~31 |
+| eos            | Whether the decode data has ended   | 0: Not ended, 1: Ended |
+
+<font color='Blue'>【Usage Example】</font> 
+
+None provided.
+
+<font color='Blue'>【Return Value】</font>  
+
+| Return Value | Description |
+| ------------ | ---- |
+| 0             | Success |
+| -1           | Failure |
 
 <font color='Blue'>【Notes】</font> 
 
-This interface needs to be used after calling `Decoder.decode()` to create a decoding channel, and the parameter `file` should be left empty when creating the decoding channel.
+This interface should be used after creating a decoding channel by calling `Decoder.decode()` with an empty `file` parameter.
 
-<font color='Blue'>【Reference code】</font>  
+<font color='Blue'>【Sample Code】</font>  
 
 ```python
 import sys, os, time
-
 import numpy as np
 import cv2
 from hobot_spdev import libsppydev as srcampy
 
 def test_cam_bind_encode_decode_bind_display():
-    #camera start
+    # Start camera
     cam = srcampy.Camera()
     ret = cam.open_cam(-1, [[1920, 1080], [1280, 720]])
     print("Camera open_cam return:%d" % ret)
 
-    #enable encoder
+    # Enable encoder
     enc = srcampy.Encoder()
     ret = enc.encode(2, [1920, 1080])
     print("Encoder encode return:%d" % ret)
 
-    #enable decoder
+    # Enable decoder
     dec = srcampy.Decoder()
-    ret = dec.decode(2,[ 1920, 1080],"")
+    ret = dec.decode(2, [1920, 1080], "")
     print ("Decoder return:%d frame count: %d" %(ret[0], ret[1]))
 
     ret = srcampy.bind(cam, enc)
@@ -151,55 +186,56 @@ def test_cam_bind_encode_decode_bind_display():
 
     a = 0
     while a < 100:
-        #get encode image from encoder
+        # Get encoded image from encoder
         img = enc.get_frame()
         if img is not None:
-            #send encode image to decoder
-            dec.set_frame(img)
+            # Send encoded image to decoder
+            dec.set_img(img)
             print("encode get image success count: %d" % a)
         else:
             print("encode get image failed count: %d" % a)
         a = a + 1
 
-```ret = srcampy.unbind(cam, enc)
-dec.close()
-enc.close()
-cam.close()
-print("test_cam_bind_encode_decode_bind_display done!!!")
+    ret = srcampy.unbind(cam, enc)
+    dec.close()
+    enc.close()
+    cam.close()
+    print("test_cam_bind_encode_decode_bind_display done!!!")
 
-test_cam_bind_encode_decode()
+    test_cam_bind_encode_decode()
 ```
 
 ## close
 
 <font color='Blue'>【Function Description】</font>
 
-Close the decoder module.
+Closes the decoding module.
 
 <font color='Blue'>【Function Declaration】</font>
+
 ```python
 Decoder.close()
 ```
 
 <font color='Blue'>【Parameter Description】</font>
 
-None
+No parameters.
 
-<font color='Blue'>【Usage】</font> 
+<font color='Blue'>【Usage Example】</font> 
 
-None
+None provided.
 
 <font color='Blue'>【Return Value】</font>
 
-| Return Value | Definition |
-| ------ | ---- |
-| 0      | Success |
-| -1    | Failure |
+| Return Value | Description |
+| ------------ | ---- |
+| 0             | Success |
+| -1           | Failure |
 
 <font color='Blue'>【Notes】</font>
 
-When exiting the program, you need to call the `close` interface to release resources.
+The `close` interface should be called when exiting the program to release resources.
 
 <font color='Blue'>【Sample Code】</font>
 
-None
+None.

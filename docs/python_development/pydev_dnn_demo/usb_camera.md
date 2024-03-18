@@ -94,23 +94,17 @@ nv12_data = bgr2nv12_opencv(resized_data)
     disp = srcampy.Display()
     # set solution to 1920 x 1080
     disp.display(0, 1920, 1080)
-    
+
     # if the solution of image is not 1920 x 1080, do resize
     if frame.shape[0]!=1080 and frame.shape[1]!=1920:
         frame = cv2.resize(frame, (1920,1080), interpolation=cv2.INTER_AREA)
-```# render the detection results to image
-box_bgr = draw_bboxs(frame, prediction_bbox)
 
-# convert BGR to NV12
-box_nv12 = bgr2nv12_opencv(box_bgr)
-# do display
-disp.set_img(box_nv12.tobytes())
-```
+    # render the detection results to image
+    box_bgr = draw_bboxs(frame, prediction_bbox)
 
-# 将检测结果渲染到图像上
-box_bgr = draw_bboxs(frame, prediction_bbox)
+    # convert BGR to NV12
+    box_nv12 = bgr2nv12_opencv(box_bgr)
+    # do display
+    disp.set_img(box_nv12.tobytes())
+    ```
 
-# 将BGR转换为NV12格式
-box_nv12 = bgr2nv12_opencv(box_bgr)
-# 进行显示
-disp.set_img(box_nv12.tobytes())

@@ -43,20 +43,22 @@ There are multiple ways to add autostart programs in Ubuntu system. This section
    sudo update-rc.d your_script_name defaults
    ```
 
-4. Enable autostart using the systemctl command```
-sudo systemctl enable your_script_name
-```
+4. Enable autostart using the systemctl command
+
+   ```bash
+   sudo systemctl enable your_script_name
+   ```
 
 5. Restart the development board to verify if the autostart service program is running correctly
 
-```
-root@ubuntu:~# systemctl status your_script_name.service 
-● your_script_name.service - LSB: Start your_service_name at boot time
-    Loaded: loaded (/etc/init.d/your_script_name; generated)
-    Active: active (exited) since Wed 2023-04-19 15:01:12 CST; 57s ago
-    Docs: man:systemd-sysv-generator(8)
-    Process: 2768 ExecStart=/etc/init.d/your_script_name start (code=exited, status=0/SUCCESS)
-```
+   ```bash
+   root@ubuntu:~# systemctl status your_script_name.service 
+   ● your_script_name.service - LSB: Start your_service_name at boot time
+      Loaded: loaded (/etc/init.d/your_script_name; generated)
+      Active: active (exited) since Wed 2023-04-19 15:01:12 CST; 57s ago
+      Docs: man:systemd-sysv-generator(8)
+      Process: 2768 ExecStart=/etc/init.d/your_script_name start (code=exited, status=0/SUCCESS)
+   ```
 
 
 
