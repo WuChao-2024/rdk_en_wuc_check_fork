@@ -42,8 +42,10 @@ sidebar_position: 8
    If the log level that occurs is greater than or equal to the set level, the log can be printed; otherwise, it is blocked. The smaller the set log level, the more print information there is (except for level 0, which does not output logs). For example, if the log level is set to 3, which is the ``WARNING`` level, logs of level 3, 4, and 5 can be printed. The default log level of the prediction library is ``HB_DNN_LOG_WARNING``, so log information of the following levels can be printed: ``WARNING``, ``ERROR``, ``FATAL``.
 
 3. Log level setting method:
-   The log level can be set using the environment variable ``HB_DNN_LOG_LEVEL``.4. Common Environment Variables
+   The log level can be set using the environment variable ``HB_DNN_LOG_LEVEL``.
 
+4. Common Environment Variables
+   ```
    HB_DNN_LOG_LEVEL                 // Set the log level.
    HB_DNN_CONV_MAP_PATH             // Path to the model convolution layer configuration file; generated json file when the compilation parameter layer_out_dump is true.
    HB_DNN_DUMP_PATH                 // Path to output the model convolution layer results, used in conjunction with HB_DNN_CONV_MAP_PATH.
@@ -52,7 +54,8 @@ sidebar_position: 8
    HB_DNN_SIM_PLATFORM              // Setting for the x86 simulator simulation platform, can be set to BERNOULLI, BERNOULLI2, BAYES.
    HB_DNN_SIM_BPU_MEM_SIZE          // Setting for the x86 simulator BPU memory size, in MB.
    HB_DNN_ENABLE_DSP                // Enables the DSP module, only available for RDK Ultra.
-
+   ```
+   
 ## Considerations for Development Machine Simulator
 
 1. When using the development machine simulator, you can specify the simulated processor architecture by setting the environment variable HB_DNN_SIM_PLATFORM. You can execute the following commands:

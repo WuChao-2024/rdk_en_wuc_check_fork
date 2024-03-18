@@ -46,38 +46,61 @@ ret = encode.encode(0, 1, 1920, 1080)
 
 <font color='Blue'>【Notes】</font>
 
-None<font color='Blue'>【Function Description】</font>
+None
 
-Retrieve the encoded image from the enabled encoding channel in the specified format.
+<font color='Blue'>【Reference Code】</font>
+
+None
+
+## encode_file
+
+<font color='Blue'>【Function Description】</font>
+
+Feeds image files into enabled encoding channels and encodes them according to a predetermined format.
 
 <font color='Blue'>【Function Declaration】</font> 
 
 ```python
-Encoder.get_img()
+Encoder.encode_file(img)
 ```
 
 <font color='Blue'>【Parameter Description】</font>  
 
-None
+| Parameter Name | Description                | Value Range                     |
+| -------------- | --------------------------- | ---------------------------- |
+| img            | Image data to be encoded, in NV12 format | N/A                          |
 
-<font color='Blue'>【Usage】</font> 
+<font color='Blue'>【Usage Example】</font> 
 
 ```python
-#retrieve the encoded image
-encoded_img = encode.get_img()
+fin = open("output.img", "rb")
+input_img = fin.read()
+fin.close()
+
+# Input image data for encoding
+ret = encode.encode_file(input_img)
 ```
 
-<font color='Blue'>【Return Value】</font>  
+<font color='Blue'>【Return Values】</font>  
 
-The encoded image data in the specified format.
+| Return Value | Definition Description |
+| ------------ | --------------------- |
+| 0            | Success               |
+| -1           | Failure               |
 
-<font color='Blue'>【Note】</font> 
+<font color='Blue'>【Notes】</font> 
 
 None
 
 <font color='Blue'>【Reference Code】</font>  
 
-None<font color='blue'>【Function Description】</font>
+None
+
+## get_img
+
+
+
+<font color='blue'>【Function Description】</font>
 
 Get encoded data.
 
@@ -126,7 +149,7 @@ def test_encode():
     a = 0
     fin = open("output.img", "rb")
     input_img = fin.read()
-```fin.close()
+    fin.close()
 while a < 100:
     #send image data to encoder
     ret = enc.encode_file(input_img)
@@ -144,6 +167,8 @@ enc.close()
 print("test_encode done!!!")
 
 test_encode()
+
+```
 
 ## close
 
@@ -174,6 +199,7 @@ None
 
 <font color='Blue'>【Note】</font> 
 
-This interface should be used after calling `Encoder.encode()` to create the encoding channel.<font color='Blue'>【Reference Code】</font>
+This interface should be used after calling `Encoder.encode()` to create the encoding channel.
+<font color='Blue'>【Reference Code】</font>
 
 None

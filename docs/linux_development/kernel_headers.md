@@ -100,7 +100,9 @@ Sign Kernel Module File Done.
 If the driver module file is not signed and loaded directly, the following error will occur:
 ```
 insmod: ERROR: could not insert module hello.ko: Required key not available
-```### Load Module
+```
+
+### Load Module
 
 Load ko: `insmod hello.ko`
 ```bash

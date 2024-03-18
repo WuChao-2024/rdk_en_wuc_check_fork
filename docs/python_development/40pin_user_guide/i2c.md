@@ -24,15 +24,30 @@ Please refer to `/app/40pin_samples/test_i2c.py` for detailed information on how
 Starting demo now! Press CTRL+C to exit
 List of enabled I2C controllers:
 /dev/i2c-0  /dev/i2c-1
-Please input I2C BUS num: 1
+Please input I2C BUS num:1
      0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
 00:          -- -- -- -- -- -- -- -- -- -- -- -- -- 
-10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-30: -- -- -- -- -- -- -- -- -- -- -- UU -- -- -- --
-40: 40 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-60: -- -- -- -- -- -- -- -- -- -- -- --# Import i2cdev
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- UU -- -- -- -- 
+40: 40 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --                         
+Please input I2C device num(Hex):40
+Read data from device 40 on I2C bus 1
+read value= b'`'
+```
+## Test Code
+
+```python
+#!/usr/bin/env python3
+
+import sys
+import os
+import time
+
+# import i2cdev
 from i2cdev import I2C
 
 def i2cdevTest():
@@ -53,3 +68,5 @@ if __name__ == '__main__':
     os.system('ls /dev/i2c*')
     while True:
         i2cdevTest()
+
+```

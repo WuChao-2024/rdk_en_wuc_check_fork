@@ -46,7 +46,9 @@ ret = camera.open_cam(0, -1, 30, 1920, 1080)
 | 0            | Success     |
 | -1           | Failure     |
 
-<font color='Blue'>[Notes]</font>The `width` and `height` parameters support `list` type input, which enables the camera to output multiple sets of different resolutions. The `list` supports up to 4 groups of downsizing and 1 group of enlargement, with a scaling range between `1/8` and `1.5` times the original resolution of the camera. The usage is as follows:
+<font color='Blue'>[Notes]</font>
+
+The `width` and `height` parameters support `list` type input, which enables the camera to output multiple sets of different resolutions. The `list` supports up to 4 groups of downsizing and 1 group of enlargement, with a scaling range between `1/8` and `1.5` times the original resolution of the camera. The usage is as follows:
 
 ```python
 ret = cam.open_cam(0, -1, 30, [1920, 1280], [1080, 720])
@@ -94,7 +96,9 @@ Enables the vps (video process) image processing function for the specified came
 
 ```python
 Camera.open_vps(pipe_id, proc_mode, src_width, src_height, dst_width, dst_height, crop_rect, rotate, src_size, dst_size)
-```<font color='Blue'>【Parameter Description】</font>  
+```
+
+<font color='Blue'>【Parameter Description】</font>  
 
 | Parameter Name | Definition | Value Range |
 | -------------- | ---------- | ----------- |
@@ -136,7 +140,9 @@ ret = camera.open_vps(1, 1, 1920, 1080, 512, 512)
 
 The `X3` chip has alignment requirements for the width of the `VPS` output. If the width you set does not meet the alignment requirement of **32**, it will be rounded up automatically. For example, if you set the output width to `720` and height to `480`, the actual output width of `VPS` will be `736`. In the **binding** situation, this situation will be automatically handled in the library **automatically**. In the case of **non-binding**, pay attention to the width alignment issue when manually handling the frame buffer, as well as the occurrence of **screen distortion and green lines** when passing the frame to the display module in this non-aligned situation.
 
-:::```python
+:::
+
+```python
 #creat camera object
 camera = libsrcampy.Camera()
 
@@ -185,7 +191,9 @@ time.sleep(1)
 img = cam.get_img(2)
 ```
 
-<font color='Blue'>【Return Value】</font>| Return Value | Definition |
+<font color='Blue'>【Return Value】</font>
+
+| Return Value | Definition |
 | ------ | ----- |
 | 0      | Success  |
 | -1    | Failure   |
@@ -233,7 +241,9 @@ test_camera()
 
 <font color='Blue'>【Function Description】</font>
 
-Input image to the `vps` module and trigger the image processing operation.<font color='Blue'>【Function Declaration】</font>  
+Input image to the `vps` module and trigger the image processing operation.
+
+<font color='Blue'>【Function Declaration】</font>  
 
 ```python
 Camera.set_img(img)
@@ -333,12 +343,14 @@ None
 
 <font color='Blue'>【Usage】</font>cam = libsrcampy.Camera()
 
+```python
 #open MIPI camera, fps: 30, solution: 1080p
 ret = cam.open_cam(0, 1, 30, 1920, 1080)
 print("Camera open_cam return:%d" % ret)
 
 #close MIPI camera
 cam.close_cam()
+```
 
 <font color='Blue'>【Return】</font>  
 

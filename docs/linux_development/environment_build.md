@@ -45,7 +45,9 @@ curl repo git liblz4-tool apt-cacher-ng libssl-dev checkpolicy autoconf \
 android-sdk-libsparse-utils mtools parted dosfstools udev rsync
 ```
 
-**Install Python**Compiling the Linux kernel requires a Python 2 environment. Starting from version Ubuntu 22.04, Python 2 is no longer installed by default. Therefore, you need to execute the following command to install it:
+**Install Python**
+
+Compiling the Linux kernel requires a Python 2 environment. Starting from version Ubuntu 22.04, Python 2 is no longer installed by default. Therefore, you need to execute the following command to install it:
 
 ```shell
 sudo apt install python2
@@ -92,7 +94,9 @@ The above commands configure the environment variables temporarily. To make the 
 
 rdk-gen is used to build a custom operating system image for the Horizon RDK X3. It provides a scalable framework that allows users to customize and build the Ubuntu operating system for RDK X3 according to their needs.
 
-Download the source code:```shell
+Download the source code:
+
+```shell
 git clone https://github.com/HorizonRDK/rdk-gen.git
 ```
 
@@ -189,7 +193,9 @@ sudo ./mk_kernel.sh
 
 After the compilation is completed, the kernel image, driver modules, device tree, and kernel header files will be generated in the `deploy/kernel` directory.
 
-```shelldtb  Image  Image.lz4  kernel_headers  modules
+```shell
+dtb  Image  Image.lz4  kernel_headers  modules
+```
 
 These contents will be used by three Debian packages: hobot-boot, hobot-dtb, and hobot-kernel-headers. If you want to customize and modify these three packages, you need to compile the kernel first.
 
@@ -285,10 +291,10 @@ Follow the steps below to recompile and generate `miniboot`.
 
 Execute the following command to download uboot code:
 
-```shellcd source/bootloader/
+```shell
+cd source/bootloader/
 git submodule init
 git submodule update
-
 ```
 
 ### Select board-level configuration file
@@ -335,7 +341,9 @@ $ ./xbuild.sh lunch board_ubuntu_nand_sdcard_config.mk
 
 You're building on #221-Ubuntu SMP Tue Apr 18 08:32:52 UTC 2023
 You are selected board config: horizon/x3/board_ubuntu_nand_sdcard_config.mk
-```### Compiling Bootloader as a Whole
+```
+
+### Compiling Bootloader as a Whole
 
 Go to the build directory and execute xbuild.sh to compile the bootloader as a whole:
 
@@ -382,7 +390,9 @@ libc6-dev-armhf-cross imagemagick curl patchutils liblz4-tool libpython2.7-dev l
 python3-dev python3-distutils libfdt-dev locales ncurses-base pixz dialog systemd-container udev \
 lib32stdc++6 libc6-i386 lib32ncurses5 lib32tinfo5 bison libbison-dev flex libfl-dev cryptsetup gpg \
 gnupg1 gpgv1 gpgv2 cpio aria2 pigz dirmngr python3-distutils distcc git dos2unix apt-cacher-ng
-```### Key Tool Introduction
+```
+
+### Key Tool Introduction
 
 #### debootstrap
 
@@ -457,3 +467,18 @@ rootfs/                                    # After extracting samplefs_desktop-v
 └── var
 
 21 directories, 5 files
+```
+
+In the code, key variable definitions are as follows:
+
+**PYTHON_PACKAGE_LIST**: A list of Python packages to be installed.
+
+**DEBOOTSTRAP_LIST**: Debian packages to be installed during the execution of debootstrap.
+
+**BASE_PACKAGE_LIST**: The essential Debian packages required for a minimal Ubuntu system installation.
+
+**SERVER_PACKAGE_LIST**: Additional Debian packages that will be installed on top of the base version for an Ubuntu Server edition.
+
+**DESKTOP_PACKAGE_LIST**: Software packages needed to support a graphical desktop environment.
+
+The officially maintained `samplefs_desktop` filesystem by Horizon includes all configurations from these package lists. Users can customize this by adding or removing packages according to their specific requirements, maintaining the original format or structure.

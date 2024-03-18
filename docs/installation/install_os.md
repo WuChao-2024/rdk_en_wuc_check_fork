@@ -192,7 +192,11 @@ When burning the Ubuntu system on RDK Ultra development kit, you need to use the
 
 1. Connect RDK Ultra and the PC directly with an Ethernet cable, and ensure that the network can be pinged.
 
-2. Short the `FC_REC` and `GND` signals of the Function Control Interface (Interface 10).3. Run the `hbupdate` main program, open the download tool, and select the development board model as `RDK_ULTRA`, which is a required option.
+2. Short the `FC_REC` and `GND` signals of the Function Control Interface (Interface 10).
+
+![image-ultra-fc-rec](image/install_os/image-ultra-fc-rec.jpg)
+
+3. Run the `hbupdate` main program, open the download tool, and select the development board model as `RDK_ULTRA`, which is a required option.
 
 ![image-flash-system1](./image/install_os/image-rdk-ultra-system1.jpg)
 

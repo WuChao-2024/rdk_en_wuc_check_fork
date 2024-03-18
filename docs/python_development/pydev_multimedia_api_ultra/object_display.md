@@ -46,7 +46,9 @@ Currently, only supports the `1920x1080` resolution.
 
 <font color='Blue'>[Reference Code]</font>
 
-None## send_frame
+None
+
+## send_frame
 
 <font color='Blue'>【Description】</font>
 
@@ -95,7 +97,7 @@ def test_display():
     #enable display function
     ret = disp.display([1920, 1080])
     print ("Display display 0 return:%d" % ret)
-```fo = open("output.img", "rb")
+    fo = open("output.img", "rb")
 img = fo.read()
 fo.close()
 
@@ -143,7 +145,10 @@ ret = disp.display(2)
 print ("Display display 2 return:%d" % ret)
 
 #set osd rectangle
-ret = disp.set_rect(100, 100, 1920, 200,  flush = 1,  color = 0xffff00ff)```<font color='Blue'>[Return Value]</font>
+ret = disp.set_rect(100, 100, 1920, 200,  flush = 1,  color = 0xffff00ff)
+```
+
+<font color='Blue'>[Return Value]</font>
 
 | Return Value | Description |
 | ------------ | ----------- |
@@ -191,7 +196,8 @@ print ("Display display 2 return:%d" % ret)
 # set osd string
 string = "horizon"
 ret = disp.set_word(300, 300, string.encode('gb2312'), 0, 0xff00ffff)
-```print ("Display set_word return:%d" % ret)
+print ("Display set_word return:%d" % ret)
+```
 
 <font color='Blue'>[Return Value]</font>  
 
@@ -239,15 +245,18 @@ None
 
 This interface needs to be used after enabling the display function with the `display` interface.
 
-<font color='Blue'>[Reference Code]</font>## bind interface
+<font color='Blue'>[Reference Code]</font>
+
+## bind interface
 
 <font color='Blue'>[Function Description]</font>
 
 This interface can bind the output and input data streams of the `Camera`, `Encoder`, `Decoder`, and `Display` modules, and the data can flow automatically between the bound modules without user operations. For example, after binding the `Camera` and `Display` modules, the camera data will be automatically output to the display screen through the display module without the need to call additional interfaces.
 
 <font color='Blue'>[Function Declaration]</font>
+
 ```python
-    srcampy.bind(src, dst)
+srcampy.bind(src, dst)
 ```
 
 <font color='Blue'>[Parameter Description]</font>
@@ -258,6 +267,7 @@ This interface can bind the output and input data streams of the `Camera`, `Enco
 | dst            | Target module | `Camera`, `Encoder`, `Decoder`, `Display` modules |
 
 <font color='Blue'>[Usage]</font>
+
 ```python
 #create camera object
 cam = srcampy.Camera()
@@ -283,7 +293,9 @@ print("srcampy bind return:%d" % ret)
 
 <font color='Blue'>[Notes]</font>
 
-None## unbind interface
+None
+
+## unbind interface
 
 <font color='Blue'>【Description】</font>
 

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 12
+sidebar_position: 4
 ---
 # GPIO Debugging Guide
 
@@ -44,7 +44,9 @@ The interface of the tool is shown in the image below. Users can input the `GPIO
 
 ![image-20220529120102028](./image/driver_develop_guide/image-20220529120102028.png)
 
-## Driver Code```bash
+## Driver Code
+
+```bash
 drivers/gpio/gpio-hobot-x3.c # gpio driver source file
 ```
 
@@ -93,7 +95,10 @@ The attributes of GPIO device tree nodes are generally named names-gpios or name
 };
 ```
 
-#### Driver Code Interface/* include/linux/gpio.h */
+#### Driver Code Interface
+
+```c
+/* include/linux/gpio.h */
 /* Request GPIO */
 int gpio_request(unsigned gpio, const char *label);
 /* Initialize GPIO as output and set output level */
@@ -187,7 +192,9 @@ echo 4 > /sys/class/gpio/unexport
 
 #### Debug interface
 
-If the Linux Kernel configuration option CONFIG_DEBUG_FS is enabled and the debugfs file system is mounted,```
+If the Linux Kernel configuration option CONFIG_DEBUG_FS is enabled and the debugfs file system is mounted
+
+```
 mount -t debugfs none /sys/kernel/debug
 ```
 

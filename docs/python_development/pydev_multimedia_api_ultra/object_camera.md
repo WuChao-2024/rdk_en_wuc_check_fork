@@ -48,7 +48,8 @@ ret = camera.open_cam(-1,  [1920, 1080])
 
 The resolution output part supports two-dimensional `list` type input, which enables multiple groups of different resolution outputs for the camera. The `list` supports up to 4 groups of reduction and 1 group of enlargement, with a zoom range between `1/8` and `1.5` times the original resolution of the camera. To use it, follow the example below:
 
-```pythonret = cam.open_cam(0, -1, 30, [[1920, 1080], [1280, 720]])
+```python
+ret = cam.open_cam(0, -1, 30, [[1920, 1080], [1280, 720]])
 ```
 
 <font color='Blue'>【Reference Code】</font>  
@@ -142,8 +143,7 @@ img = cam.get_frame(2,[512,512])
 
 <font color='Blue'>【Return Value】</font>
 
-| Return Value | Definition |Please translate the Chinese parts in the following content into English, while retaining the original format and content:
-
+| Return Value | Definition |
 | ------ | ----- |
 | 0      | Success |
 | -1    | Failure |
@@ -193,7 +193,9 @@ test_camera()
 
 Input an image to the `vps` module and trigger image processing.
 
-<font color='Blue'>[Function Declaration]</font>```python
+<font color='Blue'>[Function Declaration]</font>
+
+```python
 Camera.send_frame(img)
 ```
 
@@ -242,41 +244,72 @@ from hobot_spdev import libsppydev as srcampy
 
 def test_camera_vps():
     vps = srcampy.Camera()
-```#enable vps function, input: 1080p, output: 512x512
-ret = vps.open_vps( [1920, 1080], [512, 512])
-print("Camera vps return:%d" % ret)
+    #enable vps function, input: 1080p, output: 512x512
+    ret = vps.open_vps( [1920, 1080], [512, 512])
+    print("Camera vps return:%d" % ret)
 
-fin = open("output.img", "rb")
-img = fin.read()
-fin.close()
+    fin = open("output.img", "rb")
+    img = fin.read()
+    fin.close()
 
-#send image data to vps
-ret = vps.send_frame(img)
-print ("Process send_frame return:%d" % ret)
+    #send image data to vps
+    ret = vps.send_frame(img)
+    print ("Process send_frame return:%d" % ret)
 
-fo = open("output_vps.img", "wb+")
+    fo = open("output_vps.img", "wb+")
 
-#get image data from vps
-img = vps.get_frame()
-if img is not None:
-    fo.write(img)
-    print("encode write image success")
-else:
-    print("encode write image failed")
-fo.close()
+    #get image data from vps
+    img = vps.get_frame()
+    if img is not None:
+        fo.write(img)
+        print("encode write image success")
+    else:
+        print("encode write image failed")
+    fo.close()
 
-#close vps function
-vps.close()
-print("test_camera_vps done!!!")
-
-def test_camera_vps():
-    # close vps function
+    #close vps function
     vps.close()
-    print("test_camera_vps done!!!")cam = libsrcampy.Camera()
+    print("test_camera_vps done!!!")
 
-#open MIPI camera, fps: 30, solution: 1080p
-ret = cam.open_cam(-1,[1920, 1080])
+    test_camera_vps():
+```
+## close
+
+<font color='Blue'>【Function Description】</font>
+
+Enable the MIPI camera to close.
+
+<font color='Blue'>【Function Declaration】</font>  
+
+```python
+Camera.close()
+```
+
+<font color='Blue'>【Parameter Description】</font>  
+
+None
+
+<font color='Blue'>【Usage Method】</font> 
+
+```python
+cam = libsrcampy.Camera()
+
+# Open MIPI camera with fps set to 30 and resolution set to 1080p
+ret = cam.open_cam(-1, [1920, 1080])
 print("Camera open_cam return:%d" % ret)
 
-#close MIPI camera
+# Close the MIPI camera
 cam.close()
+```
+
+<font color='Blue'>【Return Value】</font>  
+
+None
+
+<font color='Blue'>【Precautions】</font> 
+
+None
+
+<font color='Blue'>【Sample Code】</font>  
+
+None

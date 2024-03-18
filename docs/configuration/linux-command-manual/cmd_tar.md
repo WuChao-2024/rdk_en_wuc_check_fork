@@ -267,6 +267,7 @@ never, simple    always make simple backups--quoting-style option has the follow
 The default value for this tar command is:
 --format=gnu -f- -b20 --quoting-style=escape --rmt-command=/etc/rmt
 --rsh-command=/usr/bin/ssh
+```
 
 ## Common Commands
 

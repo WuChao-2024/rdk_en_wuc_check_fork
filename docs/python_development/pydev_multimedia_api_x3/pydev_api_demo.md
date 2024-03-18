@@ -13,7 +13,7 @@ import cv2
 from hobot_vio import libsrcampy
 
 def get_nalu_pos(byte_stream):
-    size = len(byte_stream)
+    size = byte_stream.__len__()
     nals = []
     retnals = []
 
@@ -47,10 +47,9 @@ def get_nalu_pos(byte_stream):
             end = nals[i + 1][0] - 4
         retnals.append((start, end, nals[i][1], nals[i][2], nals[i][3], nals[i][4]))
     start = nals[-1][0]
-```
-Note: The translation only includes the code itself and not the surrounding context.end = byte_stream.__len__() - 1
-retnals.append((start, end, nals[-1][1], nals[-1][2], nals[-1][3], nals[-1][4]))
-return retnals
+    end = byte_stream.__len__() - 1
+    retnals.append((start, end, nals[-1][1], nals[-1][2], nals[-1][3], nals[-1][4]))
+    return retnals
 
 def get_h264_nalu_type(byte_stream):
     nalu_types = []
@@ -98,7 +97,7 @@ def test_camera_vps():
         fo.write(img)
         print("encode write image success")
     else:
-       print("encode write image failed")
+        print("encode write image failed")
     fo.close()
 
     vps.close_cam()
@@ -147,8 +146,9 @@ def test_decode():
     else:
         print("decode save img file failed")
 
-    dec.close()print("test_decode done!!!")
-
+    dec.close()
+    print("test_decode done!!!")
+    
 def test_display():
     disp = libsrcampy.Display()
     ret = disp.display(0, 1920, 1080, 0, 1)
@@ -196,7 +196,8 @@ def test_camera_bind_encode():
     fo1 = open("encode1.h264", "wb+")
     a = 0
     while a < 100:
-        img = enc.get_img()img1 = enc1.get_img()
+        img = enc.get_img()
+        img1 = enc1.get_img()
         if img is not None:
             fo.write(img)
             fo1.write(img1)
@@ -245,34 +246,35 @@ def test_camera_bind_display():
     print("test_camera_bind_display done!!!")
 
 def test_decode_bind_display():
-    #decode startdec = libsrcampy.Decoder()
-ret = dec.decode("encode.h264", 0, 1, 1920, 1080)
-print ("Decoder return:%d frame count: %d" %(ret[0], ret[1]))
+    #decode start
+    dec = libsrcampy.Decoder()
+    ret = dec.decode("encode.h264", 0, 1, 1920, 1080)
+    print ("Decoder return:%d frame count: %d" %(ret[0], ret[1]))
 
-dec1 = libsrcampy.Decoder()
-ret = dec1.decode("encode1.h264", 1, 1, 1280, 720)
-print ("Decoder return:%d frame count: %d" %(ret[0], ret[1]))
+    dec1 = libsrcampy.Decoder()
+    ret = dec1.decode("encode1.h264", 1, 1, 1280, 720)
+    print ("Decoder return:%d frame count: %d" %(ret[0], ret[1]))
 
-#display start
-disp = libsrcampy.Display()
-ret = disp.display(0, 1920, 1080, 0, 1)
-print ("Display display 0 return:%d" % ret)
-ret = disp.display(2)
-print ("Display display 2 return:%d" % ret)
-disp.set_graph_rect(100, 100, 1920, 200, chn = 2, flush = 1,  color = 0xffff00ff)
-string = "horizon"
-disp.set_graph_word(300, 300, string.encode('gb2312'), 2, 0, 0xff00ffff)
-ret = libsrcampy.bind(dec, disp)
-print("libsrcampy bind return:%d" % ret)
+    #display start
+    disp = libsrcampy.Display()
+    ret = disp.display(0, 1920, 1080, 0, 1)
+    print ("Display display 0 return:%d" % ret)
+    ret = disp.display(2)
+    print ("Display display 2 return:%d" % ret)
+    disp.set_graph_rect(100, 100, 1920, 200, chn = 2, flush = 1,  color = 0xffff00ff)
+    string = "horizon"
+    disp.set_graph_word(300, 300, string.encode('gb2312'), 2, 0, 0xff00ffff)
+    ret = libsrcampy.bind(dec, disp)
+    print("libsrcampy bind return:%d" % ret)
+    
+    time.sleep(5)
 
-time.sleep(5)
-
-ret = libsrcampy.unbind(dec, disp)
-print("libsrcampy unbind return:%d" % ret)
-disp.close()
-dec1.close()
-dec.close()
-print("test_decode_bind_display done!!!")
+    ret = libsrcampy.unbind(dec, disp)
+    print("libsrcampy unbind return:%d" % ret)
+    disp.close()
+    dec1.close()
+    dec.close()
+    print("test_decode_bind_display done!!!")
 
 def test_cam_bind_encode_decode_bind_display():
     #camera start
@@ -293,28 +295,30 @@ def test_cam_bind_encode_decode_bind_display():
     #display start
     disp = libsrcampy.Display()
     ret = disp.display(0, 1920, 1080, 0, 1)
-    print ("Display display 0 return:%d" % ret)ret = libsrcampy.bind(cam, enc)
-print("libsrcampy bind return:%d" % ret)
-ret = libsrcampy.bind(dec, disp)
-print("libsrcampy bind return:%d" % ret)
+    print ("Display display 0 return:%d" % ret)
 
-a = 0
-while a < 100:
-    img = enc.get_img()
-    if img is not None:
-        dec.set_img(img)
-        print("encode get image success count: %d" % a)
-    else:
-        print("encode get image failed count: %d" % a)
-    a = a + 1
+    ret = libsrcampy.bind(cam, enc)
+    print("libsrcampy bind return:%d" % ret)
+    ret = libsrcampy.bind(dec, disp)
+    print("libsrcampy bind return:%d" % ret)
 
-ret = libsrcampy.unbind(cam, enc)
-ret = libsrcampy.unbind(dec, disp)
-disp.close()
-dec.close()
-enc.close()
-cam.close_cam()
-print("test_cam_bind_encode_decode_bind_display done!!!")
+    a = 0
+    while a < 100:
+        img = enc.get_img()
+        if img is not None:
+            dec.set_img(img)
+            print("encode get image success count: %d" % a)
+        else:
+            print("encode get image failed count: %d" % a)
+        a = a + 1
+
+    ret = libsrcampy.unbind(cam, enc)
+    ret = libsrcampy.unbind(dec, disp)
+    disp.close()
+    dec.close()
+    enc.close()
+    cam.close_cam()
+    print("test_cam_bind_encode_decode_bind_display done!!!")
 
 def test_cam_vps_display():
     #camera start
@@ -342,65 +346,67 @@ def test_cam_vps_display():
             print("camera get image failed count: %d" % a)
 
         img = vps.get_img(2, 1920, 1080)
-        if img is not None:disp.set_img(img)
-print("vps get image success count: %d" % a)
-else:
-print("vps get image failed count: %d" % a)
-a = a + 1
+        if img is not None:
+            disp.set_img(img)
+            print("vps get image success count: %d" % a)
+        else:
+            print("vps get image failed count: %d" % a)
+        a = a + 1
 
-disp.close()
-vps.close_cam()
-cam.close_cam()
-print("test_cam_vps_display done!!!")
+    disp.close()
+    vps.close_cam()
+    cam.close_cam()
+    print("test_cam_vps_display done!!!")
 
 def test_rtsp_decode_bind_vps_bind_disp(rtsp_url):
-start_time = time.time()
-image_count = 0
-skip_count = 0
-find_pps_sps = 0
+    start_time = time.time()
+    image_count = 0
+    skip_count = 0
+    find_pps_sps = 0
 
-#rtsp start
-cap = cv2.VideoCapture(rtsp_url)
-cap.set(cv2.CAP_PROP_FORMAT, -1) # get stream
-if not cap.isOpened():
-print("fail to open rtsp: {}".format(rtsp_url))
-return -1
-width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    #rtsp start
+    cap = cv2.VideoCapture(rtsp_url)
+    cap.set(cv2.CAP_PROP_FORMAT, -1) # get stream
+    if not cap.isOpened():
+        print("fail to open rtsp: {}".format(rtsp_url))
+        return -1
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-#decode start
-dec = libsrcampy.Decoder()
-ret = dec.decode("", 0, 1, width, height)
-print ("Decoder return:%d frame count: %d" %(ret[0], ret[1]))
+    #decode start
+    dec = libsrcampy.Decoder()
+    ret = dec.decode("", 0, 1, width, height)
+    print ("Decoder return:%d frame count: %d" %(ret[0], ret[1]))
 
-#camera start
-vps = libsrcampy.Camera()
-ret = vps.open_vps(0, 1, width, height, [1920, 512], [1080, 512])
-print("Camera open_cam return:%d" % ret)
+    #camera start
+    vps = libsrcampy.Camera()
+    ret = vps.open_vps(0, 1, width, height, [1920, 512], [1080, 512])
+    print("Camera open_cam return:%d" % ret)
 
-#display start
-disp = libsrcampy.Display()
-ret = disp.display(0, 1920, 1080, 0, 1)
-print ("Display display 0 return:%d" % ret)
+    #display start
+    disp = libsrcampy.Display()
+    ret = disp.display(0, 1920, 1080, 0, 1)
+    print ("Display display 0 return:%d" % ret)
 
-ret = libsrcampy.bind(dec, vps)
-print("libsrcampy bind return:%d" % ret)
-ret = libsrcampy.bind(vps, disp)
-print("libsrcampy bind return:%d" % ret)
+    ret = libsrcampy.bind(dec, vps)
+    print("libsrcampy bind return:%d" % ret)
+    ret = libsrcampy.bind(vps, disp)
+    print("libsrcampy bind return:%d" % ret)
 
-a = 0
-while True:
-ret, stream_frame = cap.read()
-if not ret:return
+    a = 0
+    while True:
+        ret, stream_frame = cap.read()
+        if not ret:
+            return
         nalu_types = get_h264_nalu_type(stream_frame.tobytes())
 
-        # The first frame sent to the decoder needs to be pps, sps, otherwise the decoder will throw "FAILED TO DEC_PIC_HDR" exception and exit
+        # 送入解码的第一帧需要是 pps，sps, 否则解码器会报 "FAILED TO DEC_PIC_HDR" 异常而退出
         if (nalu_types[0] in [1, 5]) and find_pps_sps == 0:
             continue
 
         find_pps_sps = 1
         if stream_frame is not None:
-            ret = dec.set_img(stream_frame.tobytes(), 0) # Send stream, decode several frames first and then retrieve
+            ret = dec.set_img(stream_frame.tobytes(), 0) # 发送码流, 先解码数帧图像后再获取
             if ret != 0:
                 return ret
             if skip_count < 5:
@@ -430,3 +436,4 @@ test_cam_vps_display()
 
 # rtsp_url = "rtsp://127.0.0.1/3840x2160.264"
 # test_rtsp_decode_bind_vps_bind_disp(rtsp_url)
+```

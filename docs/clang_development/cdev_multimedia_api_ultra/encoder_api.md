@@ -22,29 +22,29 @@ RDK Ultra does **not** support H264 encoding or decoding.
 
 ## sp_init_encoder_module
 
-**[Function prototype]**
+**【Function prototype】**
 
 `void *sp_init_encoder_module()`
 
-**[Description]**
+**【Description】**
 
 Initialize the encoding module object. This function needs to be called to obtain the handle for using the encoding module.
 
-**[Parameters]**
+**【Parameters】**
 
 None
 
-**[Return type]**
+**【Return type】**
 
 If successful, it returns a pointer to an ENCODER object. Otherwise, it returns NULL.
 
 ## sp_release_encoder_module
 
-**[Function prototype]**
+**【Function prototype】**
 
 `void sp_release_encoder_module(void *obj)`
 
-**[Description]**
+**【Description】**
 
 Destroy the encoding module object.**【Parameters】**
 
@@ -94,39 +94,41 @@ Close the open encoding channel.
 
 Returns 0 on success, -1 on failure.
 
-## sp_encoder_set_frame**[Function Prototype]**
+## sp_encoder_set_frame
+
+**【Function Prototype】**
 
 `int32_t sp_encoder_set_frame(void *obj, char *frame_buffer, int32_t size)`
 
-**[Function Description]**
+**【Function Description】**
 
 This function is used to pass the image frame data that needs to be encoded to the encoding channel. The format must be `NV12`.
 
-**[Parameters]**
+**【Parameters】**
 
 - `obj`: Pointer to the initialized `ENCODER` object.
 - `frame_buffer`: Image frame data to be encoded. It must be in `NV12` format and have the same resolution as the image frame resolution when calling the `sp_start_encode` interface.
 - `size`: Size of the image frame data. The formula to calculate the size of an `NV12` format image is width * height * 3 / 2.
 
-**[Return Type]**
+**【Return Type】**
 
 Returns 0 for success, -1 for failure.
 
 ## sp_encoder_get_stream  
 
-**[Function Prototype]**
+**【Function Prototype】**
 
 `int32_t sp_encoder_get_stream(void *obj, char *stream_buffer)`
 
-**[Function Description]**
+**【Function Description】**
 
 This function is used to retrieve the encoded bitstream data from the encoding channel.
 
-**[Parameters]**
+**【Parameters】**
 
 - `obj`: Pointer to the initialized `ENCODER` object.
 - `stream_buffer`: After a successful retrieval, the bitstream data will be stored in this buffer. The size of this buffer needs to be adjusted according to the encoding resolution and bitrate.
 
-**[Return Type]**
+**【Return Type】**
 
 Returns the size of the bitstream data for success, -1 for failure.

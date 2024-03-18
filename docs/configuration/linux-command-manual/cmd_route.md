@@ -48,7 +48,7 @@ default         192.168.0.1     0.0.0.0         UG    600    0        0 wlan0
 default         192.168.1.1     0.0.0.0         UG    700    0        0 eth0
 192.168.0.0     0.0.0.0         255.255.255.0   U     600    0        0 wlan0
 192.168.1.0     0.0.0.0         255.255.255.0   U     700    0        0 eth0
-```root@ubuntu:~# route -n
+root@ubuntu:~# route -n
 Kernel IP routing table
 Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 0.0.0.0         192.168.0.1     0.0.0.0         UG    600    0        0 wlan0

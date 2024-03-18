@@ -6,7 +6,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'RDK X3用户手册',
+  title: 'RDK X3 User Document',
   favicon: 'img/logo.png',
 
   // Set the production url of your site here
@@ -85,11 +85,11 @@ const config = {
             type: 'doc',
             docId: 'RDK',
             position: 'left',
-            label: '用户手册',
+            label: 'User Guide',
           },
           {
             href: 'https://developer.horizon.cc/',
-            label: '开发者社区',
+            label: 'Horizon Developer Community',
             position: 'left',
           },
           {
@@ -101,7 +101,7 @@ const config = {
       },
       footer: {
         style: 'dark',
-        copyright: `© 版权所有 ${new Date().getFullYear()}, Horizon Robotics`,
+        copyright: `© Copyright ${new Date().getFullYear()}, Horizon Robotics`,
       },
       prism: {
         theme: lightCodeTheme,

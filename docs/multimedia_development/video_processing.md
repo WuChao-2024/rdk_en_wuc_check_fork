@@ -18,145 +18,200 @@ sidebar_position: 6
 
   The channel of `VPS` represents an output of `VPS`. The output channels are mainly divided into ordinary image channels and pyramid image channels. The ordinary channel outputs the single-layer data after scaling, cropping, or rotating, and the pyramid channel outputs multi-layer pyramid scaled data.
 
+
+
 ### Function Description
 ![Func Description](./image/video_processing/ss_ch5_func_description.png)
 
-The `VPS` can bind with other modules by calling the binding interface provided by [System Control](./system_control). The input can be bound with `VIN` and `VDEC` modules, and the output of `VPS` can be bound with `VOT` and `VENC` modules. The former is the input source of `VPS`, and the latter is the receiver of `VPS`. It can also be bound with another `VPS` to achieve more channels; support processing image data fed back by users. Users can manage `groups` through the `VPS` interface, each `group` can only bind with one input source, and each `channel` can bind with different modules. When `VPS` is bound with `VIN`, you need to call `HB_SYS_SetVINVPSMode` to configure the different modes between `VIN` and `VPS` online or offline.
+The `VPS` can be bound to other modules via the system control interface provided by [System Control](./system_control). It can accept inputs from the `VIN` and `VDEC` modules, and its outputs can be connected to the `VOT`, `VENC`, or another `VPS` module for more channels. Input sources are connected to `VPS`, and receivers are connected from `VPS`. Users can manage groups through the `VPS` interface, with each group allowed to bind to only one input source, and each channel capable of binding to different modules. When connecting `VPS` to `VIN`, the `HB_SYS_SetVINVPSMode` function must be called to configure the online or offline mode between `VIN` and `VPS`.
 
 ![Func Description Topology](./image/video_processing/ss_ch5_func_description_topology.png)
 
-The `VPS` hardware consists of one `IPU`, one `PYM`, and two `GDCs`. There are 7 output `channels` (chn0~chn6), chn0~chn4 can achieve downscales, chn5 can achieve upscale, chn0~chn5 can all achieve cropping (ROI), rotation, correction, and frame rate control, and chn6 is the pyramid online channel. The dashed box represents hardware reuse, and the gray blocks of `OSD` are CPU overlays, and the other three beige blocks are hardware overlays.
-- Upscale Function:
+The `VPS` hardware consists of an `IPU`, a `PYM`, and two `GDC`s. It offers seven output channels (chn0 to chn6), with chn0 to chn4 supporting downsampling, chn5 enabling upsampling, and all channels capable of cropping (ROI), rotation, correction, and frame rate control. Chn6 serves as the pyramid online channel. The hardware reuses resources, with the gray block in the OSD being CPU overlay, and the three beige blocks representing hardware overlays.
 
-  Size limitations are referred to in the table below
+**Upscaling Functionality:**
 
-  Maximum 1.5x zoom in the horizontal direction, the width needs to be a multiple of 4, minimum 32x32, maximum 4096
+* Limitations:
+  - Horizontal scaling up to 1.5x, width must be a multiple of 4, minimum 32x32, maximum 4096.
+  - Vertical scaling up to 1.5x, height must be even, minimum 32x32, maximum 4096.
+  - Only chn5 supports upsampling.
 
-  Maximum 1.5x zoom in the vertical direction, the height needs to be even, minimum 32x32, maximum 4096
+**Downsampling Functionality:**
 
-  Only channel 5 supports upscale function
+* Limitations:
+  - Maximum horizontal downsampling to 1/8th of the original size (greater than 1/8), minimum 32x32, maximum 4096.
+  - Maximum vertical downsampling to 1/8th of the original size (greater than 1/8), minimum 32x32, maximum 4096.
+  - Chn0 to chn4 support downsampling.
 
-- Downscale Function:
+**IPU Channel Size Constraints:**
 
-  Size limitations are referred to in the table below
-
-  Maximum 1/8 (greater than 1/8) reduction in the horizontal direction, minimum 32x32, maximum 4096
-
-  Maximum 1/8 (greater than 1/8) reduction in the vertical direction, minimum 32x32, maximum 4096
-
-  Channel 0 ~ channel 4 support downscale function
-
-- The size limitations of each channel of the IPU are as follows:
-
-| Scaler | FIFO (bytes) | Resolution (pixels) ||hb_err_t|HB_VPS_CreateGrp| (VPS_GRP_GRP grp_id, const VPS_GRP_ATTR_S* pstGrpAttr)|
+|Scaler| FIFO(bytes)| Resolution(pixel)|
 |:-:|:-:|:-:|
-|描述|创建VPS Group，并设置属性。|
-|输入参数|grp_id|组ID，取值范围为0到[VPS_MAX_GRP_NUM-1]。|
-||pstGrpAttr|指向VPS_GRP_ATTR_S结构体的指针，包含组的属性信息。|
-|返回值|成功返回HB_SUCCESS，失败返回错误码。|```c
+|Scaler 5 (IPU US)| 4096 |8M|
+|Scaler 2 (IPU DS2)| 4096 |8M|
+|Scaler 1 (IPU DS1)| 2048 |2M|
+|Scaler 3 (IPU DS3)| 2048 |2M|
+|Scaler 4 (IPU DS4)| 1280 |1M|
+|Scaler 0 (IPU DS0)| 1280 |1M|
+
+**Cropping Functionality:**
+
+`VPS` allows cropping of input images, selecting a ROI region for resizing or shrinking.
+
+**PYM Pyramid Processing Functionality:**
+
+* Input:
+  - Maximum width: 4096
+  - Maximum height: 4096
+  - Minimum width: 64
+  - Minimum height: 64
+* Output:
+  - Maximum width: 4096
+  - Maximum height: 4096
+  - Minimum width: 48
+  - Minimum height: 32
+* Layers:
+  - 24 layers for shrinking (0-23, with Base layers at 0, 4, 8, 12, 16, 20, and ROI layers based on Base layers)
+  - 6 layers for zooming (24-29, fixed scales: 1.28x, 1.6x, 2x, 2.56x, 3.2x, 4x)
+  - Non-online channels: PYM channels 0-5
+
+* One `PYM` can be used per group.
+
+### Cautionary Notes:
+
+- `PYM` hardware requires at least BASE0 and BASE4 layers to be enabled.
+
+- When using the online input (chn6), the total output data volume of all PYM ds layers (0-23) must not exceed 2.5 times the input data volume, and the sum of US layer widths (24-29) should not exceed the input width, otherwise, there may be unknown risks.
+
+- After binding `IPU` to `PYM`, it cannot be further bound to `VOT`, `VPS`, or `VENC` modules.
+
+**Rotation Functionality:**
+
+- `VPS` supports 90°, 180°, and 270° rotations.
+- Supports either Group rotation (all channels affected) or Channel rotation (rotation of specific chn0-chn5 pairs).
+- PYM-processed channels cannot be rotated.
+
+**GDC Correction Functionality:**
+
+- `VPS` accepts distortion correction files for input image correction.
+- Supports either Group correction (all channels affected) or Channel correction (specific chn0-chn5 pairs).
+- Channels can be corrected independently.
+
+**Frame Rate Control Functionality:**
+
+- Channels 0-5 of `VPS` support frame rate control, allowing any frame rate up to or equal to the input frame rate.
+
+## API Reference
+### HB_VPS_CreateGrp
+**Function Declaration:**
+```c
 int HB_VPS_CreateGrp(int VpsGrp, const VPS_GRP_ATTR_S *grpAttr);
 ```
+**Function Description:**
+> Creates a VPS Group
 
-【Function Description】
-> Create a VPS Group
+**Parameter Descriptions:**
 
-【Parameter Description】
+| Parameter Name | Description | Input/Output |
+| :------------- | :---------- | :---------- |
+|  VpsGrp        | Group ID     |   Input     |
+| grpAttr        | Group attribute pointer | Input |
 
-| Parameter Name | Description    | Input/Output |
-| :------------: | :------------- | :----------: |
-|     VpsGrp     | Group number   |    Input     |
-|    grpAttr     | Group attribute pointer | Input |
-
-【Return Value】
+**Return Values:**
 
 | Return Value | Description |
-| :----------: | :---------- |
-|      0       | Success |
-|    Non-zero  | Failure |
+| :---------: | ----------- |
+|    0       | Success     |
+| Non-zero    | Failure     |
 
-【Notes】
-> Up to 8 groups can be created in VPS; group attribute mainly includes the input width, height, and GDC buffer depth.
+**Cautionary Note:**
+> Up to 8 groups can be created. Group attributes mainly include input width, height, and GDC buffer depth.
 
-【Reference Code】
+**Reference Code:**
 > VPS reference code
 
 ### HB_VPS_DestroyGrp
-【Function Declaration】
+**Function Declaration:**
 ```c
 int HB_VPS_DestroyGrp(int VpsGrp);
 ```
+**Function Description:**
+> Destroys a VPS Group
 
-【Function Description】
-> Destroy a VPS Group
+**Parameter Descriptions:**
 
-【Parameter Description】
+| Parameter Name | Description | Input/Output |
+| :------------- | :---------- | :---------- |
+|  VpsGrp        | Group ID     |   Input     |
 
-| Parameter Name | Description    | Input/Output |
-| :------------: | :------------- | :----------: |
-|     VpsGrp     | Group number   |    Input     |
-
-【Return Value】
+**Return Values:**
 
 | Return Value | Description |
-| :----------: | :---------- |
-|      0       | Success |
-|    Non-zero  | Failure |
+| :---------: | ----------- |
+|    0       | Success     |
+| Non-zero    | Failure     |
 
-【Notes】
-> The group must have been created.【参考代码】
-> No reference code
+**Cautionary Note:**
+> The group must already exist.
+
+**Reference Code:**
+> None
 
 ### HB_VPS_StartGrp
-【Function Declaration】
+**Function Declaration:**
 ```c
 int HB_VPS_StartGrp(int VpsGrp);
 ```
-【Function Description】
-> Start VPS Group processing
+**Function Description:**
+> Starts processing for a VPS Group
 
-【Parameter Description】
+**Parameter Descriptions:**
 
 | Parameter Name | Description | Input/Output |
-| :------------: | :---------- | :----------: |
-|    VpsGrp      | Group number|    Input     |
+| :------------- | :---------- | :---------- |
+|  VpsGrp        | Group ID     |   Input     |
 
-【Return Value】
+**Return Values:**
 
 | Return Value | Description |
-| :----------: | -----------:|
-|      0       |    Success  |
-|    Non-zero  |    Failure  |
+| :---------: | ----------- |
+|    0       | Success     |
+| Non-zero    | Failure     |
 
-【Note】
-> The group must have been created
+**Cautionary Note:**
+> The group must already be created.
 
-【参考代码】
+**Reference Code:**
 > VPS reference code
 
 ### HB_VPS_StopGrp
-【Function Declaration】
+**Function Declaration:**
 ```c
 int HB_VPS_StopGrp(int VpsGrp);
 ```
-【Function Description】
-> Stop VPS Group processing
+**Function Description:**
+> Stops processing for a VPS Group
 
-【Parameter Description】
+**Parameter Descriptions:**
 
-| Parameter Name | Description | Input/Output |
-| :------------: | ----------- | :---------: |
-|    VpsGrp      | Group number|
+| Parameter Name | Description |
+| :------------- | :---------- |
+|  VpsGrp        | Group ID     |
 
-【Return Value】
+**Return Values:**
 
 | Return Value | Description |
-| :----------: | -----------:|
-|      0       |    Success  |
-|    Non-zero  |    Failure  |【Note】
-> The Group must have been created and already started.
+| :---------: | ----------- |
+|    0       | Success     |
+| Non-zero    | Failure     |
 
-【Reference Code】
-> VPS Reference Code
+**Cautionary Note:**
+> The group must already be created and started.
+
+**Reference Code:**
+> VPS reference code
+
+
 
 ### HB_VPS_GetGrpAttr
 【Function Declaration】
@@ -244,90 +299,123 @@ int HB_VPS_SetGrpRotate(int VpsGrp, ROTATION_E enRotation);
 
 > VPS Reference Code
 
+
+
 ### HB_VPS_GetGrpRotate
-【Function Declaration】
+**Function Declaration**
 ```c
 int HB_VPS_GetGrpRotate(int VpsGrp, ROTATION_E *enRotation);
 ```
-【Function Description】
-> Get the rotation function property of VPS Group
+**Function Description**
+> Retrieves the rotation feature property for a VPS Group
 
-【Parameter Description】int HB_VPS_SetGrpGdc(int VpsGrp, GDC_ATTR_S* pstGdcAttr);
+**Parameter Descriptions**
+
+| Parameter Name | Description                     | Input/Output |
+| :------------- | :------------------------------ | :----------: |
+|   VpsGrp       | Group ID                        |     Input    |
+| enRotation     | Pointer to rotation parameter   |     Output   |
+
+**Return Values**
+
+| Return Value | Description                  |
+| :---------: | ----------------------------- |
+|     0      | Success                       |
+| Non-zero    | Failure                       |
+
+**Note**
+> None
+
+**Reference Code**
+> No reference code provided
+
+### HB_VPS_SetGrpRotateRepeat
+**Function Declaration**
+```c
+int HB_VPS_SetGrpRotateRepeat(int VpsGrp, ROTATION_E enRotation);
 ```
-【功能描述】
-> 设置Gdc配置参数
+**Function Description**
+> Sets dynamic group rotation: This interface saves the channel configuration for the current group and subsequent bound VPS groups. It automatically recalculates dimensions, ROI regions, initializes the group, and rebinds VIN based on the provided `enRotation`.
 
-【参数描述】
+**Parameter Descriptions**
 
-|  参数名称  |        描述       | 输入/输出 |
-| :--------: | :--------------: | :-------: |
-|   VpsGrp   |      Group号     |   输入    |
-| pstGdcAttr | Gdc配置参数指针 |   输入    |
+| Parameter Name | Description                            | Input/Output |
+| :------------- | :-------------------------------------- | :----------: |
+|   VpsGrp       | Group ID                               |     Input    |
+| enRotation     | Rotation parameter                     |     Input    |
 
-【返回值】
+**Return Values**
 
-| 返回值 | 描述 |
-| :----: | ---: |
-|   0    | 成功 |
-|  非0   | 失败 |
+| Return Value | Description                           |
+| :---------: | -------------------------------------- |
+|     0      | Success                                |
+| Non-zero    | Failure                                |
 
-【注意事项】
-> 无
+**Note**
+> This interface is not supported for scenarios with PYM configuration.
 
-【参考代码】
-> 无int HB_VPS_SetGrpGdc(int VpsGrp, char* buf_addr, uint32_t buf_len, ROTATION_E enRotation)
+**Reference Code**
+> No reference code provided
+
+### HB_VPS_SetGrpGdc
+**Function Declaration**
+```c
+int HB_VPS_SetGrpGdc(int VpsGrp, char* buf_addr, uint32_t buf_len, ROTATION_E enRotation)
 ```
-【Function Description】
-> Set the GDC correction function for VPS Group, so that all the outputs of VPS have correction effect.
+**Function Description**
+> Sets the GDC correction function for a VPS Group, ensuring all outputs from VPS have correction effects applied.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name | Description       | Input/Output |
-| :-------------: | :---------------- | :----------: |
-|    VpsGrp       | Group number      |    Input     |
-|   buf_addr      | Correction file address |    Input     |
-|   buf_len       | Correction file length |    Input     |
-|  enRotation     | Rotation parameter |    Input     |
+| Parameter Name | Description                                       | Input/Output |
+| :------------- | :------------------------------------------------ | :----------: |
+|   VpsGrp       | Group ID                                          |     Input    |
+|  buf_addr      | Address of the correction file                    |     Input    |
+|  buf_len       | Length of the correction file                      |     Input    |
+| enRotation     | Rotation parameter                                 |     Input    |
 
-【Return Value】
+**Return Values**
 
-| Return Value | Description |
-| :----------: | ----------: |
-|       0      |   Success   |
-|   Non-zero   |   Failure   |
+| Return Value | Description                             |
+| :---------: | ---------------------------------------- |
+|     0      | Success                                  |
+| Non-zero    | Failure                                  |
 
-【Note】
-> This interface needs to be called before HB_VPS_SetChnAttr; For different lenses, different distortions, and different sizes, different correction bin files need to be passed in.
+**Note**
+> This interface must be called before HB_VPS_SetChnAttr. Different correction bin files are required based on the lens, distortion, and dimensions.
 
-【Reference Code】
-> VPS reference code
+**Reference Code**
+> VPS Reference Code
 
 ### HB_VPS_SendFrame
-【Function Declaration】
+**Function Declaration**
 ```c
 int HB_VPS_SendFrame(int VpsGrp, void* videoFrame, int ms);
 ```
-【Function Description】
-> Send data to VPS.
+**Function Description**
+> Sends data to VPS
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name | Description                                                                                                                                                                                                  | Input/Output |
-| :-------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
-|    VpsGrp       | Group number                                                                                                                                                                                                |    Input     |
-|  videoFrame     | Image data pointer; VPS feedback data structure is hb_vio_buffer_t structure;                                                                                                                              |    Input     |
-|       ms        | Timeout parameter ms set to -1 means blocking interface; 0 means non-blocking interface; greater than 0 means timeout waiting time, and the unit of timeout time is milliseconds (ms) |    Input     |
+| Parameter Name | Description                                                                                                      | Input/Output |
+| :------------- | :-------------------------------------------------------------------------------------------------------- | :----------: |
+|   VpsGrp       | Group ID                                                                                                   |     Input    |
+| videoFrame     | Pointer to image data; the VPS feedback data structure is of type hb_vio_buffer_t;                         |     Input    |
+|     ms        | Timeout parameter; -1 for blocking interface, 0 for non-blocking, positive values for timeout in milliseconds (ms) |     Input    |
 
-【Return Value】
+**Return Values**
 
 | Return Value | Description |
-| :----------: | ----------: |
-|       0      |   Success   |
-|   Non-zero   |   Failure   |【Notice】
+| :---------: | :---------: |
+|     0      | Success     |
+| Non-zero    | Failure     |
+
+**Note**
 > None
 
-【Reference Code】
-> VPS reference code
+**Reference Code**
+> VPS Reference Code
+
 
 ### HB_VPS_SetChnAttr
 【Function Declaration】
@@ -413,307 +501,350 @@ int HB_VPS_EnableChn(int VpsGrp, int VpsChn);
 【Reference Code】
 > VPS reference code
 
+
+
 ### HB_VPS_DisableChn
-【Function Declaration】
+**Function Declaration**
 ```c
 int HB_VPS_DisableChn(int VpsGrp, int VpsChn);
 ```
-【Function Description】
-> Disable the VPS channel【函数声明】
+**Function Description**
+> Disable a VPS channel
+
+**Parameter Descriptions**
+
+| Parameter Name | Description | Input/Output |
+| :-------------: | :---------- | :----------: |
+|      VpsGrp     | Group ID    |      Input   |
+|      VpsChn     | Channel ID  |      Input   |
+
+**Return Values**
+
+| Return Value | Description |
+| :---------: | :---------: |
+|       0     | Success    |
+| Non-zero   | Failure    |
+
+**Caution**
+> None
+
+**Reference Code**
+> VPS Reference Code
+
+### HB_VPS_SetChnRotate
+**Function Declaration**
 ```c
-int HB_VPS_GetChnRotate(int VpsGrp, int VpsChn, ROTATION_E *penRotation);
+int HB_VPS_SetChnRotate(int VpsGrp, int VpsChn, ROTATION_E enRotation);
 ```
-【功能描述】
-> 获取VPS通道图像固定角度旋转属性
+**Function Description**
+> Set the image rotation angle for a VPS channel
 
-【参数描述】
+**Parameter Descriptions**
 
-|  参数名称  |  描述    | 输入/输出 |
-| :--------: | :------ | :-------: |
-|   VpsGrp   | Group号  |   输入    |
-|   VpsChn   | 通道号   |   输入    |
-| penRotation | 旋转属性 |   输出    |
+| Parameter Name | Description | Input/Output |
+| :-------------: | :---------- | :----------: |
+|      VpsGrp     | Group ID    |      Input   |
+|      VpsChn     | Channel ID  |      Input   |
+|   enRotation   | Rotation Type |      Input   |
 
-【返回值】
+**Return Values**
 
-| 返回值 | 描述 |
-| :----: | ---: |
-|   0    | 成功 |
-|  非0   | 失败 |
+| Return Value | Description |
+| :---------: | :---------: |
+|       0     | Success    |
+| Non-zero   | Failure    |
 
-【注意事项】
-> 无
+**Caution**
+> SetChnRotate must be called after SetChnAttr, and up to two CHNs can be rotated simultaneously. It is also supported after startup for dynamic channel rotation control.
 
-【参考代码】
-> VPS参考代码【Function Declaration】
+**Reference Code**
+> VPS Reference Code
+
+### HB_VPS_GetChnRotate
+**Function Declaration**
 ```c
 int HB_VPS_GetChnRotate(int VpsGrp, int VpsChn, ROTATION_E *enRotation);
 ```
-【Function Description】
-> Get the rotation property of the VPS channel image.
+**Function Description**
+> Retrieve the image rotation property for a VPS channel
 
-【Parameter Description】
+**Parameter Descriptions**
 
-|  Parameter Name | Description      | Input/Output |
-| :-------------: | :--------------  | :----------: |
-|    VpsGrp       | Group number     |    Input     |
-|    VpsChn       | Channel number   |    Input     |
-|  enRotation     | Rotation property|    Output    |
+| Parameter Name | Description | Input/Output |
+| :-------------: | :---------- | :----------: |
+|      VpsGrp     | Group ID    |      Input   |
+|      VpsChn     | Channel ID  |      Input   |
+|   enRotation   | Rotation Type |     Output   |
 
-【Return Value】
+**Return Values**
 
 | Return Value | Description |
-| :----: | ---: |
-|   0    | Success |
-|  Non-zero  | Failure |
+| :---------: | :---------: |
+|       0     | Success    |
+| Non-zero   | Failure    |
 
-【Note】
+**Caution**
 > None
 
-【Referenced Code】
-> None
+**Reference Code**
+> N/A
+
+
 
 ### HB_VPS_SetChnGdc
-【Function Declaration】
+**Function Declaration**
 ```c
 int HB_VPS_SetChnGdc(int VpsGrp, int VpsChn, char* buf_addr, uint32_t buf_len, ROTATION_E enRotation)
 ```
-【Function Description】
-> Set the GDC correction function for VPS channel.
+**Function Description**
+> Sets the GDC correction feature for a VPS channel
 
-【Parameter Description】
+**Parameter Descriptions**
 
-|  Parameter Name | Description         | Input/Output |
-| :-------------: | :--------------     | :----------: |
-|    VpsGrp       | Group number        |    Input     |
-|    VpsChn       | Channel number      |    Input     |
-|    buf_addr     | Correction file address |    Input     |
-|    buf_len      | Correction file length  |    Input     |
-|  enRotation     | Rotation parameter  |    Input     |
+| Parameter Name | Description        | Input/Output |
+| :------------- | :----------------- | :----------: |
+|   VpsGrp       | Group ID           |    Input    |
+|   VpsChn       | Channel ID         |    Input    |
+|  buf_addr      | Correction file address |   Input    |
+|  buf_len       | Correction file length |   Input    |
+| enRotation     | Rotation parameter |   Input    |
 
-【Return Value】
+**Return Values**
 
 | Return Value | Description |
-| :----: | ---: |Please translate the Chinese parts in the following content into English, while keeping the original format and content:
+| :---------: | :---------: |
+|    0       | Success    |
+| Non-zero   | Failure    |
 
-| 0 | Success |
-| Non-zero | Failed |
+**Note**
+> This interface must be called after HB_VPS_SetChnAttr, and at most two CHNs can be corrected simultaneously. Different lenses, distortions, and dimensions require different calibration bin files.
 
-[Notes]
-> This interface needs to be called after HB_VPS_SetChnAttr and supports up to two CHN corrections at the same time; different lenses, distortions, and sizes require different correction bin files to be passed in.
-
-[Reference Code]
+**Reference Code**
 > VPS reference code
 
 ### HB_VPS_UpdateGdcSize
-[Function Declaration]
+**Function Declaration**
 ```c
 int HB_VPS_UpdateGdcSize(int VpsGrp, int VpsChn, uint16_t out_width, uint16_t out_height)
 ```
-[Function Description]
-> Set the VPS GDC correction output size (the GDC input and output sizes are normally the same, use this interface to change the GDC output size)
+**Function Description**
+> Updates the GDC correction output size (the default input and output sizes for GDC are the same, but this interface allows changing the GDC output size)
 
-[Parameter Description]
+**Parameter Descriptions**
 
-| Parameter Name | Description | Input/Output |
-| :--------: | :-------- | :-------: |
-| VpsGrp | Group number | Input |
-| VpsChn | Channel number | Input |
-| out_width | Output width | Input |
-| out_height | Output height | Input |
+| Parameter Name | Description      | Input/Output |
+| :------------- | :--------------- | :----------: |
+|   VpsGrp       | Group ID         |    Input    |
+|   VpsChn       | Channel ID       |    Input    |
+| out_width      | Output width     |    Input    |
+| out_height     | Output height    |    Input    |
 
-[Return Value]
+**Return Values**
 
 | Return Value | Description |
-| :----: | ---: |
-| 0 | Success |
-| Non-zero | Failed |
+| :---------: | :---------: |
+|    0       | Success    |
+| Non-zero   | Failure    |
 
-[Notes]
-> This interface needs to be called after HB_VPS_SetChnGdc and HB_VPS_SetGrpGdc. The output size passed in needs to correspond to the correction bin file. The input size cannot be larger than the current GDC input size.
+**Note**
+> This interface should be called after HB_VPS_SetChnGdc and HB_VPS_SetGrpGdc. The provided output size must match the calibration bin file. The output dimensions cannot be larger than the current GDC input size.
 
-[Reference Code]
-> Scene where the output size is inconsistent between the Group and GDC correction:
+**Reference Code**
+> Scenario where GDC correction output size differs from input in a group:
 ```c
     ret = HB_VPS_SetGrpGdc(grp_id, bin_buf, buf_len, degree);
     ret = HB_VPS_UpdateGdcSize(grp_id, 0, 1280, 720);
 ```
-> Scene where the output size is inconsistent between the channel and GDC correction:
+> Scenario where GDC correction output size differs from input in a channel:
 ```c
     ret = HB_VPS_SetChnGdc(grp_id, chn_id, bin_buf, buf_len, degree);
     ret = HB_VPS_UpdateGdcSize(grp_id, 0, 1280, 720);
 ```
 
+
+
 ### HB_VPS_SetChnCrop
-[Function Declaration]```c
+**Function Declaration**
+```c
 int HB_VPS_SetChnCrop(int VpsGrp, int VpsChn, const VPS_CROP_INFO_S *cropInfo)
 ```
-【Function Description】
-> Set the cropping function of VPS Chn
+**Function Description**
+> Configures the cropping for a VPS channel.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name | Description | Input/Output |
-| :------------: | :--------- | :----------: |
-|    VpsGrp      | Group number |   Input    |
-|    VpsChn      | Channel number |   Input    |
-|   cropInfo     | Cropping attribute |   Input    |
+| Parameter Name | Description      | Input/Output |
+| :------------: | :--------------- | :---------: |
+|    VpsGrp      | Group ID         |    Input    |
+|    VpsChn      | Channel ID       |    Input    |
+|  cropInfo     | Crop properties |    Input    |
 
-【Return Value】
+**Return Values**
 
-|   Return Value   | Description |
-| :--------------: | ----------: |
-|        0         |  Success |
-|       Non-zero       |  Failed |
+| Return Value | Description |
+| :---------: | :---------- |
+|     0      | Success     |
+| Non-zero    | Failure     |
 
-【Notes】
-> Need to be called after SetChnAttr; The ROI region passed in needs to be within the size range of the IPU input;
+**Note**
+> Call this function after HB_VPS_SetChnAttr; the ROI region must be within the IPU input size.
 
-【Reference Code】
+**Reference Code**
 > VPS Reference Code
 
 ### HB_VPS_GetChnCrop
-【Function Declaration】
+**Function Declaration**
 ```c
 int HB_VPS_GetChnCrop(int VpsGrp, int VpsChn, VPS_CROP_INFO_S *cropInfo)
 ```
-【Function Description】
-> Get the fixed angle rotation of VPS Chn
+**Function Description**
+> Retrieves the fixed cropping settings for a VPS channel.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name | Description | Input/Output |
-| :------------: | :--------- | :----------: |
-|    VpsGrp      | Group number |   Input    |
-|    VpsChn      | Channel number |   Input    |
-|   cropInfo     | Cropping attribute |   Output    |
+| Parameter Name | Description      | Input/Output |
+| :------------: | :--------------- | :---------: |
+|    VpsGrp      | Group ID         |    Input    |
+|    VpsChn      | Channel ID       |    Input    |
+|  cropInfo     | Crop properties |    Output   |
 
-【Return Value】
+**Return Values**
 
-|   Return Value   | Description |
-| :--------------: | ----------: |
-|        0         |  Success |
-|       Non-zero       |  Failed |【注意事项】
-> No
+| Return Value | Description |
+| :---------: | :---------- |
+|     0      | Success     |
+| Non-zero    | Failure     |
 
-【参考代码】
-> No
+**Note**
+> No additional notes.
+
+**Reference Code**
+> None
 
 ### HB_VPS_SetChnFrameRate
-【Function Declaration】
+**Function Declaration**
 ```c
 int HB_VPS_SetChnFrameRate(int VpsGrp, int VpsChn, FRAME_RATE_CTRL_S *frameRate)
 ```
-【Description】
-> Set the frame rate of the VPS channel.
+**Function Description**
+> Sets the frame rate for a VPS channel.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-|   Parameter Name   | Description             | Input/Output |
-| :----------------: | :---------------------- | :----------: |
-|      VpsGrp        | Group number            |    Input     |
-|      VpsChn        | Channel number          |    Input     |
-| frameRate (struct) | Frame rate attribute    |    Input     |
+| Parameter Name         | Description                     | Input/Output |
+| :---------------------: | :------------------------------ | :---------: |
+|          VpsGrp         | Group ID                        |    Input    |
+|          VpsChn         | Channel ID                      |    Input    |
+|      frameRate        | Frame rate control structure |    Input    |
 
-【Return Value】
+**Return Values**
 
 | Return Value | Description |
-| :----------: | ----------- |
-|      0       | Success     |
-|    Non-zero  | Failed      |
+| :---------: | :---------- |
+|     0      | Success     |
+| Non-zero    | Failure     |
 
-【注意事项】
-> No
+**Note**
+> No additional notes.
 
-【参考代码】
-> No
+**Reference Code**
+> None
+
+
 
 ### HB_VPS_TriggerSnapFrame
-【Function Declaration】
+**Function Declaration**
 ```c
 int HB_VPS_TriggerSnapFrame(int VpsGrp, int VpsChn, uint32_t frameCnt)
 ```
-【Description】
-> Capture frames; mark frameCnt frames starting from the current frame.
+**Function Description**
+> Trigger snapshot frames; Mark frameCnt frames starting from the current one.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-|  Parameter Name  | Description             | Input/Output |
-| :--------------: | :---------------------- | :----------: |
-|      VpsGrp      | Group number            |    Input     |
-|      VpsChn      | Channel number          |    Input     |
-|   frameCnt       | Number of captured frames|    Input     |【返回值】
+| Parameter Name | Description                              | Input/Output |
+| :------------- | :---------------------------------------- | :---------: |
+|    VpsGrp      | Group number                             |    Input   |
+|    VpsChn      | Channel number                            |    Input   |
+|   frameCnt     | Number of frames to capture             |    Input   |
 
-| 返回值 | 描述     |
-| :----: | -------: |
-|   0    | Success |
-|  Non-0 | Failure |
+**Return Values**
 
-【注意事项】
-> The function can only be called after initialization.
+| Return Value | Description |
+| :----------: | :---------: |
+|      0       | Success    |
+| Non-zero    | Failure    |
 
-【参考代码】
-> N/A
+**Note**
+> Must be called after initialization.
+
+**Reference Code**
+> No reference code provided.
 
 ### HB_VPS_GetChnFrame
-【函数声明】
+**Function Declaration**
 ```c
-int HB_VPS_GetChnFrame(int VpsGrp, int VpsChn, void *videoFrame, int ms);
+int HB_VPS_GetChnFrame(int VpsGrp, int VpsChn, void *videoFrame, int ms)
 ```
-【功能描述】
-> Get a processed image frame from the channel.
+**Function Description**
+> Retrieve a processed image frame from a channel
 
-【参数描述】
+**Parameter Descriptions**
 
-|  参数名称  |                     描述                     | 输入/输出 |
-| :--------: | :------------------------------------------: | :-------: |
-|   VpsGrp   |                  Group number                |   Input   |
-|   VpsChn   |                  Channel number              |   Input   |
-| videoFrame |                 Image information             |   Output  |
-|     ms     | Timeout parameter <br/>-1 for blocking interface;<br/>0 for non-blocking interface;<br/>larger than 0 for timeout waiting time in milliseconds (ms) |   Input   |
+| Parameter Name | Description                                                                                           | Input/Output |
+| :------------- | :-------------------------------------------------------------------------------------------------- | :---------: |
+|    VpsGrp      | Group number                                                                                           |    Input   |
+|    VpsChn      | Channel number                                                                                        |    Input   |
+|  videoFrame   | Pointer to the image data structure (hb_vio_buffer_t for normal BUF structure, pym_buffer_t for pyramid BUF structure) |    Output  |
+|        ms      | Timeout parameter<br/>-1 for blocking interface<br/>0 for non-blocking interface<br/>Positive value for timeout in milliseconds (ms) |    Input   |
 
-【返回值】
+**Return Values**
 
-| 返回值 | 描述     |
-| :----: | -------: |
-|   0    | Success |
-|  Non-0 | Failure |
+| Return Value | Description |
+| :----------: | :---------: |
+|      0       | Success    |
+| Non-zero    | Failure    |
 
-【注意事项】
-> The obtained image structure can be either a normal buffer structure (hb_vio_buffer_t) or a pyramid buffer structure (pym_buffer_t).
+**Note**
+> The retrieved image structure can be either a normal BUF structure (hb_vio_buffer_t) or a pyramid BUF structure (pym_buffer_t).
 
-【参考代码】
-> Reference code for VPS
+**Reference Code**
+> VPS Reference Code (not provided)
+
+
 
 ### HB_VPS_GetChnFrame_Cond
-【函数声明】
+**Function Declaration**
 ```c
 int HB_VPS_GetChnFrame_Cond(int VpsGrp, int VpsChn, void *videoFrame, int ms, int time);
 ```
-【功能描述】> Obtain a processed image frame from the channel if conditions are met.
+**Function Description**
+> Retrieves a processed image from the channel conditionally.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name | Description                                                                                                     | Input/Output |
-| :------------: | :-------------------------------------------------------------------------------------------------------------- | :----------: |
-|    VpsGrp      | Group number                                                                                                    |    Input     |
-|    VpsChn      | Channel number                                                                                                  |    Input     |
-|  videoFrame    | Image information                                                                                               |    Output    |
-|       ms       | Timeout parameter <br/>When ms is set to -1, it is a blocking interface;<br/>When set to 0, it is a non-blocking interface;<br/>When greater than 0, it is the timeout waiting time in milliseconds (ms) |    Input     |
-|      time      | Time condition: set to 0 to discard old frames starting from the current frame and wait for a new frame; other values are not supported        |    Input     |
+| Parameter Name | Description                                                                                             | Input/Output |
+| :------------- | :------------------------------------------------------------------------------------------------------- | :----------: |
+|   VpsGrp       | Group ID                                                                                                 |      Input   |
+|   VpsChn       | Channel number                                                                                            |      Input   |
+| videoFrame    | Pointer to the image data                                                                                  |     Output   |
+|      ms        | Timeout parameter<br/>-1 for blocking interface<br/>0 for non-blocking interface<br/>Positive value for timeout in milliseconds (ms) |      Input   |
+|       time      | Time condition: 0 means discard old frames and wait for a new one; other values are not supported yet. |      Input   |
 
-【Return Value】
+**Return Values**
 
 | Return Value | Description |
-| :----------: | :--------- |
-|       0      | Success    |
-|   Non-zero   | Failure    |
+| :---------: | :---------: |
+|     0      | Success    |
+| Non-zero    | Failure    |
 
-【Note】
-> The obtained image structure is divided into normal BUF structure (hb_vio_buffer_t) and pyramid BUF structure (pym_buffer_t).
+**Note**
+> The retrieved image structure can be either a normal BUF structure (hb_vio_buffer_t) or a pyramid BUF structure (pym_buffer_t).
 
-【Reference Code】
-> VPS reference code
+**Reference Code**
+> VPS Reference Code (not included here as it would typically be a part of the implementation and not shown in the documentation)
+
+
 
 ### HB_VPS_ReleaseChnFrame
 【Function Declaration】
@@ -772,97 +903,117 @@ int HB_VPS_SetPymChnAttr(int VpsGrp, int VpsChn, const VPS_PYM_CHN_ATTR_S *pymCh
 【Reference Code】
 > VPS reference code
 
+
+
 ### HB_VPS_GetPymChnAttr
-【Function Declaration】
+**Function Declaration**
 ```c
 int HB_VPS_GetPymChnAttr(int VpsGrp, int VpsChn, VPS_PYM_CHN_ATTR_S *pymChnAttr);
 ```
-【Function Description】
-> Get pyramid channel attributes
+**Function Description**
+> Retrieves the pyramid channel attribute.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name | Description           | Input/Output |
-| :------------: | :-------------------- | :----------: |
-|    VpsGrp      | Group number          |    Input     |
-|    VpsChn      | Channel number        |    Input     |
-|  pymChnAttr    | Pyramid channel attributes pointer |    Output     |### HB_VPS_ChangePymUs
-【Function Declaration】
-```c
-int HB_VPS_ChangePymUs(int VpsGrp, uint8_t us_num, uint8_t enable)
-```
-【Function Description】
-> Enable or disable a certain layer of us in pym.
+| Parameter Name | Description | Input/Output |
+| :-------------: | ----------- | -----------: |
+|    VpsGrp      | Group ID    |       Input |
+|    VpsChn      | Channel ID  |       Input |
+| pymChnAttr    | Pyramid chan attr pointer |       Output |
 
-【Parameter Description】
-
-| Parameter Name |  Description | Input/Output |
-| :------: | ---------: | ---------: |
-|  VpsGrp  |    Group number |       Input |
-|  us_num  | Pyramid us layer |       Input |
-|  enable  |     Is enable |       Input |
-
-【Return Value】
+**Return Values**
 
 | Return Value | Description |
-| :----: | ---: |
-|   0    | Success |
+| :---------: | -----------: |
+|      0      |      Success     |
 
-【Notes】
+**Notes**
 > None
 
-【Reference Code】
+**Reference Code**
+> None
+
+### HB_VPS_ChangePymUs
+**Function Declaration**
+```c
+int HB_VPS_ChangePymUs(int VpsGrp, uint8_t us_num, uint8_t enable);
+```
+**Function Description**
+> Enables or disables a specific US layer in the pym.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description | Input/Output |
+| :-------------: | ----------- | -----------: |
+|    VpsGrp      | Group ID    |       Input |
+|    us_num      | Pyramid US layer |       Input |
+|    enable      | Enable/disable flag |       Input |
+
+**Return Values**
+
+| Return Value | Description |
+| :---------: | -----------: |
+|      0      |      Success     |
+
+**Notes**
+> None
+
+**Reference Code**
 > None
 
 ### HB_VPS_GetChnFd
-【Function Declaration】
+**Function Declaration**
 ```c
 int HB_VPS_GetChnFd(int VpsGrp, int VpsChn);
 ```
-【Function Description】
-> Get the device file descriptor corresponding to the VPS channel, and the obtained fd can be monitored by select. After select returns, the image can be directly obtained through the getChnFrame interface.
+**Function Description**
+> Retrieves the device file descriptor for a VPS channel, which can be used for select monitoring. After a select return, images can be directly obtained using the getChnFrame interface.
 
-【Parameter Description】| Parameter Name | Description | Input/Output |
-| :------------: | :--------- | :----------: |
-|    VpsGrp     |   Group ID  |    Input     |
-|    VpsChn     |  Channel ID |    Input     |
+**Parameter Descriptions**
 
-【Return Value】
+| Parameter Name | Description    | Input/Output |
+| :-------------: | :------------- | :-------: |
+|    VpsGrp      | Group ID      |   Input    |
+|    VpsChn      | Channel ID    |   Input    |
+
+**Return Values**
 
 | Return Value | Description |
-| :----------: | ---------: |
-|   Positive   |   Success  |
-|   Negative   |   Failure  |
+| :---------: | -----------: |
+| Positive value | Success |
+| Negative value | Failure |
 
-【Notes】
+**Notes**
 > None
 
-【Reference Code】
+**Reference Code**
 > None
 
 ### HB_VPS_CloseChnFd
-【Function Declaration】
+**Function Declaration**
 ```c
 int HB_VPS_CloseChnFd(void);
 ```
-【Function Description】
-> Close the fd of all channels in VPS.
+**Function Description**
+> Closes all channel file descriptors within the VPS.
 
-【Parameter Description】
+**Parameter Descriptions**
 > None
 
-【Return Value】
+**Return Values**
 
 | Return Value | Description |
-| :----------: | ---------: |
-|      0       |   Success  |
-|    Non-zero  |   Failure  |
+| :---------: | -----------: |
+|      0      |      Success     |
+| Non-zero    |      Failure     |
 
-【Notes】
+**Notes**
 > None
 
-【Reference Code】
+**Reference Code**
 > None
+
+
 
 ### VPS Reference Code
 ```c
@@ -872,44 +1023,57 @@ int HB_VPS_CloseChnFd(void);
 
     grp_attr.maxW = 1920;
     grp_attr.maxH = 1080;
-```ret = HB_VPS_SetGrpAttr(grp_id, &grp_attr);
+    ret = HB_VPS_SetGrpAttr(grp_id, &grp_attr);
 
-ret = HB_VPS_SetGrpRotate(grp_id, ROTATION_90);
-ret = HB_VPS_SetGrpGdc(grp_id, bin_buf, bin_len, ROTATION_90);
-chn_attr.enScale = 1;
-chn_attr.width = 1280;
-chn_attr.height = 720;
-chn_attr.frameDepth = 8;
-ret = HB_VPS_SetChnAttr(grp_id, chn_id, &chn_attr);
+    ret = HB_VPS_SetGrpRotate(grp_id, ROTATION_90);
+    ret = HB_VPS_SetGrpGdc(grp_id, bin_buf, bin_len, ROTATION_90);
+    chn_attr.enScale = 1;
+    chn_attr.width = 1280;
+    chn_attr.height = 720;
+    chn_attr.frameDepth = 8;
+    ret = HB_VPS_SetChnAttr(grp_id, chn_id, &chn_attr);
 
-chn_crop_info.en = 1;
-chn_crop_info.cropRect.x = 0;
-chn_crop_info.cropRect.y = 0;
-chn_crop_info.cropRect.width = 1280;
-chn_crop_info.cropRect.height = 720;
-ret = HB_VPS_SetChnCrop(grp_id, chn_id, &chn_crop_info);
+    chn_crop_info.en = 1;
+    chn_crop_info.cropRect.x = 0;
+    chn_crop_info.cropRect.y = 0;
+    chn_crop_info.cropRect.width = 1280;
+    chn_crop_info.cropRect.height = 720;
+    ret = HB_VPS_SetChnCrop(grp_id, chn_id, &chn_crop_info);
 
-ret = HB_VPS_EnableChn(grp_id, chn_id);
+    ret = HB_VPS_EnableChn(grp_id, chn_id);
 
-ret = HB_VPS_SetChnRotate(grp_id, chn_id, ROTATION_90);
+    ret = HB_VPS_SetChnRotate(grp_id, chn_id, ROTATION_90);
 
-ret = HB_VPS_SetChnGdc(grp_id, chn_id, bin_buf, bin_len, ROTATION_90);
+    ret = HB_VPS_SetChnGdc(grp_id, chn_id, bin_buf, bin_len, ROTATION_90);
 
-pym_chn_attr.timeout = 2000;
-pym_chn_attr.ds_layer_en = 24;
-pym_chn_attr.us_layer_en = 0;
-pym_chn_attr.frame_id = 0;
-pym_chn_attr.frameDepth = 8;
-ret = HB_VPS_SetPymChnAttr(grp_id, pym_chn, &pym_chn_attr);
+    pym_chn_attr.timeout = 2000;
+    pym_chn_attr.ds_layer_en = 24;
+    pym_chn_attr.us_layer_en = 0;
+    pym_chn_attr.frame_id = 0;
+    pym_chn_attr.frameDepth = 8;
+    ret = HB_VPS_SetPymChnAttr(grp_id, pym_chn, &pym_chn_attr);
 
-ret = HB_VPS_StartGrp(grp_id);
+    ret = HB_VPS_StartGrp(grp_id);
 
-ret = HB_VPS_SendFrame(grp_id, feedback_buf, 1000);
-ret = HB_VPS_GetChnFrame(grp_id, chn_id, &out_buf, 2000);
-ret = HB_VPS_ReleaseChnFrame(grp_id, chn_id, &out_buf);
-ret = HB_VPS_DisableChn(grp_id, chn_id);
-ret = HB_VPS_StopGrp(grp_id);
-ret = HB_VPS_DestroyGrp(grp_id);If only one module IPU is used, after creating the Group, you need to call HB_VPS_SetChnAttr. If multiple channels need to be output from IPU, then you need to call this interface multiple times.
+    ret = HB_VPS_SendFrame(grp_id, feedback_buf, 1000);
+    ret = HB_VPS_GetChnFrame(grp_id, chn_id, &out_buf, 2000);
+    ret = HB_VPS_ReleaseChnFrame(grp_id, chn_id, &out_buf);
+    ret = HB_VPS_DisableChn(grp_id, chn_id);
+    ret = HB_VPS_StopGrp(grp_id);
+    ret = HB_VPS_DestroyGrp(grp_id);
+```    
+
+### VPS Interface Call Flow
+The VPS initialization interface mainly consists of Group initialization and Channel initialization. The Group interface can be seen as a global configuration, where Group attributes apply to the entire VPS output. On the other hand, Channel interfaces are used for configuring separate output channels individually, with properties set only for the current channel. When initializing, you need to first configure Group properties, followed by the properties for each individual channel.
+
+![image-20220329204239415](./image/video_processing/image-20220329204239415.png)
+
+### VPS Scenario Usage Guide
+The VPS internally consists of four modules: one IPU, one PYM, and two GDCs. These modules are dynamically bound together based on the order of interface calls. It can run individually or in combination with multiple modules. The sequence of interface calls for different connection relationships is as follows:
+
+![VPS IPU](./image/video_processing/ss_vps_ipu.png)
+
+If only one module IPU is used, after creating the Group, you need to call HB_VPS_SetChnAttr. If multiple channels need to be output from IPU, then you need to call this interface multiple times.
 
 ![VPS GDC](./image/video_processing/ss_vps_gdc.png)
 
@@ -958,7 +1122,7 @@ If all four modules in VPS need to be run together, you need to call HB_VPS_SetG
 ## Data Structure
 ### HB_VPS_GRP_ATTR_S
 【Structure Definition】
-```c```c
+```c
 // Define the structure of VPS group attributes
 typedef struct HB_VPS_GRP_ATTR_S {
     uint32_t    maxW;
@@ -966,11 +1130,13 @@ typedef struct HB_VPS_GRP_ATTR_S {
     uint8_t     frameDepth;
     int         pixelFormat;
 } VPS_GRP_ATTR_S;
+```
 
 【Function Description】
 > Structure for VPS group attributes
 
 【Member Description】
+
 |   Member   |                        Description                        |
 | :--------: | :-------------------------------------------------------: |
 |    maxW    |               Maximum width of input image in VPS               |
@@ -992,6 +1158,7 @@ typedef struct HB_RECT_S {
 > Define a rectangular region
 
 【Member Description】
+
 |  Member  |  Description  |
 | :------: | :-----------: |
 |    x     | Starting x coordinate |
@@ -1008,108 +1175,188 @@ typedef HB_VPS_CROP_INFO_S {
 } VPS_CROP_INFO_S;
 ```
 【Function Description】【Member Description】
+
 |   Member   |                  Meaning                  |
 | :--------: | :---------------------------------------: |
 |    width   |           Width of the image output        |
 |   height   |           Height of the image output       |
 
-### HB_VPS_CHN_CROP_CFG_S
-【Structure Definition】
+
+
+### HB_FRAME_RATE_CTRL_S
+**Structure Definition**
 ```c
-typedef struct HB_VPS_CHN_CROP_CFG_S {
-    uint8_t             en;
-    RECT_S              cropRect;
-} VPS_CHN_CROP_CFG_S;
+typedef struct HB_FRAME_RATE_CTRL_S {
+    uint32_t srcFrameRate;
+    uint32_t dstFrameRate;
+} FRAME_RATE_CTRL_S;
 ```
-【Function Description】
-> Structure for cropping configuration
+**Function Description**
+> Frame rate control structure, where dstFrameRate must not exceed srcFrameRate.
 
-【Member Description】
-|   Member   |              Meaning               |
-| :--------: | :---------------------------------: |
-|     en     |     Whether cropping is enabled     |
-|  cropRect  |         The area to be cropped      ||   new_height  |        高        |
+**Member Descriptions**
 
-### HB_VPS_SetChnCrop
-【接口声明】
+|   Member   |         Meaning         |
+| :--------: | :----------------------: |
+| srcFrameRate | Input video frame rate |
+| dstFrameRate | Target video frame rate |
+
+### HB_VPS_CHN_ATTR_S
+**Structure Definition**
 ```c
-int32_t HB_VPS_SetChnCrop(HB_VPS_CHN_ID_E channel,uint32_t x,uint32_t y,uint32_t width,uint32_t height,HB_ROTATION_E rotation);
+typedef struct HB_VPS_CHN_ATTR_S {
+    uint32_t width;
+    uint32_t height;
+    int pixelFormat;
+    uint8_t enMirror;
+    uint8_t enFlip;
+    uint8_t enScale;
+    uint32_t frameDepth;
+    FRAME_RATE_CTRL_S frameRate;
+} VPS_CHN_ATTR_S;
 ```
+**Function Description**
+> Structure for channel output attributes.
 
-【功能描述】
-> 设置通道裁剪位置和尺寸
+**Member Descriptions**
 
-【参数说明】
+|   Member   |                             Meaning                             |
+| :--------: | :----------------------------------------------------------: |
+|   width    | Output image width |
+|   height   | Output image height |
+| pixelFormat | Pixel format (VPS currently only supports NV12) |
+| enMirror   | Mirror enable; VPS does not support this, use HB_VIN_CtrlPipeMirror for horizontal mirroring |
+|   enFlip    | Flip enable; VPS does not support this, sensor flipping is needed |
+|   enScale   | Scaling enable |
+| frameDepth | Image queue length |
+|  frameRate  | Frame rate control (this frame rate is not effective, use HB_VPS_SetChnFrameRate to implement frame rate control) |
 
-|   参数    |                    含义                     |
-| :-------: | :-----------------------------------------: |
-|  channel  |               通道ID，枚举类型                |
-|     x     |               裁剪起始横坐标                |
-|     y     |               裁剪起始纵坐标                |
-|   width   |                   裁剪宽度                  |
-|  height   |                   裁剪高度                  |
-| rotation  | 旋转角度，枚举类型（详情见HB_ROTATION_E说明） |
-
-### HB_VPS_SetChnFrameRate
-【接口声明】
+### HB_ROTATION_E
+**Structure Definition**
 ```c
-int32_t HB_VPS_SetChnFrameRate(HB_VPS_CHN_ID_E channel,uint32_t frame_rate);
+typedef enum HB_ROTATION_E {
+    ROTATION_0      = 0,
+    ROTATION_90     = 1,
+    ROTATION_180    = 2,
+    ROTATION_270    = 3,
+    ROTATION_MAX
+} ROTATION_E;
 ```
+**Function Description**
+> Rotation enumeration
 
-【功能描述】
-> 设置通道帧率
+**Member Descriptions**
 
-【参数说明】
+|   Member   |     Meaning     |
+| :--------: | :-------------: |
+| ROTATION_0  | No rotation |
+| ROTATION_90  | Rotate by 90 degrees |
+| ROTATION_180 | Rotate by 180 degrees |
+| ROTATION_270 | Rotate by 270 degrees |
+| ROTATION_MAX | Maximum value of the enumeration |
 
-|   参数    |       含义       |
-| :-------: | :--------------: |
-|  channel  |  通道ID，枚举类型 |
-| frame_rate|     帧率值       ||       成员       |                含义                |
-| :--------------: | :--------------------------------: |
-|    frame_id     |              帧ID                 |
-|   ds_uv_bypass   |         DS层YUV是否绕过          |
-|    ds_layer_en   |            DS层使能位             |
-|    us_layer_en   |           US层使能位              |
-|   us_uv_bypass   |          US层YUV是否绕过          |
-|     timeout      |              超时时间             |
-|    frameDepth    |            帧深度设置            |
-| dynamic_src_info |       动态源信息结构体            |
-|  MAX_PYM_DS_NUM  |       DS层最大数目限制           |
-|  MAX_PYM_US_NUM  |       US层最大数目限制           |
-|    ds_info[]     |     DS层的金字塔缩放信息数组     |
-|    us_info[]     |     US层的金字塔缩放信息数组     ||   Member   |      Meaning       |
-| :--------: | :----------------: |
-|  frame_id  |     Frame ID       |
-| ds_uv_bypass |  DS layer UV bypass |
-|  ds_layer_en  | DS layer enable levels (4~23) |
-|  us_layer_en  | US layer enable levels (0~6)  |
-| us_uv_bypass |  US layer UV bypass |
-|  timeout   |     Timeout       |
-| frameDepth |  Image queue length |
-|   ds_info  |   DS scaling information |
-|   us_info  |   US scaling information |
+### DYNAMIC_SRC_INFO_S
+**Structure Definition**
+```c
+typedef struct HB_VPS_DYNAMIC_SRC_INFO_S {
+    uint8_t src_change_en;
+    uint16_t new_width;
+    uint16_t new_height;
+} DYNAMIC_SRC_INFO_S;
+```
+**Function Description**
+> Structure for dynamic input size configuration when pyramid is changing.
+
+**Member Descriptions**
+
+|   Member   |       Meaning       |
+| :--------: | :------------------: |
+| src_change_en | Enable change in input size |
+|   new_width   | New width |
+|  new_height   | New height |
+
+### HB_PYM_SCALE_INFO_S
+**Structure Definition**
+```c
+typedef struct HB_PYM_SCALE_INFO_S {
+    uint8_t factor;
+    uint16_t roi_x;
+    uint16_t roi_y;
+    uint16_t roi_width;
+    uint16_t roi_height;
+} PYM_SCALE_INFO_S;
+```
+**Function Description**
+> Structure for pyramid cropping and scaling attributes.
+
+**Member Descriptions**
+
+|   Member    |                             Meaning                             |
+| :--------: | :----------------------------------------------------------: |
+|   factor   | Scaling factor (1-63); for shrinking layers, the formula is factor/(factor+64), for expanding layers, it's 64/factor. Fixed ratios apply for specific layers: 24 - factor=50, 25 - factor=40, 26 - factor=32, 27 - factor=25, 28 - factor=20, 29 - factor=16 |
+|   roi_x    | Starting x-coordinate |
+|   roi_y    | Starting y-coordinate |
+| roi_width  | Image width |
+| roi_height | Image height |
+
+### HB_VPS_PYM_CHN_ATTR_S
+**Structure Definition**
+```c
+typedef struct HB_VPS_PYM_CHN_ATTR_S {
+    uint32_t frame_id;
+    uint32_t ds_uv_bypass;
+    uint16_t ds_layer_en;
+    uint8_t us_layer_en;
+    uint8_t us_uv_bypass;
+    int timeout;
+    uint32_t frameDepth;
+    DYNAMIC_SRC_INFO_S dynamic_src_info;
+#define MAX_PYM_DS_NUM 24
+#define MAX_PYM_US_NUM 6
+    PYM_SCALE_INFO_S ds_info[MAX_PYM_DS_NUM];
+    PYM_SCALE_INFO_S us_info[MAX_PYM_US_NUM];
+} VPS_PYM_CHN_ATTR_S;
+```
+**Function Description**
+> Structure for auxiliary channel attributes.
+
+**Member Descriptions**
+
+|   Member   |         Meaning         |
+| :--------: | :----------------------: |
+|   frame_id   | Enable frame ID functionality |
+| ds_uv_bypass | DS layer UV bypass |
+| ds_layer_en  | Enabled DS layer count (4-23) |
+| us_layer_en  | Enabled US layer count (0-6) |
+| us_uv_bypass | US layer UV bypass |
+|   timeout    | Timeout value |
+|  frameDepth  | Image queue length |
+|   ds_info    | DS scaling information |
+|   us_info    | US scaling information |
 
 ### HB_DIS_MV_INFO_S
-【Structure Definition】
+**Structure Definition**
 ```c
 typedef struct HB_DIS_MV_INFO_S {
-    int    gmvX;
-    int    gmvY;
-    int    xUpdate;
-    int    yUpdate;
+    int gmvX;
+    int gmvY;
+    int xUpdate;
+    int yUpdate;
 } DIS_MV_INFO_S;
 ```
-【Function Description】
+**Function Description**
 > Offset information structure
 
-【Member Description】
+**Member Descriptions**
 
-|   Member  |    Meaning    |
-| :-------: | :-----------: |
-|   gmvX    |  Horizontal offset value |
-|   gmvY    |  Vertical offset value |
-|  xUpdate  |     X update value   |
-|  yUpdate  |     Y update value   |
+|  Member   |     Meaning     |
+| :-----: | :----------: |
+|  gmvX   | Horizontal offset value |
+|  gmvY   | Vertical offset value |
+| xUpdate | X update value |
+| yUpdate | Y update value |
+
+
 
 ## Error Codes
 

@@ -47,7 +47,7 @@ Navigate to the `/sys/devices/system/cpu/cpufreq/policy0` directory and execute 
 
 ```shell
 affected_cpus    // CPUs currently affected by the frequency control (offline CPUs are not displayed)
-```cpuinfo_cur_freq                    // Current CPU frequency (unit: KHz)
+cpuinfo_cur_freq                    // Current CPU frequency (unit: KHz)
 cpuinfo_max_freq                    // The highest frequency available for the CPU under the current scaling strategy (unit: KHz)
 cpuinfo_min_freq                    // The lowest frequency available for the CPU under the current scaling strategy (unit: KHz)
 cpuinfo_transition_latency          // The time required to switch the processor frequency (unit: ns)
@@ -62,6 +62,7 @@ scaling_governor                    // The current governor (scaling) strategy
 scaling_max_freq                    // The highest frequency available for the CPU under the current scaling strategy (read from the cpufreq module cache)
 scaling_min_freq                    // The lowest frequency available for the CPU under the current scaling strategy (read from the cpufreq module cache)
 scaling_setspeed                    // A file that should be used to switch the governor to 'userspace' before use. Echo a value to this file to switch the frequency.
+```
 
 The Linux kernel used by the RDK system supports the following types of scaling strategies:
 
@@ -72,7 +73,7 @@ The Linux kernel used by the RDK system supports the following types of scaling 
 - Userspace: It exposes the control interface through sysfs to allow users to customize their own strategies. Users can manually adjust the frequency in the user space.
 - Schedutil: This is a strategy introduced in Linux-4.7 that adjusts the frequency based on the CPU utilization information provided by the scheduler. It has similar effects to the ondemand strategy but is more accurate and natural (as the scheduler has the best understanding of CPU usage).
 
-Users can control the CPU scaling strategy by modifying the corresponding settings under the directory '/sys/devices/system/cpu/cpufreq/policy0'.
+Users can control the CPU scaling strategy by modifying the corresponding settings under the directory `/sys/devices/system/cpu/cpufreq/policy0`.
 
 For example, to set the CPU to performance mode:
 
@@ -93,7 +94,11 @@ sudo bash -c "echo 1000000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_set
 The following content is applicable to RDK X3 and RDK X3 Module development boards and not applicable to the RDK Ultra development board.
 :::
 
-The development board uses the CPU Freq driver to manage the CPU operating state. The default mode is the 'ondemand' mode, where the CPU frequency is dynamically adjusted based on the load to save power. User can change to the 'performance' mode to make the CPU always operate at the highest frequency. The command is as follows:```bash
+<iframe src="//player.bilibili.com/player.html?aid=700903305&bvid=BV1rm4y1E73q&cid=1196557803&page=14" scrolling="no" border="0" frameborder="no" framespacing="0" width="100%" height="500" allowfullscreen="true"> </iframe>
+
+The development board uses the CPU Freq driver to manage the CPU operating state. The default mode is the 'ondemand' mode, where the CPU frequency is dynamically adjusted based on the load to save power. User can change to the 'performance' mode to make the CPU always operate at the highest frequency. The command is as follows:
+
+```bash
 sudo bash -c 'echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor'
 ```
 

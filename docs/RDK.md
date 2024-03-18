@@ -98,7 +98,7 @@ Bug Fixes: [No specific translation provided]- Remove redundant kernel logs for 
 
 Other updates:
 
-- Support for the Chromium browser, users can install and use it with "sudo apt install chromium".
+- Support for the Chromium browser, users can install and use it with `sudo apt install chromium`.
 
 ### Version Number: 2.0.0
 

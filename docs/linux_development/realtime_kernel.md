@@ -48,6 +48,7 @@ The `cyclictest` test is a commonly used test in `rt-tests`, which is used to ev
 
 ```
 sudo cyclictest -l50000000 -m -S -p90 -i200 -h400
+```
 
 This command will run a real-time performance test with the following options:
 

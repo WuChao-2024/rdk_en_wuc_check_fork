@@ -46,7 +46,9 @@ i2c0: i2c@0xA5009000 {
     pinctrl-names = "default";
     pinctrl-0 = <&i2c0_func>;
 };
-```Note: 
+```
+
+Note: 
 The nodes in hobot-xj3.dtsi mainly declare some registers and interrupts resources, which are common features of the soc and are not specific to a particular circuit board. In general, they do not need to be modified.
 
 ## I2C Usage
@@ -94,7 +96,7 @@ static void recal_clk_div(struct hobot_i2c_dev *dev)
 }
 
 /* Reset I2C frequency to the default frequency */
-```static void reset_client_freq(struct hobot_i2c_dev *dev)
+static void reset_client_freq(struct hobot_i2c_dev *dev)
 {
         struct client_request *client_req;
 
@@ -111,6 +113,7 @@ static int hobot_i2c_xfer(struct i2c_adapter *adap, struct i2c_msg msgs[], int n
     reset_client_freq(dev);
     ...
 }
+```
 
 ### User Space
 

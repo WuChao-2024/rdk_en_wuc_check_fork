@@ -15,11 +15,11 @@ By arranging the elements of different dimensions closely together according to 
 Different layouts are used for input and output data, and users can obtain layout description information through APIs. Different layouts cannot be directly compared.
 
 :::info Note
-
 Please note that when performing data layout transformation, if padding is required, it is recommended to set the padding value to zero.
 
 Here we introduce two types of data layout: "NHWC_NATIVE" and "NCHW_NATIVE". Taking "NHWC_NATIVE" as an example, the data layout is as follows:
 :::
+
 
   | <!-- -->    | <!-- -->    |<!-- --> |
   |-----------|----------------|-----|
@@ -45,7 +45,9 @@ A tensor of size N * H * W * C can be represented by the following 4 nested loop
         }
     }
 
-Compared to "NCHW_NATIVE", "NHWC_NATIVE" has a different loop order, but it is not listed separately here.:::caution
+Compared to "NCHW_NATIVE", "NHWC_NATIVE" has a different loop order, but it is not listed separately here.
+
+:::caution
 The term "native" mentioned in the following content specifically refers to this layout.
 :::
 

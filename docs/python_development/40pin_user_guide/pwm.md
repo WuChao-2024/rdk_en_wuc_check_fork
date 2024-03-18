@@ -48,7 +48,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-```Please translate the following Chinese parts into English, while preserving the original format and content: 
 ```
-
-`中文` (Chinese) → `English`

@@ -47,7 +47,9 @@ netstat { [-vWeenNac] -i | [-cnNe] -M | -s [-6tuw] }
 - `-F`: Print routing information from the FIB (default).
 - `-C`: Print routing information from the cache. 
 
-## Common CommandsDisplay detailed network conditions
+## Common Commands
+
+Display detailed network conditions
 
 ```
 netstat -a       #List all ports
@@ -94,7 +96,9 @@ netstat -l      #Only display listening ports
 netstat -lt     #Only list all listening TCP ports
 netstat -lu     #Only list all listening UDP ports
 netstat -lx     #Only list all listening UNIX ports
-```Display PID and process name in netstat output
+```
+
+Display PID and process name in netstat output
 
 ```
 netstat -pt

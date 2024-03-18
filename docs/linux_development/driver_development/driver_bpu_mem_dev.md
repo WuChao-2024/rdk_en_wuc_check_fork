@@ -40,13 +40,8 @@ where `/boot/hobot/hobot-x3-pi.dtb` is the path of the DTB file to be edited. Th
 
 After opening the dts file, locate the ion_cma node, and modify the 0x2a000000 in the alloc-ranges and size attributes to the desired memory size value. Before modifying this value, make sure you have a clear understanding of its meaning, including the allowed range of settings.
 
+
 ```
-ion_cma {
-		compatible = "shared-dma-pool";
-		alloc-ranges = <0x00 0x4000000 0x00 0x2a000000>;
-		alignment = <0x00 0x100000>;
-		size = <0x00 0x2a000000>;
-``````
 ion_cma {
 	compatible = "shared-dma-pool";
 	alloc-ranges = <0x00 0x4000000 0x00 0x5dc00000>;

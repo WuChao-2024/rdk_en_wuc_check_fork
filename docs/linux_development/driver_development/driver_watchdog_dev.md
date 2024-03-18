@@ -47,7 +47,7 @@ CONFIG_WATCHDOG=y
 CONFIG_WATCHDOG_CORE=y
 # CONFIG_WATCHDOG_NOWAYOUT is not set
 CONFIG_WATCHDOG_HANDLE_BOOT_ENABLED=y
-```# CONFIG_WATCHDOG_SYSFS is not set
+# CONFIG_WATCHDOG_SYSFS is not set
 #
 # Watchdog Device Drivers
 #
@@ -61,7 +61,7 @@ CONFIG_WATCHDOG_HANDLE_BOOT_ENABLED=y
 # CONFIG_DW_WATCHDOG is not set
 # CONFIG_MAX63XX_WATCHDOG is not set
 CONFIG_HOBOT_WATCHDOG=y
-# CONFIG_HOBOT_WATCHDOG_ENABLE is not set/*Enable this option for the system to automatically feed the dog*/
+# CONFIG_HOBOT_WATCHDOG_ENABLE is not set /*Enable this option for the system to automatically feed the dog*/
 CONFIG_HOBOT_WATCHDOG_TEST=y
 # CONFIG_MEN_A21_WDT is not set
 
@@ -97,7 +97,7 @@ CONFIG_HOBOT_WATCHDOG_ENABLE=y/*Enable this option for the system to automatical
 #include <stdlib.h>
 #include <unistd.h> //UNIX standard function definitions
 #include <sys/types.h>
-```#include <sys/stat.h>
+#include <sys/stat.h>
 #include <fcntl.h> // file control definition
 #include <termios.h> // PPSIX terminal control definition
 #include <errno.h> // error number definition

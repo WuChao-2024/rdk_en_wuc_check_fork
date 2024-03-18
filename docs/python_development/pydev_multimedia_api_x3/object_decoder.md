@@ -46,7 +46,11 @@ The return value is a `list` data with 2 members.
 | list[0]               | 0: decoding succeeded, -1: decoding failed     | 
 | list[1]               | Number of frames in the input stream file, valid when decoding succeeds     |
 
-<font color='Blue'>[Note]</font><font color='Blue'>【Reference Code】</font>
+<font color='Blue'>【Note】</font>
+
+None
+
+<font color='Blue'>【Reference Code】</font>
 
 None
 
@@ -57,6 +61,7 @@ None
 Get the output result of the decoding module.
 
 <font color='Blue'>【Function Declaration】</font>
+
 ```python
 Decoder.get_img()
 ```
@@ -92,7 +97,7 @@ import sys, os, time
 import numpy as np
 import cv2
 from hobot_vio import libsrcampy
-```def test_decode():
+    def test_decode():
     #create decode object
     dec = libsrcampy.Decoder()
 
@@ -140,7 +145,9 @@ Decoder.set_img(img, chn, eos)
 
 <font color='Blue'>【Usage】</font> 
 
-N/A<font color='Blue'>【Return Values】</font>  
+N/A
+
+<font color='Blue'>【Return Values】</font>  
 
 | Return Value | Description |
 | ------ | ---- |
@@ -190,7 +197,7 @@ def test_cam_bind_encode_decode_bind_display():
         else:
             print("encode get image failed count: %d" % a)
         a = a + 1
-```ret = libsrcampy.unbind(cam, enc)
+    ret = libsrcampy.unbind(cam, enc)
 dec.close()
 enc.close()
 cam.close_cam()
@@ -206,6 +213,7 @@ test_cam_bind_encode_decode()
 Close the decoding module.
 
 <font color='Blue'>【Function Declaration】</font>
+
 ```python
 Decoder.close()
 ```

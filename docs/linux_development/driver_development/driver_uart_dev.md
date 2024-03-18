@@ -57,7 +57,50 @@ uart0: serial@0xA5000000 {
 
 &uart3 {
 	status = "okay"; /* 4 wire uart for bt */
-};#include <stdio.h>
+};
+```
+
+## UART Testing {#uart_test}
+
+Physically connect the TX and RX pins of uart3 on the hardware.
+
+
+![image-20220324122032808](./image/driver_develop_guide/image-20220324122032808.png)
+
+
+Compile the `uart_duplex.c` code as follows, with the full code provided in Appendix A:
+
+```bash
+/opt/gcc-ubuntu-9.3.0-2020.03-x86_64-aarch64-linux-gnu/bin/aarch64-linux-gnu-gcc -o uart_duplex uart_duplex.c -lpthread
+```
+
+Loopback test command: Open `/dev/ttyS3` with a default baud rate of 4Mbps, and for each round of testing, transmit and receive 1MB of data by default over 100 rounds. Concurrently read and write, perform data verification after every transmission and reception of 512 bytes. Upon the completion of a full round of testing without errors, print "Verification Correct".
+
+```bash
+# ./uart_duplex -c 100 -d /dev/ttyS3
+test size:1024 Kbytes, baud:4000000
+Start receive thread
+Start send thread
+Start recv_check thread
+This is receive test 1 times
+This is uart send 1 times
+receive sum:102416 bytes
+receive sum:205312 bytes
+...
+receive sum:924164 bytes
+receive sum:1027076 bytes
+send 1024Kbytes,time:2700.000000ms, BPS:379259.250000
+This is receive test 2 times
+## Check the received data is correct ##
+```
+
+The `uart_duplex` command is used to test the UART functionality. For more usage instructions, refer to its help information.
+
+## Appendix (Test Code)
+
+
+```c
+#include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -105,104 +148,107 @@ static void dump_send_data(uint32_t sum, uint32_t len)
 {
 	int ii = 0;
 	printf("dump send data:\n");
-```for (ii = 0; ii < len; ii += 4) {
-    printf("0x%x: 0x%x, 0x%x, 0x%x, 0x%x\n", sum + ii,
-        send_buffer[sum + ii],
-        send_buffer[sum + ii + 1],
-        send_buffer[sum + ii + 2],
-        send_buffer[sum + ii + 3]);
+	for (ii = 0; ii < len; ii += 4) {
+		printf("0x%x: 0x%x, 0x%x, 0x%x, 0x%x\n", sum + ii,
+				send_buffer[sum + ii],
+				send_buffer[sum + ii + 1],
+				send_buffer[sum + ii + 2],
+				send_buffer[sum + ii + 3]);
 
-}
+	}
 
 }
 #endif
 
 static void set_baudrate(int fd, int nSpeed)
 {
-    struct termios newtio;
+	struct termios newtio;
 
-    tcgetattr(fd, &newtio);
+	tcgetattr(fd, &newtio);
 
-    switch (nSpeed) {
-    case 2400:
-        cfsetispeed(&newtio, B2400);
-        cfsetospeed(&newtio, B2400);
-        break;
+	switch (nSpeed) {
+	case 2400:
+		cfsetispeed(&newtio, B2400);
+		cfsetospeed(&newtio, B2400);
+		break;
 
-    case 4800:
-        cfsetispeed(&newtio, B4800);
-        cfsetospeed(&newtio, B4800);
-        break;
+	case 4800:
+		cfsetispeed(&newtio, B4800);
+		cfsetospeed(&newtio, B4800);
+		break;
 
-    case 9600:
-        cfsetispeed(&newtio, B9600);
-        cfsetospeed(&newtio, B9600);
-        break;
+	case 9600:
+		cfsetispeed(&newtio, B9600);
+		cfsetospeed(&newtio, B9600);
+		break;
 
-    case 19200:
-        cfsetispeed(&newtio, B19200);
-        cfsetospeed(&newtio, B19200);
-        break;
+	case 19200:
+		cfsetispeed(&newtio, B19200);
+		cfsetospeed(&newtio, B19200);
+		break;
 
-    case 38400:
-        cfsetispeed(&newtio, B38400);
-        cfsetospeed(&newtio, B38400);
-        break;
+	case 38400:
+		cfsetispeed(&newtio, B38400);
+		cfsetospeed(&newtio, B38400);
+		break;
 
-    case 57600:
-        cfsetispeed(&newtio, B57600);
-        cfsetospeed(&newtio, B57600);
-        break;
+	case 57600:
+		cfsetispeed(&newtio, B57600);
+		cfsetospeed(&newtio, B57600);
+		break;
 
-    case 115200:cfsetispeed(&newtio, B115200);
-cfsetospeed(&newtio, B115200);
-break;
-case 230400:
-cfsetispeed(&newtio, B230400);
-cfsetospeed(&newtio, B230400);
-break;
-case 921600:
-cfsetispeed(&newtio, B921600);
-cfsetospeed(&newtio, B921600);
-break;
-case 1000000:
-cfsetispeed(&newtio, B1000000);
-cfsetospeed(&newtio, B1000000);
-break;
+	case 115200:
+		cfsetispeed(&newtio, B115200);
+		cfsetospeed(&newtio, B115200);
+		break;
+	case 230400:
+		cfsetispeed(&newtio, B230400);
+		cfsetospeed(&newtio, B230400);
+		break;
+	case 921600:
+		cfsetispeed(&newtio, B921600);
+		cfsetospeed(&newtio, B921600);
+		break;
+	case 1000000:
+		cfsetispeed(&newtio, B1000000);
+		cfsetospeed(&newtio, B1000000);
+		break;
 
-case 1152000:
-cfsetispeed(&newtio, B1152000);
-cfsetospeed(&newtio, B1152000);
-break;
-case 1500000:
-cfsetispeed(&newtio, B1500000);
-cfsetospeed(&newtio, B1500000);
-break;
-case 2000000:
-cfsetispeed(&newtio, B2000000);
-cfsetospeed(&newtio, B2000000);
-break;
-case 2500000:
-cfsetispeed(&newtio, B2500000);
-cfsetospeed(&newtio, B2500000);
-break;
-case 3000000:
-cfsetispeed(&newtio, B3000000);
-cfsetospeed(&newtio, B3000000);
-break;
-case 3500000:
-cfsetispeed(&newtio, B3500000);
-cfsetospeed(&newtio, B3500000);
-break;
+	case 1152000:
+		cfsetispeed(&newtio, B1152000);
+		cfsetospeed(&newtio, B1152000);
+		break;
+	case 1500000:
+		cfsetispeed(&newtio, B1500000);
+		cfsetospeed(&newtio, B1500000);
+		break;
+	case 2000000:
+		cfsetispeed(&newtio, B2000000);
+		cfsetospeed(&newtio, B2000000);
+		break;
+	case 2500000:
+		cfsetispeed(&newtio, B2500000);
+		cfsetospeed(&newtio, B2500000);
+		break;
+	case 3000000:
+		cfsetispeed(&newtio, B3000000);
+		cfsetospeed(&newtio, B3000000);
+		break;
+	case 3500000:
+		cfsetispeed(&newtio, B3500000);
+		cfsetospeed(&newtio, B3500000);
+		break;
 
-case 4000000:
-cfsetispeed(&newtio, B4000000);
-cfsetospeed(&newtio, B4000000);
-break;
+	case 4000000:
+		cfsetispeed(&newtio, B4000000);
+		cfsetospeed(&newtio, B4000000);
+		break;
 
-default:
-printf("\tSorry, Unsupported baud rate, use previous baudrate!\n\n");
-break;tcsetattr(fd, TCSANOW, &newtio);
+	default:
+		printf("\tSorry, Unsupported baud rate, use previous baudrate!\n\n");
+		break;
+	}
+	tcsetattr(fd,TCSANOW,&newtio);
 }
 
 static void set_termios(int fd)
@@ -251,9 +297,8 @@ static void *send_test(void *times)
 				return NULL;
 			}
 		}
-	}
 #if 1
-gettimeofday(&end, NULL);
+		gettimeofday(&end, NULL);
 		//		printf("start %ld sec, %ld usec, end %ld sec, %ld usec\n", start.tv_sec, start.tv_usec, end.tv_sec, end.tv_usec);
 		ts = ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec)) / 1000;
 		printf("send %dKbytes,time:%fms, BPS:%f\n", test_size, ts, test_size * 1000 / (ts / 1000));
@@ -301,7 +346,9 @@ static void *recv_test(void *times)
 			if (len_frame >= FRAME_LEN) {
 				len_frame -= FRAME_LEN;
 				sem_post(&sem_check);
-			}#if 0
+			}
+
+#if 0
 			ret = memcmp(&recv_buffer[sum], &send_buffer[sum], len);
 			if (ret != 0) {
 				printf("data compare error\n");
@@ -351,57 +398,58 @@ static void *recv_check_test(void *times)
 	while (1) {
 		sem_wait(&sem_check);
 		/*check data*/
-cur_frame = (uint32_t *)&recv_buffer[check_pos];
-if (*cur_frame != check_pos / FRAME_LEN) {
-    printf("error: may lost frame, curruent frame is %d, expected frame is %d position: 0x%x\n",
-            *cur_frame, check_pos / FRAME_LEN, check_pos);
-    //dump_recv_data(check_pos, FRAME_LEN);
-    //dump_send_data(check_pos, FRAME_LEN);
-    error_bit_cnt = 0;
-    error_bit_cnt = error_bit((uint64_t *)&recv_buffer[check_pos],
-            (uint64_t *)&send_buffer[check_pos],
-            FRAME_LEN / 8);
-    check_pos += FRAME_LEN;
-    printf("test total data: 0x%lx, error bit count:%d\n", recv_total, error_bit_cnt);
-    if (check_pos == test_size * 1024) {
-        //exit(1);
-        printf("uart: frame head error\n");
+		cur_frame = (uint32_t *)&recv_buffer[check_pos];
+		if (*cur_frame != check_pos / FRAME_LEN) {
+			printf("error: may lost frame, curruent frame is %d, expected frame is %d position: 0x%x\n",
+					*cur_frame, check_pos / FRAME_LEN, check_pos);
+			//dump_recv_data(check_pos, FRAME_LEN);
+			//dump_send_data(check_pos, FRAME_LEN);
+			error_bit_cnt = 0;
+			error_bit_cnt = error_bit((uint64_t *)&recv_buffer[check_pos],
+					(uint64_t *)&send_buffer[check_pos],
+					FRAME_LEN / 8);
+			check_pos += FRAME_LEN;
+			printf("test total data: 0x%lx, error bit count:%d\n", recv_total, error_bit_cnt);
+			if (check_pos == test_size * 1024) {
+				//exit(1);
+				printf("uart: frame head error\n");
 
-    }
-    continue;
-}
-error_bit_cnt = 0;
-error_bit_cnt = error_bit((uint64_t *)&recv_buffer[check_pos],
-        (uint64_t *)&send_buffer[check_pos],
-        FRAME_LEN / 8);
-if (error_bit_cnt) {
-    printf("test total data: 0x%lx!!!!!!!, error bit count:%d\n", recv_total, error_bit_cnt);
-    //dump_recv_data(check_pos, FRAME_LEN);
-    //dump_send_data(check_pos, FRAME_LEN);
-    check_pos += FRAME_LEN;
-    if (check_pos == test_size * 1024) {
-        //exit(1);
-        printf("uart: frame data error\n");
-    }
-    continue;
-}
-memset(&recv_buffer[check_pos], 0, FRAME_LEN);
-check_pos += FRAME_LEN;
-if (check_pos == test_size * 1024) {
-    check_pos = 0;
-    printf("## Check the received data is correct ##\n");
-}
-}
-return NULL;
+			}
+			continue;
+		}
+		error_bit_cnt = 0;
+		error_bit_cnt = error_bit((uint64_t *)&recv_buffer[check_pos],
+				(uint64_t *)&send_buffer[check_pos],
+				FRAME_LEN / 8);
+		if (error_bit_cnt) {
+			printf("test total data: 0x%lx!!!!!!!, error bit count:%d\n", recv_total, error_bit_cnt);
+			//dump_recv_data(check_pos, FRAME_LEN);
+			//dump_send_data(check_pos, FRAME_LEN);
+			check_pos += FRAME_LEN;
+			if (check_pos == test_size * 1024) {
+				//exit(1);
+				printf("uart: frame data error\n");
+			}
+			continue;
+		}
+		memset(&recv_buffer[check_pos], 0, FRAME_LEN);
+		check_pos += FRAME_LEN;
+		if (check_pos == test_size * 1024) {
+			check_pos = 0;
+			printf("## Check the received data is correct ##\n");
+		}
+	}
+	return NULL;
 }
 
 static const char short_options[] = "s:u:c:b:d:h";
 static const struct option long_options[] = {
-    {"size", required_argument, NULL, 's'},
-    {"baudrate", required_argument, NULL, 'b'},
-    {"count", required_argument, NULL, 'c'},
-    {"device", required_argument, NULL, 'd'},{"help", no_argument, NULL, 'h'},
-{0, 0, 0, 0}};
+	{"size", required_argument, NULL, 's'},
+	{"baudrate", required_argument, NULL, 'b'},
+	{"count", required_argument, NULL, 'c'},
+	{"device", required_argument, NULL, 'd'},
+	{"help", no_argument, NULL, 'h'},
+	{0, 0, 0, 0}};
 int main(int argc, char *argv[])
 {
 	int ret = 0;
@@ -450,45 +498,46 @@ int main(int argc, char *argv[])
 	set_termios(g_fd);
 	printf("test size:%d Kbytes, baud:%d\n", test_size, baud);
 	for (i = 0; i < test_size * 1024; i+=4) {
-if (i % FRAME_LEN) {
-    frame_value = (uint32_t *)&send_buffer[i];
-    *frame_value = rand();
-}
+		if (i % FRAME_LEN) {
+			frame_value = (uint32_t *)&send_buffer[i];
+			*frame_value = rand();
+		}
 
-}
-for (i = 0; i < test_size * 1024 / FRAME_LEN; i++) {
-    frame_num = (uint32_t *)&send_buffer[i * FRAME_LEN];
-    *frame_num = i;
-    //        printf("pos:0x%x, value:0x%x\n", i * FRAME_LEN, *frame_num);
-}
+	}
+	for (i = 0; i < test_size * 1024 / FRAME_LEN; i++) {
+		frame_num = (uint32_t *)&send_buffer[i * FRAME_LEN];
+		*frame_num = i;
+		//        printf("pos:0x%x, value:0x%x\n", i * FRAME_LEN, *frame_num);
+	}
 
-sem_init(&sem_check, 0, 0);
-ret = pthread_create(&recv_thread_id,
-        NULL,
-        recv_test,
-        NULL);
-if (ret < 0) {
-    printf("create uart1 test thread failed\n");
-    return -1;
+	sem_init(&sem_check, 0, 0);
+	ret = pthread_create(&recv_thread_id,
+			NULL,
+			recv_test,
+			NULL);
+	if (ret < 0) {
+		printf("create uart1 test thread failed\n");
+		return -1;
+	}
+	ret = pthread_create(&send_thread_id,
+			NULL,
+			send_test,
+			NULL);
+	if (ret < 0) {
+		printf("create uart2 test thread failed\n");
+		return -1;
+	}
+	ret = pthread_create(&recv_check_thread_id,
+			NULL,
+			recv_check_test,
+			NULL);
+	if (ret < 0) {
+		printf("create receive check thread failed\n");
+		return -1;
+	}
+	pthread_join(recv_thread_id, NULL);
+	pthread_join(recv_check_thread_id, NULL);
+	pthread_join(send_thread_id, NULL);
+	return 0;
 }
-ret = pthread_create(&send_thread_id,
-        NULL,
-        send_test,
-        NULL);
-if (ret < 0) {
-    printf("create uart2 test thread failed\n");
-    return -1;
-}
-ret = pthread_create(&recv_check_thread_id,
-        NULL,
-        recv_check_test,
-        NULL);
-if (ret < 0) {
-    printf("create receive check thread failed\n");
-    return -1;
-}
-pthread_join(recv_thread_id, NULL);
-pthread_join(recv_check_thread_id, NULL);
-pthread_join(send_thread_id, NULL);
-return 0;
-}
+```

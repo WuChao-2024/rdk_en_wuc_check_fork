@@ -98,6 +98,7 @@ HB_VOT_GetWBAttr: Get the write back attributes.
 HB_VOT_GetWBFrame: Get the write back image.HB_VOT_ReleaseWBFrame: Release write-back image.
 HB_VOT_ShutDownHDMI: Turn off HDMI output image to the device, and the display module still works normally.
 HB_VOT_StartHDMI: Enable HDMI output image to the device.
+```
 
 ### HB_VOT_SetPubAttr
 【Function Declaration】
@@ -108,18 +109,21 @@ int HB_VOT_SetPubAttr(uint8_t dev, const VOT_PUB_ATTR_S *pstPubAttr);
 > Set the public attributes of video output.
 
 【Parameter Description】
- 
-|  Parameter Name  |       Description       | Input/Output |
-| :--------------: | :---------------------: | :----------: |
-|       dev        | Video output device ID. |    Input     |
-|    pstPubAttr    | Video output device public attributes. |  Input   |
+
+| Parameter Name |                   Description                   | Input/Output |
+| :------------: | :---------------------------------------------: | :---------: |
+|      dev       | Video output device ID. Range: 0.                |    Input    |
+| pstPubAttr    | Video output device public attributes.          |    Input    |
+
+
 
 【Return Value】
- 
+
 | Return Value | Description |
-| :----------: | :---------: |
-|      0       |  Succeeded. |
-|    Non-zero    | Failed. |
+| :---------: | :---------: |
+|     0      | Success.    |
+| Non-zero   | Failure.    |
+
 
 【Notes】
 > None.
@@ -136,13 +140,15 @@ int HB_VOT_GetPubAttr(uint8_t dev, VOT_PUB_ATTR_S *pstPubAttr);
 > Get the public attributes of video output.
 
 【Parameter Description】
- 
+
 |  Parameter Name  |              Description              | Input/Output |
 | :--------------: | :-----------------------------------: | :----------: |
 |       dev        |    Video output device ID.<br/>Range: 0.    |    Input     |
 |    pstPubAttr    |       Video output device public attributes.      |    Output    |
 
-【Return Value】| Return value | Description |
+【Return Value】
+
+| Return value | Description |
 | :----------: | :---------: |
 |      0       |   Success.  |
 |    Non-0     |   Failure.  |
@@ -192,14 +198,14 @@ int HB_VOT_Enable(uint8_t dev);
         printf("HB_VOT_SetPubAttr failed.\n");
         // break;
     }
-```ret = HB_VOT_Enable(0);
-if (ret) {
-    printf("HB_VOT_Enable failed.\n");
-}
-ret = HB_VOT_Disable(0);
-if (ret) {
-    printf("HB_VOT_Disable failed.\n");
-}
+    ret = HB_VOT_Enable(0);
+    if (ret) {
+        printf("HB_VOT_Enable failed.\n");
+    }
+    ret = HB_VOT_Disable(0);
+    if (ret) {
+        printf("HB_VOT_Disable failed.\n");
+    }
 ```
 
 ### HB_VOT_Disable
@@ -217,6 +223,7 @@ int HB_VOT_Disable(uint8_t dev);
 |      dev       | Video output device ID.<br/>Range: 0. |    Input     |
 
 【Return Value】
+
 | Return Value | Description |
 | :----------: | :---------: |
 |      0       |   Success   |
@@ -240,7 +247,8 @@ int HB_VOT_SetLcdBackLight (uint8_t dev, uint32_t backlight);
 
 | Parameter Name |          Description          | Input/Output |
 | :------------: | :---------------------------: | :----------: |
-|      dev       | Video output device ID.<br/>Range:0. |    Input     || backlight | Backlight brightness value. <br/>Value range: 0-10. The larger the value, the brighter the backlight.<br/>When the brightness value is 0, the screen is completely black. | Input |
+|      dev       | Video output device ID.<br/>Range:0. |    Input     |
+| backlight | Backlight brightness value. <br/>Value range: 0-10. The larger the value, the brighter the backlight.<br/>When the brightness value is 0, the screen is completely black. | Input |
 
 【Return Value】
 
@@ -289,13 +297,18 @@ int HB_VOT_SetVideoLayerAttr(uint8_t layer, const VOT_VIDEO_LAYER_ATTR_S *pstLay
 int HB_VOT_GetVideoLayerAttr(uint8_t layer,  VOT_VIDEO_LAYER_ATTR_S *pstLayerAttr);
 ```
 【Function Description】
-> Get the attributes of the video layer.【Parameter Description】
+
+> Get the attributes of the video layer.
+
+【Parameter Description】
+
 | Parameter Name |               Description                | Input/Output |
 | :------------: | :--------------------------------------: | :----------: |
 |     layer      | Video output video layer ID.<br/>Range: 0 |    Input     |
 | pstLayerAttr   |      Video output video layer attribute.  |    Output    |
 
 【Return Value】
+
 | Return Value |  Description  |
 | :----------: | :-----------: |
 |      0       |    Success.   |
@@ -322,6 +335,7 @@ int HB_VOT_EnableVideoLayer(uint8_t layer);
 |     layer      | Video output video layer ID.<br/>Range: 0.  |    Input     |
 
 【Return Value】
+
 | Return Value |  Description  |
 | :----------: | :-----------: |
 |      0       |    Success.   |
@@ -332,58 +346,60 @@ int HB_VOT_EnableVideoLayer(uint8_t layer);
 
 【Reference Code】
 ```C
-ret = HB_VOT_GetVideoLayerAttr(0, &stLayerAttr);
-if (ret) {
-    printf("HB_VOT_GetVideoLayerAttr failed.\n");
-printf("stLayer width:%d\n", stLayerAttr.stImageSize.u32Width);
-printf("stLayer height:%d\n", stLayerAttr.stImageSize.u32Height);
-stLayerAttr.stImageSize.u32Width = 1920;
-stLayerAttr.stImageSize.u32Height = 1080;
-ret = HB_VOT_SetVideoLayerAttr(0, &stLayerAttr);
-if (ret) {
-    printf("HB_VOT_SetVideoLayerAttr failed.\n");
-}
-ret = HB_VOT_GetVideoLayerCSC(0, &stCsc);
-if (ret) {
-    printf("HB_VOT_GetVideoLayerCSC failed.\n");
-}
-printf("stCsc luma :%d\n", stCsc.u32Luma);
-printf("stCsc contrast :%d\n", stCsc.u32Contrast);
-printf("stCsc hue :%d\n", stCsc.u32Hue);
-printf("stCsc satuature :%d\n", stCsc.u32Satuature);
-stCsc.u32Luma = 60;
-stCsc.u32Contrast = 60;
-stCsc.u32Hue = 60;
-stCsc.u32Satuature = 60;
-ret = HB_VOT_SetVideoLayerCSC(0, &stCsc);
-ret = HB_VOT_GetVideoLayerUpScale(0, &stUpScale);
-if (ret) {
-    printf("HB_VOT_GetVideoLayerUpScale failed.\n");
-}
-printf("stUpScale src width :%d\n", stUpScale.src_width);
-printf("stUpScale src height :%d\n", stUpScale.src_height);
-printf("stUpScale tgt width :%d\n", stUpScale.tgt_width);
-printf("stUpScale tgt height :%d\n", stUpScale.tgt_height);
-printf("stUpScale pos x :%d\n", stUpScale.pos_x);
-printf("stUpScale pos y :%d\n", stUpScale.pos_y);
-stUpScale.src_width = 1280;
-stUpScale.src_height = 720;
-stUpScale.tgt_width = 1920;
-stUpScale.tgt_height = 1080;
-ret = HB_VOT_SetVideoLayerUpScale(0, &stUpScale);
-if (ret) {
-    printf("HB_VOT_SetVideoLayerUpScale failed.\n");
-}
-ret = HB_VOT_EnableVideoLayer(0);
-if (ret) {
-    printf("HB_VOT_EnableVideoLayer failed.\n");
-}
+    ret = HB_VOT_GetVideoLayerAttr(0, &stLayerAttr);
+    if (ret) {
+        printf("HB_VOT_GetVideoLayerAttr failed.\n");
+    }
+    printf("stLayer width:%d\n", stLayerAttr.stImageSize.u32Width);
+    printf("stLayer height:%d\n", stLayerAttr.stImageSize.u32Height);
+    stLayerAttr.stImageSize.u32Width = 1920;
+    stLayerAttr.stImageSize.u32Height = 1080;
+    ret = HB_VOT_SetVideoLayerAttr(0, &stLayerAttr);
+    if (ret) {
+        printf("HB_VOT_SetVideoLayerAttr failed.\n");
+    }
+    ret = HB_VOT_GetVideoLayerCSC(0, &stCsc);
+    if (ret) {
+        printf("HB_VOT_GetVideoLayerCSC failed.\n");
+    }
+    printf("stCsc luma :%d\n", stCsc.u32Luma);
+    printf("stCsc contrast :%d\n", stCsc.u32Contrast);
+    printf("stCsc hue :%d\n", stCsc.u32Hue);
+    printf("stCsc satuature :%d\n", stCsc.u32Satuature);
+    stCsc.u32Luma = 60;
+    stCsc.u32Contrast = 60;
+    stCsc.u32Hue = 60;
+    stCsc.u32Satuature = 60;
+    ret = HB_VOT_SetVideoLayerCSC(0, &stCsc);
+    ret = HB_VOT_GetVideoLayerUpScale(0, &stUpScale);
+    if (ret) {
+        printf("HB_VOT_GetVideoLayerUpScale failed.\n");
+    }
+    printf("stUpScale src width :%d\n", stUpScale.src_width);
+    printf("stUpScale src height :%d\n", stUpScale.src_height);
+    printf("stUpScale tgt width :%d\n", stUpScale.tgt_width);
+    printf("stUpScale tgt height :%d\n", stUpScale.tgt_height);
+    printf("stUpScale pos x :%d\n", stUpScale.pos_x);
+    printf("stUpScale pos y :%d\n", stUpScale.pos_y);
+    stUpScale.src_width = 1280;
+    stUpScale.src_height = 720;
+    stUpScale.tgt_width = 1920;
+    stUpScale.tgt_height = 1080;
+    ret = HB_VOT_SetVideoLayerUpScale(0, &stUpScale);
+    if (ret) {
+        printf("HB_VOT_SetVideoLayerUpScale failed.\n");
+    }
+    ret = HB_VOT_EnableVideoLayer(0);
+    if (ret) {
+        printf("HB_VOT_EnableVideoLayer failed.\n");
+    }
 
-ret = HB_VOT_GetChnAttr(0, 0, &stChnAttr);
-if (ret) {
-    printf("HB_VOT_GetChnAttr failed.\n");
-}
-printf("stChnAttr priority :%d\n", stChnAttr.u32Priority);printf("stChnAttr src width :%d\n", stChnAttr.u32SrcWidth);
+    ret = HB_VOT_GetChnAttr(0, 0, &stChnAttr);
+    if (ret) {
+        printf("HB_VOT_GetChnAttr failed.\n");
+    }
+    printf("stChnAttr priority :%d\n", stChnAttr.u32Priority);
+    printf("stChnAttr src width :%d\n", stChnAttr.u32SrcWidth);
     printf("stChnAttr src height :%d\n", stChnAttr.u32SrcHeight);
     printf("stChnAttr s32X :%d\n", stChnAttr.s32X);
     printf("stChnAttr s32Y :%d\n", stChnAttr.s32Y);
@@ -432,28 +448,29 @@ printf("stChnAttr priority :%d\n", stChnAttr.u32Priority);printf("stChnAttr src 
     ret = HB_VOT_GetChnAttrEx(0, 0, &stChnAttrEx);
     if (ret) {
         printf("HB_VOT_GetChnAttrEx failed.\n");
-        // break;```C
-printf("stChnAttrEx format :%d\n", stChnAttrEx.format);
-printf("stChnAttrEx alpha_en :%d\n", stChnAttrEx.alpha_en);
-printf("stChnAttrEx alpha_sel :%d\n", stChnAttrEx.alpha_sel);
-printf("stChnAttrEx alpha :%d\n", stChnAttrEx.alpha);
-printf("stChnAttrEx keycolor :%d\n", stChnAttrEx.keycolor);
-printf("stChnAttrEx ov_mode :%d\n", stChnAttrEx.ov_mode);
-// stChnAttrEx.format = 1;
-stChnAttrEx.alpha_en = 1;
-stChnAttrEx.alpha_sel = 0;
-stChnAttrEx.alpha = 30;
-stChnAttrEx.keycolor = 0x7F88;
-stChnAttrEx.ov_mode = 1;
-ret = HB_VOT_SetChnAttrEx(0, 0, &stChnAttrEx);
-if (ret) {
-    printf("HB_VOT_SetChnAttrEx failed.\n");
-}
+        // break;
+    }
+    printf("stChnAttrEx format :%d\n", stChnAttrEx.format);
+    printf("stChnAttrEx alpha_en :%d\n", stChnAttrEx.alpha_en);
+    printf("stChnAttrEx alpha_sel :%d\n", stChnAttrEx.alpha_sel);
+    printf("stChnAttrEx alpha :%d\n", stChnAttrEx.alpha);
+    printf("stChnAttrEx keycolor :%d\n", stChnAttrEx.keycolor);
+    printf("stChnAttrEx ov_mode :%d\n", stChnAttrEx.ov_mode);
+    // stChnAttrEx.format = 1;
+    stChnAttrEx.alpha_en = 1;
+    stChnAttrEx.alpha_sel = 0;
+    stChnAttrEx.alpha = 30;
+    stChnAttrEx.keycolor = 0x7F88;
+    stChnAttrEx.ov_mode = 1;
+    ret = HB_VOT_SetChnAttrEx(0, 0, &stChnAttrEx);
+    if (ret) {
+        printf("HB_VOT_SetChnAttrEx failed.\n");
+    }
 
-ret = HB_VOT_DisableVideoLayer(0);
-if (ret) {
-    printf("HB_VOT_DisableVideoLayer failed.\n");
-}
+    ret = HB_VOT_DisableVideoLayer(0);
+    if (ret) {
+        printf("HB_VOT_DisableVideoLayer failed.\n");
+    }
 ```
 
 ### HB_VOT_DisableVideoLayer
@@ -481,7 +498,10 @@ int HB_VOT_DisableVideoLayer(uint8_t layer);
 > None
 
 【Reference Code】
-> See HB_VOT_EnableVideoLayer### HB_VOT_SetVideoLayerCSC
+> See HB_VOT_EnableVideoLayer
+
+### HB_VOT_SetVideoLayerCSC
+
 【Function Declaration】
 ```C
 int HB_VOT_SetVideoLayerCSC(uint8_t layer, const VOT_CSC_S *pstVideoCSC);
@@ -564,339 +584,369 @@ int HB_VOT_SetVideoLayerUpScale(uint8_t layer, const VOT_UPSCALE_ATTR_S *pstUpSc
 > See HB_VOT_EnableVideoLayer
 
 ### HB_VOT_GetVideoLayerUpScale
-【Function Declaration】
+**Function Declaration**
 ```C
 int HB_VOT_GetVideoLayerUpScale(uint8_t layer, VOT_UPSCALE_ATTR_S *pstUpScaleAttr);
 ```
-【Function Description】
-> Get the scaling attribute of the video layer.
+**Function Description**
+> Retrieves the video layer scaling attributes.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name |             Description             | Input/Output |
-| :------------: | :---------------------------------: | :----------: |
-|     layer      | Video output layer ID.<br/>Range: 0 |    Input     |
-| pstUpScaleAttr |         Scaling attributes         |    Output    |【返回值】
+| Parameter Name | Description | Input/Output |
+| :-------------: | :----------: | :---------: |
+|     layer      | Video output layer ID. <br/>Range: 0. |   Input    |
+| pstUpScaleAttr | Video layer scaling attributes. |   Output    |
+
+**Return Values**
 
 | Return Value | Description |
-| :----: | :----: |
-|   0    | Success. |
-|  Non-zero   | Fail. |
+| :----------: | :----------: |
+|     0       | Success.    |
+| Non-zero    | Failure.    |
 
-【注意事项】
-> N/A
+**Caution**
+> None
 
-【参考代码】
+**Reference Code**
 > See HB_VOT_EnableVideoLayer
 
 ### HB_VOT_BatchBegin
-【函数声明】
+**Function Declaration**
 ```C
 int HB_VOT_BatchBegin(uint8_t layer);
 ```
-【功能描述】
-> Start setting attributes for the video layer channel.
+**Function Description**
+> Begins setting channel properties for a video layer.
 
-【参数描述】
+**Parameter Descriptions**
 
-| Parameter |                 Description                 | Input/Output |
-| :------: | :----------------------------------: | :-------: |
-|  layer   | Video output layer ID.<br/>Value range: 0. |   Input    |
+| Parameter Name | Description | Input/Output |
+| :-------------: | :----------: | :---------: |
+|     layer      | Video output layer ID. <br/>Range: 0. |   Input    |
 
-【返回值】
+**Return Values**
 
-| Return Value |  Description  |
-| :----: | :----: |
-|   0    | Success. |
-|  Non-zero   | Fail. |
+| Return Value | Description |
+| :----------: | :----------: |
+|     0       | Success.    |
+| Non-zero    | Failure.    |
 
-【注意事项】
-> N/A
+**Caution**
+> None
 
-【参考代码】
-> N/A
+**Reference Code**
+> None
+
 
 ### HB_VOT_BatchEnd
-【函数声明】
+**Function Declaration**
 ```C
 int HB_VOT_BatchEnd(uint8_t layer);
 ```
-【功能描述】
-> End setting attributes for the video layer channel.
+**Function Description**
+> Ends setting channel properties for a video layer.
 
-【参数描述】| Parameter Name |       Description       | Input/Output |
-| :------------: | :---------------------: | :----------: |
-|     layer      |   Video output layer ID.<br/>Range: 0.   |    Input     |
+**Parameter Descriptions**
 
-【Return Value】
+| Parameter Name | Description | Input/Output |
+| :-------------: | :----------: | :---------: |
+|     layer      | Video output layer ID. <br/>Range: 0. |   Input    |
+
+**Return Values**
 
 | Return Value | Description |
-| :----------: | :---------: |
-|      0       |   Success.  |
-|    Non-zero  |   Failure.  |
+| :----------: | :----------: |
+|     0       | Success.    |
+| Non-zero    | Failure.    |
 
-【Notes】
+**Caution**
 > None
 
-【Reference Code】
+**Reference Code**
 > None
+
 
 ### HB_VOT_GetScreenFrame
-【Function Declaration】
+**Function Declaration**
 ```C
 int HB_VOT_GetScreenFrame(uint8_t layer, void *pstVFrame, int millisec);
 ```
-【Function Description】
-> Get the output screen image data.
+**Function Description**
+> Retrieves the output screen image data.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-|  Parameter Name  |            Description             | Input/Output |
-| :--------------: | :--------------------------------: | :----------: |
-|      layer       |   Video output layer ID。<br/>Range: 0.   |    Input     |
-|   pstVFrame |     Output screen image data information.     |    Output    |
-|    millisec    |         Timeout period. Unit: ms        |    Input     |
+| Parameter Name | Description | Input/Output |
+| :------------: | :----------: | :---------: |
+|   layer       | Video output layer ID. <br/>Range: 0. |    Input    |
+| pstVFrame     | Pointer to the output screen image data information. |   Output    |
+|  millisec     | Timeout in milliseconds. |    Input    |
 
-【Return Value】
+**Return Values**
 
 | Return Value | Description |
-| :----------: | :---------: |
-|      0       |   Success.  |
-|    Non-zero  |   Failure.  |
+| :--------: | :---------: |
+|    0      | Success.    |
+| Non-zero   | Failure.    |
 
-【Notes】
-> Need to be used after enabling the device, video layer, and channel.
+**Caution**
+> This function must be used after enabling the device, video layer, and channel.
 
-【Reference Code】
+**Reference Code**
 ```C
     int ret;
     hb_vio_buffer_t stVFrame;
 
     ret = HB_VOT_GetScreenFrame(0, &stVFrame, 0);
-    if (ret != ) {
-``````C
-|    chn     |                            视频输出通道id。取值范围：0。                             |   输入    |
-| pstChnAttr | 视频输出通道属性参数指针。具体参数请参考结构体VOT_CHN_ATTR_S的定义。 |   输入    |
+    if (ret != 0) {
+        printf("HB_VOT_GetScreenFrame failed.\n");
+    }
+
+    ret = HB_VOT_ReleaseScreenFrame(0, &stVFrame, 0);
+    if (ret != 0) {
+        printf("HB_VOT_ReleaseScreenFrame failed.\n");
+    }
 ```
+### HB_VOT_ReleaseScreenFrame
+**Function Declaration**
+```C
+int HB_VOT_ReleaseScreenFrame(uint8_t layer, const void *pstVFrame);
+```
+**Function Description**
+> Releases the output screen image data.
 
-【返回值】
+**Parameter Descriptions**
 
-| 返回值 |  描述  |
-| :----: | :----: |
-|   0    | 成功。 |
-|  非0   | 失败。 |
+| Parameter Name | Description | Input/Output |
+| :------------: | :----------: | :---------: |
+|   layer       | Video output layer ID. <br/>Range: 0. |    Input    |
+| pstVFrame     | Pointer to the output screen image data information. |   Input    |
 
-【注意事项】
-> 无
-
-【参考代码】
-> 见HB_VOT_SetChnAttr|    chn     | Video output channel ID. Range: [0,4).<br/>0 and 1 represent video channels;<br/>2 and 3 are graphic channels. |   Input   |
-| pstChnAttr |                                  Video output channel attributes.                                  |   Input   |
-
-【Return Value】
+**Return Values**
 
 | Return Value | Description |
-| :----------: | :---------: |
-|      0       |   Success.  |
-|    Non-zero  |   Failure.  |
+| :--------: | :---------: |
+|    0      | Success.    |
+| Non-zero   | Failure.    |
 
-【Notes】
+**Caution**
 > None
 
-【Reference Code】
+**Reference Code**
+> See the example for HB_VOT_ReleaseScreenFrame above, as there is no separate reference code provided.
+
+
+
+### HB_VOT_SetChnAttr
+**Function Declaration**
+```C
+int HB_VOT_SetChnAttr(uint8_t layer, uint8_t chn, const VOT_CHN_ATTR_S *pstChnAttr);
+```
+**Function Description**
+> Sets the properties of a video output channel.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description | Input/Output |
+| :-------------: | :----------: | :---------: |
+|   layer        | Video output layer ID (range: 0). | Input      |
+|    chn         | Video output channel ID (range: [0, 4)).<br/>0 and 1 correspond to video channels; <br/>2 and 3 are graphic channels. | Input      |
+| pstChnAttr    | Video output channel attributes. | Input      |
+
+**Return Values**
+
+| Return Value | Description |
+| :---------: | :---------: |
+|    0       | Success.   |
+| Non-zero   | Failure.   |
+
+**Note**
+> None
+
+**Reference Code**
 > See HB_VOT_EnableVideoLayer
 
 ### HB_VOT_GetChnAttr
-【Function Declaration】
+**Function Declaration**
 ```C
-int HB_VOT_GetChnAttr(uint8_t layer, uint8_t chn, VOT_CHN _ATTR_S *pstChnAttr);
+int HB_VOT_GetChnAttr(uint8_t layer, uint8_t chn, VOT_CHN_ATTR_S *pstChnAttr);
 ```
-【Function Description】
-> Get the video output channel attributes.
+**Function Description**
+> Retrieves the properties of a video output channel.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name |                          Description                           | Input/Output |
-| :------------: | :----------------------------------------------------------: | :----------: |
-|     layer      |                    Video output layer ID.                    |    Input     |
-|      chn       | Video output channel ID. Range: [0,4).<br/>0 and 1 represent video channels;<br/>2 and 3 are graphic channels. |    Input     |
-|  pstChnAttr   |                 Video output channel attributes.                 |    Output    |
+| Parameter Name | Description | Input/Output |
+| :-------------: | :----------: | :---------: |
+|   layer        | Video output layer ID (range: 0). | Input      |
+|    chn         | Video output channel ID (range: [0, 4)).<br/>0 and 1 represent video channels; <br/>2 and 3 are graphic channels. | Input      |
+| pstChnAttr    | Video output channel attributes. | Output     |
 
-【Return Value】
+**Return Values**
 
 | Return Value | Description |
-| :----------: | :---------: |
-|      0       |   Success.  |
-|    Non-zero  |   Failure.  |
+| :---------: | :---------: |
+|    0       | Success.   |
+| Non-zero   | Failure.   |
 
-【Notes】
+**Note**
 > None
 
-【Reference Code】
+**Reference Code**
 > See HB_VOT_EnableVideoLayer
 
+
 ### HB_VOT_SetChnAttrEx
-【Function Declaration】
+**Function Declaration**
 ```C
 int HB_VOT_SetChnAttrEx(uint8_t layer, uint8_t chn, const VOT_CHN_ATTR_EX_S *pstChnAttrEx);
 ```
-【Function Description】
-> Set the video output channel attributes.
+**Function Description**
+> Sets advanced properties for a video output channel.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name |                          Description                           | Input/Output |
-| :------------: | :----------------------------------------------------------: | :----------: |
-|     layer      |                    Video output layer ID.                    |    Input     |
-|      chn       | Video output channel ID. Range: [0,4).<br/>0 and 1 represent video channels;<br/>2 and 3 are graphic channels. |    Input     |
-| pstChnAttrEx |                 Video output channel attributes.                 |    Input    |
+| Parameter Name | Description | Input/Output |
+| :-------------: | :----------: | :---------: |
+|    layer       | Video output layer ID. Range: 0. | Input      |
+|     chn        | Video output channel ID. Range: [0, 4). <br/>0 and 1 represent video channels; <br/>2 and 3 are graphic channels. | Input      |
+| pstChnAttrEx   | Advanced video output channel properties. | Input      |
 
-【Return Value】
+**Return Values**
 
 | Return Value | Description |
-| :----------: | :---------: |
-|      0       |   Success.  |
-|    Non-zero  |   Failure.  |
+| :---------: | :---------: |
+|    0       | Success.    |
+| Non-zero   | Failure.    |
 
-【Notes】
+**Note**
 > None
 
-【Reference Code】
-> See HB_VOT_EnableVideoLayer【功能描述】
-Set advanced properties for video output channels.
+**Reference Code**
+> See HB_VOT_EnableVideoLayer
 
-【参数描述】
-
-|   参数名称   |                                      描述                                      |   输入/输出   |
-| :----------: | :----------------------------------------------------------------------------: | :-----------: |
-|    layer     |                        Video output layer ID. Range: 0.                         |     Input     |
-|     chn      | Video output channel ID. Range: [0, 4).<br/>0, 1: video channels;<br/>2, 3: graphic channels. |     Input     |
-| pstChnAttrEx |                             Advanced properties of video output channel.                             |     Input     |
-
-【返回值】
-
-| 返回值 |                     描述                      |
-| :----: | :------------------------------------------: |
-|   0    |                 Success.                     |
-|  Non-0 |                 Failure.                     |
-
-【注意事项】
-> None
-
-【参考代码】
-> Refer to HB_VOT_EnableVideoLayer
+---
 
 ### HB_VOT_GetChnAttrEx
-【函数声明】
+**Function Declaration**
 ```C
-int HB_VOT_GetChnAttrEx(uint8_t layer, uint8_t chn, VOT_CHN _ATTR_EX_S *pstChnAttrEx);
+int HB_VOT_GetChnAttrEx(uint8_t layer, uint8_t chn, VOT_CHN_ATTR_EX_S *pstChnAttrEx);
 ```
-【功能描述】
-> Get advanced properties of video output channels.
+**Function Description**
+> Retrieves advanced properties for a video output channel.
 
-【参数描述】
+**Parameter Descriptions**
 
-|   参数名称   |                                      描述                                      |   输入/输出   |
-| :----------: | :----------------------------------------------------------------------------: | :-----------: |
-|    layer     |                        Video output layer ID. Range: 0.                         |     Input     |
-|     chn      | Video output channel ID. Range: [0, 4).<br/>0, 1: video channels;<br/>2, 3: graphic channels. |     Input     |
-| pstChnAttrEx |                             Advanced properties of video output channel.                             |     Output     |
+| Parameter Name | Description | Input/Output |
+| :-------------: | :----------: | :---------: |
+|    layer       | Video output layer ID. Range: 0. | Input      |
+|     chn        | Video output channel ID. Range: [0, 4). <br/>0 and 1 represent video channels; <br/>2 and 3 are graphic channels. | Input      |
+| pstChnAttrEx   | Advanced video output channel properties. | Output     |
 
-【返回值】
+**Return Values**
 
-| 返回值 |                     描述                      |
-| :----: | :------------------------------------------: |
-|   0    |                 Success.                     |
-|  Non-0 |                 Failure.                     |
+| Return Value | Description |
+| :---------: | :---------: |
+|    0       | Success.    |
+| Non-zero   | Failure.    |
 
-【注意事项】
-> NonePlease refer to the following code:
+**Note**
+> None
+
+**Reference Code**
+> See HB_VOT_EnableVideoLayer
+
+
 
 ### HB_VOT_EnableChn
-【Function Declaration】
+**Function Declaration**
 ```C
 int HB_VOT_EnableChn(uint8_t layer, uint8_t chn);
 ```
-【Function Description】
-> Enable the video output channel.
+**Function Description**
+> Enables a video output channel.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter |                            Description                             | Input/Output |
-| :-------: | :-----------------------------------------------------------------: | :----------: |
-|   layer   |                      Video output layer id. Range: 0.              |    Input     |
-|    chn    | Video output channel id. Range: [0, 4).<br/>0, 1 represent video channels;<br/>2, 3 represent graphic channels. |    Input     |
+| Parameter Name | Description                                                                                   | Input/Output |
+| :------------: | :--------------------------------------------------------------------------------------------- | :----------: |
+|     layer      | ID of the video output layer. Range: 0.                                                              |    Input    |
+|       chn      | ID of the video output channel. Range: [0, 4). <br/>0 and 1 represent video channels; <br/>2 and 3 are graphic channels. |    Input    |
 
-【Return Value】
+**Return Values**
 
-| Return Value | Description |
-| :----------: | :---------: |
-|      0       |   Success   |
-|    Non-zero    |   Failure   |
+| Return Value | Description                     |
+| :---------: | :------------------------------ |
+|      0      | Success.                        |
+| Non-zero    | Failure.                        |
 
-【Note】
+**Caution**
 > None
 
-【Reference Code】
-> Please refer to HB_VOT_EnableVideoLayer
+**Reference Code**
+> Refer to HB_VOT_EnableVideoLayer
 
 ### HB_VOT_DisableChn
-【Function Declaration】
+**Function Declaration**
 ```C
 int HB_VOT_DisableChn(uint8_t layer, uint8_t chn);
 ```
-【Function Description】
-> Disable the video output channel.
+**Function Description**
+> Disables a video output channel.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter |                            Description                             | Input/Output |
-| :-------: | :-----------------------------------------------------------------: | :----------: |
-|   layer   |                      Video output layer id. Range: 0.               |    Input     |
-|    chn    | Video output channel id. Range: [0, 4).<br/>0, 1 represent video channels;<br/>2, 3 represent graphic channels. |    Input     |
+| Parameter Name | Description                                                                             | Input/Output |
+| :------------: | :------------------------------------------------------------------------------------- | :----------: |
+|     layer      | ID of the video output layer. Range: 0.                                                   |    Input    |
+|       chn      | ID of the video output channel. Range: [0, 4). <br/>0 and 1 represent video channels; <br/>2 and 3 are graphic channels. |    Input    |
 
-【Return Value】
+**Return Values**
 
-| Return Value | Description |
-| :----------: | :---------: |
-|      0       |   Success   |
-|    Non-zero    |   Failure   ||   0    | Success. |
-|  Non-zero   | Failure. |
+| Return Value | Description                     |
+| :---------: | :------------------------------ |
+|      0      | Success.                        |
+| Non-zero    | Failure.                        |
 
-【Notes】
+**Caution**
 > None
 
-【Reference Code】
-> See HB_VOT_EnableVideoLayer
+**Reference Code**
+> Refer to HB_VOT_EnableVideoLayer
+
+
 
 ### HB_VOT_SetChnCrop
-【Function Declaration】
+**Function Declaration**
 ```C
-int HB_VOT_SetChnCrop(uint8_t layer, uint8_t chn,  const VOT_CROP_INFO_S *pstCropInfo);
+int HB_VOT_SetChnCrop(uint8_t layer, uint8_t chn, const VOT_CROP_INFO_S *pstCropInfo);
 ```
-【Description】
-> Set the cropping properties of the video output channel.
+**Function Description**
+> Sets the cropping properties for the video output channel.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-|  Parameter Name   | Description                                                                           | Input/Output |
-| :---------: | :----------------------------------------------------------------------------- | :-------: |
-|    layer    | Video output layer ID. Value range: 0.                                                |   Input    |
-|     chn     | Video output channel ID. Value range: [0, 4).<br/>0 and 1 are for video channels;<br/>2 and 3 are for graphic channels. |   Input    |
-| pstCropInfo | Cropping properties of the video output channel.                                                         |   Input    |
+| Parameter Name | Description                                                                                   | Input/Output |
+| :------------- | :--------------------------------------------------------------------------------------------- | :----------- |
+|    layer       | ID of the video output layer. Range: 0.                                                       |    Input     |
+|     chn        | ID of the video output channel. Range: [0, 4). <br/>0 and 1 represent video channels; <br/>2 and 3 are graphic channels. |    Input     |
+| pstCropInfo    | Cropping attributes for the video output channel.                                                  |    Input     |
 
-【Return Value】
+**Return Values**
 
-| Return Value |  Description  |
-| :----: | :----: |
-|   0    | Success. |
-|  Non-zero   | Failure. |
+| Return Value | Description                            |
+| :----------: | :-------------------------------------- |
+|      0       | Success.                                |
+| Non-zero value | Failure.                               |
 
-【Notes】
-> None
+**Caution**
+> None.
 
-【Reference Code】
-> See HB_VOT_EnableVideoLayer
+**Reference Code**
+> Refer to HB_VOT_EnableVideoLayer for an example.
+
+
 
 ### HB_VOT_GetChnCrop
 【Function Declaration】
@@ -908,8 +958,9 @@ int HB_VOT_GetChnCrop(uint8_t layer, uint8_t chn, VOT_CROP_INFO_S *pstCropInfo);
 
 【Parameter Description】
 
-|  Parameter Name   | Description                                                                           | Input/Output |
-| :---------: | :----------------------------------------------------------------------------- | :-------: ||    layer    | Video output video layer ID. Value range: 0.                                                |   Input    |
+|  Parameter Name   | Description  | Input/Output |
+| :---------: | :----------------------------------------------------------------------------- | :-------: |
+|    layer    | Video output video layer ID. Value range: 0.                                                |   Input    |
 |     chn     | Video output channel ID. Value range: [0, 4).<br/>0 and 1 represent video channels;<br/>2 and 3 represent graphic channels. |   Input    |
 | pstCropInfo | Video output channel crop attributes.                                                         |   Output    |
 
@@ -958,12 +1009,15 @@ int HB_VOT_SetChnDisplayPosition(uint8_t layer, uint8_t chn, const POINT_S *pstD
 ### HB_VOT_GetChnDisplayPosition
 【Function Declaration】
 ```C
-int HB_VOT_GetChnDisplayPosition(uint8_t layer, uint8_t chn, POINT_S *pstDispPos);【Function Description】
+int HB_VOT_GetChnDisplayPosition(uint8_t layer, uint8_t chn, POINT_S *pstDispPos);
+```
+
+【Function Description】
 > Get the displayed coordinates of the video output channel.
 
 【Parameter Description】
 
-| Parameter Name | Description                                                     | Input/Output |
+| Parameter Name | Description | Input/Output |
 | :------------: | :-------------------------------------------------------------- | :----------: |
 |     layer      | Video output layer ID. Value range: 0.                          |    Input     |
 |      chn       | Video output channel ID. Value range: [0, 4).<br/>0, 1 represent video channels;<br/>2, 3 represent graphic channels. |    Input     |
@@ -1006,7 +1060,9 @@ int HB_VOT_SetChnFrameRate(uint8_t layer, uint8_t chn, int frame_rate);
 |   Non-zero   |   Failed.   |
 
 【Note】
-> None【参考代码】
+> None
+
+【Reference Code】
 > N/A
 
 ### HB_VOT_GetChnFrameRate
@@ -1038,59 +1094,96 @@ int HB_VOT_GetChnFrameRate(uint8_t layer, uint8_t chn, int *pframe_rate);
 【Reference Code】
 > N/A
 
+
+
 ### HB_VOT_ShowChn
-【Function Declaration】
+**Function Declaration**
 ```C
 int HB_VOT_ShowChn(uint8_t layer, uint8_t chn);
 ```
-【Description】
-> Display the specified channel.
+**Function Description**
+> Displays the specified channel.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name |                  Description                   | Input/Output |
-| :------------: | :-------------------------------------------: | :----------: |
-|      layer     |     Video output layer ID. Value range: 0.     |    Input     |
-|      chn       | Video output channel ID. Value range: [0, 4). <br/>0, 1 represents the video channel; <br/>2, 3 represents the graphic channel. |    Input     |
+| Parameter Name | Description | Input/Output |
+| :------------: | :---------- | :---------- |
+|    layer      | Video output layer ID. Range: 0. | Input       |
+|     chn       | Video output channel ID. Range: [0, 4).<br/>0, 1 for video channels;<br/>2, 3 for graphic channels. | Input       |
 
-【Return Value】| Parameter Name | Description                                                         | Input/Output |
-| :------------: | :------------------------------------------------------------------ | :----------: |
-|     layer      | Video output layer id. Value range: 0.                              |    Input     |
-|      chn       | Video output channel id. Value range: [0, 4).                       |    Input     |
-|   pstVFrame    | Pointer to the video frame to be sent.                              |    Input     |
-|   millisec     | Time in milliseconds for the video to be displayed on the channel. |    Input     |
-
-【返回值】
-
-| 返回值 |  描述  |
-| :----: | :----: |
-|   0    | Success. |
-|  非0   | Failure. |
-
-【注意事项】
-> N/A
-
-【参考代码】
-> N/APlease translate the following content in English, while keeping the original format and content: 
-
-| :-------: | :-------------------------------------------------------- | :-------: |
-|   layer   | Video output video layer ID. Range: 0.                     |   Input   |
-|    chn    | Video output channel ID. Range: [0, 2).<br/>0 and 1 represent video channels. |   Input   |
-| pstVFrame | Video data information.                                    |   Input   |
-| millisec  | Timeout duration. Unit: ms                                |   Input   |
-
-[Return Value]
+**Return Values**
 
 | Return Value | Description |
-| :----: | :----: |
-|   0    | Success. |
-|  Non-0   | Failure. |
+| :---------: | :---------- |
+|     0      | Success.    |
+| Non-zero   | Failure.    |
 
-[Attention]
-> None
+**Note**
+> None.
 
-[Reference code]
-> None
+**Reference Code**
+> N/A
+
+### HB_VOT_HideChn
+**Function Declaration**
+```C
+int HB_VOT_HideChn(uint8_t layer, uint8_t chn);
+```
+**Function Description**
+> Hides the specified channel.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description                                                                           | Input/Output |
+| :------------: | :----------------------------------------------------------------------------- | :---------- |
+|    layer      | Video output video layer ID. Range: 0.                                                | Input       |
+|     chn       | Video output channel ID. Range: [0, 4).<br/>0, 1 for video channels;<br/>2, 3 for graphic channels. | Input       |
+
+**Return Values**
+
+| Return Value | Description |
+| :---------: | :---------- |
+|     0      | Success.    |
+| Non-zero   | Failure.    |
+
+**Note**
+> None.
+
+**Reference Code**
+> N/A
+
+### HB_VOT_SendFrame
+**Function Declaration**
+```C
+int HB_VOT_SendFrame(uint8_t layer, uint8_t chn, void *pstVFrame, int millisec);
+```
+**Function Description**
+> Sends the video image to the specified output channel for display.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description                                                      | Input/Output |
+| :------------: | :-------------------------------------------------------- | :---------- |
+|    layer      | Video output video layer ID. Range: 0.                           | Input       |
+|     chn       | Video output channel ID. Range: [0, 2).<br/>0, 1 for video channels. | Input       |
+|  pstVFrame    | Pointer to video data information.                                  | Input       |
+|    millisec   | Timeout time. Unit: ms                                          | Input       |
+
+**Return Values**
+
+| Return Value | Description |
+| :---------: | :---------- |
+|     0      | Success.    |
+| Non-zero   | Failure.    |
+
+**Note**
+> None.
+
+**Reference Code**
+> N/A
+
+
+
 
 ### HB_VOT_ClearChnBuf
 [Function Declaration]
@@ -1153,101 +1246,133 @@ int HB_VOT_BindVps(uint8_t vpsGroup, uint8_t vpsChn, uint8_t layer, uint8_t chn)
 [Reference code]
 > None
 
-### HB_VOT_EnableWB
-[Function Declaration]
 
+
+### HB_VOT_EnableWB
+**Function Declaration**
 ```C
 int HB_VOT_EnableWB(VOT_WB votWb);
 ```
-[Function Description]
-> Enable the write-back of video output device.
+**Function Description**
+> Enables write-back for the video output device.
 
-[Parameter Description]
+**Parameter Descriptions**
 
-| Parameter  |        Description        | Input/Output |
-| :--------: | :-----------------------: | :----------: |
-|   votWb    | The id of write-back device.<br/>Range: 0 |    Input     |
+| Parameter Name | Description | Input/Output |
+| :------------: | :----------: | :----------: |
+|   votWb       | Write-back device ID.<br/>Range: 0. |   Input      |
 
-[Return Value]
-
-| Return Value | Description |
-|:------:|:-------:|
-|    0   |  Success  |
-|  Non-zero  |  Failure  |
-
-[Note]int HB_VOT_GetWBAttr(int votWb, VOT_WB_ATTR_S *pstWbAttr);
-```
-【功能描述】
-> 获取视频输出设备的回写属性。
-
-【参数描述】
-
-|   参数名称   |                 描述                 | 输入/输出 |
-| :----------: | :----------------------------------: | :-------: |
-|    votWb     |   回写设备id。<br/>取值范围：0。    |   输入    |
-| *pstWbAttr   | 指向保存回写属性的结构体变量的指针。 |   输出    |
-
-【返回值】
-
-| 返回值 |      描述      |
-| :----: | :------------: |
-|   0    |      成功      |
-|  非0   | 出错：参数无效 |
-
-【注意事项】
-> pstWbAttr的成员变量wb_src和wb_format分别表示视频源和回写的图像格式。
-
-【参考代码】
-> 无int HB_VOT_GetWBAttr (VOT_WB votWb, VOT_WB_ATTR_S *pstWBAttr);
-
-【Function Description】
-> Enable the write back of the video output device.
-
-【Parameter Description】
-
-| Parameter Name |          Description          | Input/Output |
-| :------------: | :---------------------------: | :----------: |
-|     votWb      |     Write back device id.     |    Input     |
-|   pstWBAttr    |        Write back attribute        |    Output    |
-
-【Return Value】
+**Return Values**
 
 | Return Value | Description |
-| :----------: | :---------: |
-|       0      |   Success   |
-|     Non-zero     |   Failure   |
+|:------------:|:------------:|
+|     0       | Success     |
+| Non-zero     | Failure     |
 
-【Note】
+**Caution**
 > None
 
-【Reference Code】
+**Reference Code**
+```C
+int sample_vot_wb_init(int wb_src, int wb_format)
+{
+    int ret = 0;
+    VOT_WB_ATTR_S stWbAttr;
+    stWbAttr.wb_src = wb_src;
+    stWbAttr.wb_format = wb_format;
+    HB_VOT_SetWBAttr(0, &stWbAttr);
+    ret = HB_VOT_EnableWB(0);
+    if (ret) {
+        printf("HB_VOT_EnableWB failed.\n");
+        return -1;
+    }
+    return 0;
+}
+```
+### HB_VOT_DisableWB
+**Function Declaration**
+```C
+int HB_VOT_DisableWB(VOT_WB votWb);
+```
+**Function Description**
+> Disables write-back for the video output device.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description | Input/Output |
+| :------------: | :----------: | :----------: |
+|   votWb       | Write-back device ID.<br/>Range: 0. |   Input      |
+
+**Return Values**
+
+| Return Value | Description |
+|:------------:|:------------:|
+|     0       | Success     |
+| Non-zero     | Failure     |
+
+**Caution**
+> None
+
+**Reference Code**
+> None
+
+### HB_VOT_GetWBAttr
+**Function Declaration**
+```C
+int HB_VOT_GetWBAttr (VOT_WB votWb, VOT_WB_ATTR_S *pstWBAttr);
+```
+**Function Description**
+> Retrieves the write-back attributes of the video output device.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description | Input/Output |
+| :------------: | :----------: | :----------: |
+|   votWb       | Write-back device ID.<br/>Range: 0. |   Input      |
+|  pstWBAttr    | Write-back attribute structure. |   Output    |
+
+**Return Values**
+
+| Return Value | Description |
+|:------------:|:------------:|
+|     0       | Success     |
+| Non-zero     | Failure     |
+
+**Caution**
+> None
+
+**Reference Code**
 > None
 
 ### HB_VOT_SetWBAttr
-【Function Declaration】
+**Function Declaration**
 ```C
 int HB_VOT_SetWBAttr (VOT_WB votWb, VOT_WB_ATTR_S *pstWBAttr);
 ```
-【Function Description】
-> Enable the write back of the video output device.
+**Function Description**
+> Sets the write-back attributes for the video output device.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name |          Description          | Input/Output |
-| :-----------: | :----------------------------: | :----------: |
-|     votWb     |     Write back device id.     |    Input     |
-|   pstWBAttr   |        Write back attribute        |    Input    |
+| Parameter Name | Description | Input/Output |
+| :------------: | :----------: | :----------: |
+|   votWb       | Write-back device ID.<br/>Range: 0. |   Input      |
+|  pstWBAttr    | Write-back attribute structure. |   Input    |
 
-【Return Value】
+**Return Values**
 
 | Return Value | Description |
-| :----------: | :---------: |
-|       0      |   Success   |
-|     Non-zero     |   Failure   |
+|:------------:|:------------:|
+|     0       | Success     |
+| Non-zero     | Failure     |
 
-【Note】
-> None【Reference Code】
-> See HB_VOT_EnableWB
+**Caution**
+> None
+
+**Reference Code**
+> See the `HB_VOT_EnableWB` example for a usage reference.
+
+
 
 ### HB_VOT_GetWBFrame
 【Function Declaration】
@@ -1278,47 +1403,91 @@ int HB_VOT_GetWBFrame (VOT_WB votWb, void* pstVFrame, int millisec);
 【Reference Code】
 > None
 
+
+
 ### HB_VOT_ReleaseWBFrame
-【Function Declaration】
+**Function Declaration**
 ```C
-int HB_VOT_ReleaseWBFrame (VOT_WB votWb, void* pstVFrame);
+int HB_VOT_ReleaseWBFrame (VOT_WB votWb, void* pstVFrame)；
 ```
-【Function Description】
-> Enable the writeback of the video output device.
+**Function Description**
+> Enables the video output device for write-back.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name |             Description            | Input/Output |
-| :------------: | :------------------------------: | :----------: |
-|     votWb      | ID of the writeback device.<br/>Range: 0. |    Input     |
-|   pstVFrame    |     The captured writeback image frame     |    Input     |
+| Parameter Name | Description | Input/Output |
+| :------------- | :---------- | :---------: |
+|   votWb        | Write-back device ID. <br/>Range: 0. |   Input     |
+| pstVFrame      | Acquired write-back image frame. |   Input     |
 
-【Return Value】
-
-| Return Value | Description |
-| :----------: | :--------: |
-【返回值】
-
-| 返回值 | 描述 |
-|:------:|:----:|
-|    0   | 成功 |
-|   非0  | 失败 |
-
-【注意事项】
-> 限于HDMI显示时使用
-
-【参考代码】【Return Value】
+**Return Values**
 
 | Return Value | Description |
-|:------:|:----:|
-|    0   | Success |
-|   Non-zero  | Failure |
+|:------------|:------------|
+|    0         | Success     |
+| Non-zero    | Failure     |
 
-【Note】
+**Caution**
+> None
 
-> Used to restart image output after HB_VOT_ShutDownHDMI.
+**Reference Code**
+> N/A
 
-【Reference Code】
+### HB_VOT_ShutDownHDMI
+**Function Declaration**
+```C
+int HB_VOT_ShutDownHDMI(void)；
+```
+**Function Description**
+> Closes HDMI output to the target device, such as a monitor, causing it to display black but keeping the display hardware module functioning normally.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description  | Input/Output |
+| :------------- | :----------- | :---------: |
+|   void         | Empty        |   Input     |
+
+**Return Values**
+
+| Return Value | Description |
+|:------------|:------------|
+|    0         | Success     |
+| Non-zero    | Failure     |
+
+**Caution**
+> Limited to HDMI display usage
+
+**Reference Code**
+
+### HB_VOT_StartHDMI
+**Function Declaration**
+```C
+int HB_VOT_StartHDMI (void)；
+```
+**Function Description**
+> Enables HDMI output of images to the target display device, to be used in conjunction with HB_VOT_ShutDownHDMI.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description  | Input/Output |
+| :------------- | :----------- | :---------: |
+|   void         | Empty        |   Input     |
+
+**Return Values**
+
+| Return Value | Description |
+|:------------|:------------|
+|    0         | Success     |
+| Non-zero    | Failure     |
+
+**Caution**
+> For restarting image output after HB_VOT_ShutDownHDMI
+
+**Reference Code**
+> N/A
+
+
+
 
 ### Example of API calling process
 ```C
@@ -1358,7 +1527,7 @@ int sample_vot_init()
     stLayerAttr.hue_en = 0;
     stLayerAttr.sat_en = 0;
     stLayerAttr.con_en = 0;
-stLayerAttr.bright_en = 0;
+    stLayerAttr.bright_en = 0;
     stLayerAttr.theta_sign = 0;
     stLayerAttr.contrast = 0;
     stLayerAttr.theta_abs = 0;
@@ -1408,17 +1577,68 @@ stLayerAttr.bright_en = 0;
     if (g_use_ipu) {
         ret = HB_VOT_BindVps(0, 3, 0, 0);  // 37 gdc0
     } else {
-1. `u32BgColor`: 设备背景色，用RGB表示。
-2. `enOutputMode`: VOT接口类型，表示视频输出的接口类型。
-3. `enIntfSync`: VOT接口时序类型，表示视频输出的时序类型。
-4. `stSyncInfo`: VOT接口时序信息，包含了视频输出的时序信息。|成员| 含义|
-|:---|:---|
-|u32BgColor |Device Background Color|
-|enOutputMode |Video Output Interface Type|
-|enIntfSync| Interface Timing Typical Configuration|
-|stSyncInfo| Interface Timing Structure|
+        ret = HB_VOT_BindVps(0, 11, 0, 0);  // 37 gdc0
+    }
 
-This structure takes effect when enabling user timing.
+    if (ret) {
+        printf("HB_VOT_BindVps: %d\n", ret);
+        HB_VOT_DisableChn(0, 1);
+        HB_VOT_DisableVideoLayer(0);
+        HB_VOT_Disable(0);
+    }
+    err:
+    return ret;
+}
+
+int sample_vot_deinit()
+{
+    int ret = 0;
+    ret = HB_VOT_DisableChn(0, 0);
+    if (ret) {
+        printf("HB_VOT_DisableChn failed.\n");
+    }
+    ret = HB_VOT_DisableVideoLayer(0);
+    if (ret) {
+        printf("HB_VOT_DisableVideoLayer failed.\n");
+    }
+
+    ret = HB_VOT_Disable(0);
+    if (ret) {
+        printf("HB_VOT_Disable failed.\n");
+    }
+    return 0;
+}
+```
+
+
+
+## Data Structures
+
+### HB_VOT_PUB_ATTR_S
+**Structure Definition**
+```C
+typedef struct HB_VOT_PUB_ATTR_S {
+    uint32_t u32BgColor; /* Device background color in RGB format */
+    VOT_OUTPUT_MODE_E enOutputMode; /* Video Output Interface (VOT) type */
+    VOT_INTF_SYNC_E enIntfSync; /* Type of synchronization for the VOT interface */
+    VOT_SYNC_INFO_S stSyncInfo; /* Structure containing synchronization information for the VOT interface */
+} VOT_PUB_ATTR_S;
+```
+**Function Description**
+> Defines common attributes for video output.
+
+**Member Descriptions**
+
+|Member| Meaning|
+|---|---|
+|u32BgColor| Device background color|
+|enOutputMode| Type of Vo interface|
+|enIntfSync| Default synchronization configuration for the interface|
+|stSyncInfo| Structure holding interface synchronization details|
+
+This structure is effective when enabling user-defined timing.
+
+
 
 ### HB_VOT_OUTPUT_MODE_E
 【Structure Definition】
@@ -1472,11 +1692,13 @@ VOT_OUTPUT_720P60,
     VO_OUTPUT_USER, /* User timing. */
     VO_OUTPUT_BUTT
 } VOT_INTF_SYNC_E;
+```
 
 【Function Description】
 > Defines the typical video output timing modes.
 
 【Member Description】
+
 | Member                 | Description           |
 | :--------------------  | :------------------    |
 | VOT_OUTPUT_1920x1080   | 1920x1080             |
@@ -1509,7 +1731,16 @@ VOT_OUTPUT_720P60,
 typedef struct HB_VOT_SYNC_INFO_S {
     uint32_t hbp;
     uint32_t hfp;
-    Tuint32_t hs;【Function Description】
+    Tuint32_t hs;
+    uint32_t vbp;
+    uint32_t vfp;
+    uint32_t vs;
+    uint32_t vfp_cnt;
+    uint32_t width;
+    uint32_t height;
+} VOT_SYNC_INFO_S;
+```    
+【Function Description】
 > Defines the user-defined video output timing.
 
 【Member Description】
@@ -1649,7 +1880,8 @@ typedef struct HB_VOT_CHN_ATTR_S {
     uint32_t u32DstWidth;
     uint32_t u32DstHeight;
 } VOT_CHN_ATTR_S;
-```【Function Description】
+```
+【Function Description】
 > Define the attributes of video output channel
 
 【Member Description】
@@ -1697,7 +1929,9 @@ typedef struct HB_VOT_CHN_ATTR_EX_S {
 typedef struct HB_VOT_WBC_ATTR_S{
     int wb_src;
     int wb_format;
-}VOT_WB_ATTR_S;【Function Description】
+}VOT_WB_ATTR_S;
+```
+【Function Description】
 > Define the write-back attributes
 
 【Member Description】
@@ -1746,12 +1980,10 @@ void *addr_uv;   unsigned int size; }VOT_FRAME_INFO_S;
 【Structure Definition】
 ```C
 typedef struct HB_POINT_S {
-``````C
-typedef struct POINT_S {
     int s32X;
     int s32Y;
 } POINT_S;
-
+```
 【Function Description】
 > Definition of pixel point.
 
@@ -1798,10 +2030,9 @@ typedef enum HB_PIXEL_FORMAT_RGB_E {
     PIXEL_FORMAT_RGB565 = 1,
     PIXEL_FORMAT_RGB888 = 2,
     PIXEL_FORMAT_RGB888P = 3,
-``````C
-PIXEL_FORMAT_ARGB8888 = 4,
-PIXEL_FORMAT_RGBA8888 = 5,
-PIXEL_FORMAT_RGB_BUTT = 6
+    PIXEL_FORMAT_ARGB8888 = 4,
+    PIXEL_FORMAT_RGBA8888 = 5,
+    PIXEL_FORMAT_RGB_BUTT = 6
 } PIXEL_FORMAT_RGB_E;
 ```
 

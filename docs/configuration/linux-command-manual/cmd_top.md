@@ -46,7 +46,9 @@ Some interactive commands that can be used during the execution of the top comma
 - `M`: Sort by resident memory size.
 - `P`: Sort by CPU usage percentage.
 - `T`: Sort by time/accumulative time.
-- `w`: Write current settings to the ~/.toprc file.## Display Information
+- `w`: Write current settings to the ~/.toprc file.
+
+## Display Information
 
 ```
 top - 14:55:57 up  1:03,  2 users,  load average: 0.62, 0.55, 0.45
@@ -95,7 +97,9 @@ Features and Interactions:
 
 Display Process Information
 
-``````
+```
+top
+```
 
 Show the complete command
 

@@ -45,7 +45,11 @@ Supports enabling and disabling buses such as uart, i2c, spi, i2s, etc.
 
 Currently supported options: uart3, spi0, spi1, spi2, i2c0, i2c1, i2c2, i2c3, i2c4, i2c5, i2s0, i2s1
 
-For example, to disable uart3:dtparam=uart3=off
+For example, to disable uart3:
+
+```
+dtparam=uart3=off
+```
 
 For example, to enable i2c5:
 
@@ -93,6 +97,8 @@ frequency=1000000
 ### gpio
 
 Supports setting the IO multiplexing, output, input mode, output high/low level, and pull-up/pull-down mode.gpio:
+
+```bash
 ip - Input                             Set to input mode
 op - Output                            Set to output mode
 f0-f3 - Func0-Func3                    Set function multiplexing, f3 functions are all set to IO mode, For other functions, please refer to the register manual.
@@ -101,6 +107,8 @@ dl - Driving low (for outputs)         Drive low level
 pu - Pull up                           Pull up
 pd - Pull down                         Pull down
 pn/np - No pull                        No pull
+```
+
 
 ### Example
 
@@ -138,7 +146,9 @@ gpio=6=op,dl,pu
 
 ### throttling_temp
 
-The temperature point at which the system CPU and BPU will throttle. When the temperature exceeds this point, the CPU and BPU will reduce their operating frequency to reduce power consumption. The CPU can go as low as 240MHz, while the BPU can go as low as 400MHz.### shutdown_temp
+The temperature point at which the system CPU and BPU will throttle. When the temperature exceeds this point, the CPU and BPU will reduce their operating frequency to reduce power consumption. The CPU can go as low as 240MHz, while the BPU can go as low as 400MHz.
+
+### shutdown_temp
 
 Shutdown temperature point of the system. If the temperature exceeds this point, the system will automatically shut down to protect the chip and hardware. It is recommended to perform heat dissipation treatment on the device to avoid system shutdown, as the device will not restart automatically after shutdown.
 

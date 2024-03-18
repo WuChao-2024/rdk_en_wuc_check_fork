@@ -46,9 +46,11 @@ The information of each file node can be obtained using the "cat" command or set
     echo 200000000 > /sys/devices/system/bpu/bpu0/devfreq/devfreq*/userspace/set_freq
     ```
 
-  - Confirm the set frequency:```
-cat /sys/devices/system/bpu/bpu0/devfreq/devfreq*/available_frequencies
-```
+  - Confirm the set frequency:
+
+    ```
+    cat /sys/devices/system/bpu/bpu0/devfreq/devfreq*/available_frequencies
+    ```
 - limit: Read/write file used to set the number of buffers related to the Core hardware. The default value is 0, any value greater than 0 is the actual number of buffers. It is related to priority, where smaller positive values have higher priority and the task is scheduled earlier, but the efficiency of task switching would be reduced. Users should set this based on the actual situation.
 
 - power_level: Read/write file used to set the power level at which the Core operates (including power supply and frequency):

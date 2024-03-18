@@ -142,7 +142,9 @@ Advanced options allow you to configure disk expansion, network proxy settings, 
 
 - **Boot Order**
 
-  The RDK X3 module supports booting the system from eMMC and SD cards. This option is used to switch the boot mode.## Update
+  The RDK X3 module supports booting the system from eMMC and SD cards. This option is used to switch the boot mode.
+  
+## Update
 
 Update the `srpi-config` tool to the latest version.
 

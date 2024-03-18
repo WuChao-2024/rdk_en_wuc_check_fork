@@ -46,7 +46,9 @@ pinctrl: pinctrl@0xA6004000 {
     };
     ...
 }
-```## Pinctrl Usage
+```
+
+## Pinctrl Usage
 
 ### Driver DTS Configuration
 
@@ -97,7 +99,7 @@ btout_func: btout_func {
         0x178   (MUX_F0 | DRIVE1_12MA | SCHMITT2_DIS | PULL2_DOWN) /*BT1120_OUT_DAT15*/
 ```
 
-```
+
 pinctrl configuration groups combine multiple pin configurations together. Each pin configuration consists of two columns. The first column indicates the offset address of the pin register, which is the pin number multiplied by 4. For example, the pin number of BT1120_OUT_CLK is 78, so the offset address is 78 * 4 = 312, which is converted to hexadecimal as 0x138. The second column indicates the pin's function multiplexing configuration (Pin-mux).
 
 ### Pin-mux Configuration
@@ -238,7 +240,9 @@ If the CONFIG_DEBUG_FS option of Linux Kernel is enabled in the kernel configura
 mount -t debugfs none /sys/kernel/debug
 ```
 
-Then there are some nodes in /sys/kernel/debug/pinctrl/a6004000.pinctrl/ directory in user space where you can view pinctrl information, for example:```bash
+Then there are some nodes in /sys/kernel/debug/pinctrl/a6004000.pinctrl/ directory in user space where you can view pinctrl information, for example:
+
+```bash
 cat /sys/kernel/debug/pinctrl/a6004000.pinctrl/pinmux-pins
 ```
 
