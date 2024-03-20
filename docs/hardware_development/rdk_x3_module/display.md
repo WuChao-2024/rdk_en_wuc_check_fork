@@ -44,7 +44,9 @@ Execute the following command to print the modified node and confirm that the mo
 sudo fdtget /boot/hobot/hobot-x3-cm.dtb /chosen bootargs
 ```
 
-Enter the following command to restart the development board:```shell
+Enter the following command to restart the development board:
+
+```shell
 sync
 sudo reboot
 ```

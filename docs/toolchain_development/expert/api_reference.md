@@ -45,9 +45,12 @@ Get default qconfig.
 ```python 
 
 default_qat_8bit_fake_quant_qconfig = get_default_qconfig(
-        activation_observer="min_max",
-        activation_qkwargs=None,
-        weight_qkwargs={"qscheme": torch.per_channel_symmetric, "ch_axis": 0,},
+    activation_fake_quant="fake_quant",
+    weight_fake_quant="fake_quant",
+    activation_observer="min_max",
+    weight_observer="min_max",
+    activation_qkwargs=None,
+    weight_qkwargs={"qscheme": torch.per_channel_symmetric, "ch_axis": 0,},
     )
 
 default_qat_out_8bit_fake_quant_qconfig = get_default_qconfig(
@@ -79,132 +82,149 @@ default_qat_8bit_lsq_quant_qconfig = get_default_qconfig(
     weight_observer="min_max",
     activation_qkwargs={"use_grad_scaling": True, "averaging_constant": 1.0,},
     weight_qkwargs={"qscheme": torch.per_channel_symmetric, "ch_axis": 0, "use_grad_scaling": True,"averaging_constant": 1.0,},
-    )weight_observer="min_max",
+    )
+```
+
+**RDK Ultra**
+
+```python
+
+default_qat_8bit_fake_quant_qconfig = get_default_qconfig(
+        activation_fake_quant="fake_quant",
+        weight_fake_quant="fake_quant",
+        activation_observer="min_max",
+        weight_observer="min_max",
         activation_qkwargs=None,
         weight_qkwargs={"qscheme": torch.per_channel_symmetric, "ch_axis": 0,},
         )
 
-default_qat_8bit_weight_32bit_out_fake_quant_qconfig = get_default_qconfig(
-    activation_fake_quant=None,
-    weight_fake_quant="fake_quant",
-    activation_observer=None,
-    weight_observer="min_max",
-    activation_qkwargs=None,
-    weight_qkwargs={"qscheme": torch.per_channel_symmetric, "ch_axis": 0,},
+    default_qat_8bit_weight_32bit_out_fake_quant_qconfig = get_default_qconfig(
+        activation_fake_quant=None,
+        weight_fake_quant="fake_quant",
+        activation_observer=None,
+        weight_observer="min_max",
+        activation_qkwargs=None,
+        weight_qkwargs={"qscheme": torch.per_channel_symmetric, "ch_axis": 0,},
+        )
+
+    default_calib_8bit_fake_quant_qconfig = get_default_qconfig(
+        activation_fake_quant="fake_quant",
+        weight_fake_quant="fake_quant",
+        activation_observer="percentile",
+        weight_observer="min_max",
+        activation_qkwargs=None,
+        weight_qkwargs={"qscheme": torch.per_channel_symmetric, "ch_axis": 0,},
+        )
+
+    default_calib_8bit_weight_32bit_out_fake_quant_qconfig = (
+        default_qat_out_8bit_fake_quant_qconfig
+        )
+
+    default_qat_8bit_weight_16bit_act_fake_quant_qconfig = get_default_qconfig(
+        activation_fake_quant="fake_quant",
+        weight_fake_quant="fake_quant",
+        activation_observer="min_max",
+        weight_observer="min_max",
+        activation_qkwargs={"dtype": qint16,},
+        weight_qkwargs={"qscheme": torch.per_channel_symmetric, "ch_axis": 0,},
     )
 
-default_calib_8bit_fake_quant_qconfig = get_default_qconfig(
-    activation_fake_quant="fake_quant",
-    weight_fake_quant="fake_quant",
-    activation_observer="percentile",
-    weight_observer="min_max",
-    activation_qkwargs=None,
-    weight_qkwargs={"qscheme": torch.per_channel_symmetric, "ch_axis": 0,},
+    default_calib_8bit_weight_16bit_act_fake_quant_qconfig = get_default_qconfig(
+        activation_fake_quant="fake_quant",
+        weight_fake_quant="fake_quant",
+        activation_observer="percentile",
+        weight_observer="min_max",
+        activation_qkwargs={"dtype": qint16,},
+        weight_qkwargs={"qscheme": torch.per_channel_symmetric, "ch_axis": 0,},
     )
-
-default_calib_8bit_weight_32bit_out_fake_quant_qconfig = (
-    default_qat_out_8bit_fake_quant_qconfig
-    )
-
-default_qat_8bit_weight_16bit_act_fake_quant_qconfig = get_default_qconfig(
-    activation_fake_quant="fake_quant",
-    weight_fake_quant="fake_quant",
-    activation_observer="min_max",
-    weight_observer="min_max",
-    activation_qkwargs={"dtype": qint16,},
-    weight_qkwargs={"qscheme": torch.per_channel_symmetric, "ch_axis": 0,},
-)
-
-default_calib_8bit_weight_16bit_act_fake_quant_qconfig = get_default_qconfig(
-    activation_fake_quant="fake_quant",
-    weight_fake_quant="fake_quant",
-    activation_observer="percentile",
-    weight_observer="min_max",
-    activation_qkwargs={"dtype": qint16,},
-    weight_qkwargs={"qscheme": torch.per_channel_symmetric, "ch_axis": 0,},
-)class horizon_plugin_pytorch.quantization.FakeQuantize(observer: type = <class 'horizon_plugin_pytorch.quantization.observer.MovingAverageMinMaxObserver'>, saturate: bool = None, in_place: bool = False, compat_mask: bool = True, channel_len: int = 1, **observer_kwargs)
-
 ```
 
-模拟训练期间的量化和反量化操作。
 
-该模块的输出由以下公式计算得出：
+## Pseudo-quantization operator
+
+```python
+class horizon_plugin_pytorch.quantization.FakeQuantize(observer: type = <class 'horizon_plugin_pytorch.quantization.observer.MovingAverageMinMaxObserver'>, saturate: bool = None, in_place: bool = False, compat_mask: bool = True, channel_len: int = 1, **observer_kwargs)
+```
+
+Simulate the quantize and dequantize operations in training time.
+
+The output of this module is given by
 
 - x_out = (clamp(round(x/scale + zero_point), quant_min, quant_max)-zero_point)*scale # noqa
 
-- scale定义了用于量化的比例因子。
+- scale defines the scale factor used for quantization.
 
-- zero_point指定浮点数中0所映射到的量化值
+- zero_point specifies the quantized value to which 0 in floating point maps to
 
-- quant_min指定允许的最小量化值。
+- quant_min specifies the minimum allowable quantized value.
 
-- quant_max指定允许的最大量化值。
+- quant_max specifies the maximum allowable quantized value.
 
-- fake_quant_enabled控制对张量应用伪量化的操作，注意统计信息仍然可以更新。
+- fake_quant_enabled controls the application of fake quantization on tensors, note that statistics can still be updated.
 
-- observer_enabled控制对张量进行统计收集。
+- observer_enabled controls statistics collection on tensors
 
-- dtype指定了使用伪量化进行模拟的量化dtype，允许的值为qint8和qint16。quant_min和quant_max的值应与dtype一致。
+- dtype specifies the quantized dtype that is being emulated with fake-quantization, the allowable values is qint8 and qint16. The values of quant_min and quant_max should be chosen to be consistent with the dtype
 
-**Parameters**
+**parameters**
 
-- **observer** – 用于观察输入张量统计信息并计算scale和zero-point的模块。
+- **observer** – Module for observing statistics on input tensors and calculating scale and zero-point.
 
-- **saturate** – 是否将超出量化范围的梯度置为0。
+- **saturate** – Whether zero out the grad for value out of quanti range.
 
-- **in_place** – 是否使用就地伪量化。
+- **in_place** – Whether use in place fake quantize.
 
-- **compat_mask** – 当saturate=True时，是否将布尔掩码打包到位字段中。
+- **compat_mask** – Whether pack the bool mask into bitfield when saturate = True.
 
-- **channel_len** – 通道维度上的数据大小。
+- **channel_len** – Size of data at channel dim.
 
-- **observer_kwargs** – 观察模块的参数。
+- **observer_kwargs** – Arguments for the observer module
 
 ```python
 observer
 ```
 
-用户提供的模块，用于收集输入张量的统计信息并计算scale和zero-point。
+User provided module that collects statistics on the input tensor and provides a method to calculate scale and zero-point.
 
 ```python
 extra_repr()
 ```
 
-设置模块的额外表示。
+Set the extra representation of the module
 
-要打印自定义的额外信息，您应该在自己的模块中重新实现此方法。可以接受单行和多行字符串。
+To print customized extra information, you should re-implement this method in your own modules. Both single-line and multi-line strings are acceptable.
 
-``````python
+```python
 forward(x)
 ```
 
-定义每次调用时执行的计算。
+Defines the computation performed at every call.
 
-所有子类都应该重写这个函数。
+Should be overridden by all subclasses.
 
 :::info 注解
 
-尽管前向传播的步骤需要在这个函数中定义，但是应该之后调用模块实例，而不是直接调用这个函数，因为前者会处理注册的hooks的运行，而后者则会默默地忽略它们。
+Although the recipe for forward pass needs to be defined within this function, one should call the Module instance afterwards instead of this since the former takes care of running the registered hooks while the latter silently ignores them.
 :::
 
 ```python
 set_qparams(scale: Union[torch.Tensor, Sequence, float], zero_point: Optional[Union[torch.Tensor, Sequence, int]] = None)
 ```
 
-设置量化参数，默认对称量化。
+Set qparams, default symmetric.
 
 ```python
 classmethod with_args(**kwargs)
 ```
 
-允许创建类工厂的包装器。
+Wrapper that allows creation of class factories.
 
-当需要使用相同的构造函数参数创建不同的实例时，这非常有用。可以与_callable_args连用。
+This can be useful when there is a need to create classes with the same constructor arguments, but different instances. Can be used in conjunction with _callable_args
 
-示例：
+Example:
 
 ```python
->>> # xdoctest: +SKIP("未定义的变量")
+>>> # xdoctest: +SKIP("Undefined vars")
 >>> Foo.with_args = classmethod(_with_args)
 >>> foo_builder = Foo.with_args(a=3, b=4).with_args(answer=42)
 >>> foo_instance1 = foo_builder()
@@ -213,16 +233,18 @@ classmethod with_args(**kwargs)
 False
 ```
 
+
 ## QAT
 
 ```python
 horizon_plugin_pytorch.quantization.convert(module, mapping=None, inplace=False, remove_qconfig=True, fast_mode=False)
 ```
 
-转换模块。
+Convert modules.
 
-通过调用目标模块类上的from_float方法，将输入模块中的子模块转换为不同的模块。
-如果将remove_qconfig设置为True，则最后会删除qconfig。**Parameters**
+Convert submodules in input module to a different module according to mapping by calling from_float method on the target module class. And remove qconfig at the end if remove_qconfig is set to True.
+
+**parameters**
 
 - **module** – input module
 
@@ -238,7 +260,7 @@ horizon_plugin_pytorch.quantization.convert_fx(graph_module: torch.fx.graph_modu
 
 Convert a calibrated or trained model to a quantized model.
 
-**Parameters**
+**parameters**
 
 - **graph_module** – A prepared and calibrated/trained model (GraphModule)
 
@@ -260,7 +282,7 @@ convert_custom_config_dict = {
 
 - **fast_mode** – whether to accelerate quantized model forward. If set True, quantized model cannot be compiled.
 
-**Returns**
+**Return **
 
 A quantized model (GraphModule)
 
@@ -270,7 +292,9 @@ Example: convert fx example:
 # prepared_model: the model after prepare_fx/prepare_qat_fx and
 # calibration/training
 quantized_model = convert_fx(prepared_model)
-``````python
+```
+
+```python
 horizon_plugin_pytorch.quantization.fuse_fx(model: torch.nn.modules.module.Module, fuse_custom_config_dict: Optional[Dict[str, Any]] = None) → horizon_plugin_pytorch.quantization.fx.graph_module.GraphModuleWithAttr
 ```
 
@@ -278,7 +302,7 @@ Fuse modules like conv+add+bn+relu etc.
 
 Fusion rules are defined in horizon_plugin_pytorch.quantization.fx.fusion_pattern.py
 
-**Parameters**
+**parameters**
 
 - **model** – a torch.nn.Module model
 
@@ -317,17 +341,19 @@ horizon_plugin_pytorch.quantization.fuse_modules(model, modules_to_fuse, inplace
 
 Fuses a list of modules into a single module.
 
-Fuses only the following sequence of modules: conv, bn; conv, bn, relu; conv, relu; conv, bn, add; conv, bn, add, relu; conv, add; conv, add, relu; linear, bn; linear, bn, relu; linear, relu; linear, bn, add; linear, bn, add, relu; linear, add; linear, add, relu. For these sequences, the first element in the output module list performs the fused operation. The rest of the elements are set to nn.Identity()**Parameters**
+Fuses only the following sequence of modules: conv, bn; conv, bn, relu; conv, relu; conv, bn, add; conv, bn, add, relu; conv, add; conv, add, relu; linear, bn; linear, bn, relu; linear, relu; linear, bn, add; linear, bn, add, relu; linear, add; linear, add, relu. For these sequences, the first element in the output module list performs the fused operation. The rest of the elements are set to nn.Identity()
 
-- **model** - Model containing the modules to be fused
+**parameters**
 
-- **modules_to_fuse** - list of list of module names to fuse. Can also be a list of strings if there is only a single list of modules to fuse.
+- **model** – Model containing the modules to be fused
 
-- **inplace** - bool specifying if fusion happens in place on the model, by default a new model is returned
+- **modules_to_fuse** – list of list of module names to fuse. Can also be a list of strings if there is only a single list of modules to fuse.
 
-- **fuser_func** - Function that takes in a list of modules and outputs a list of fused modules of the same length. For example, fuser_func([convModule, BNModule]) returns the list [ConvBNModule, nn.Identity()]. Defaults to torch.ao.quantization.fuse_known_modules
+- **inplace** – bool specifying if fusion happens in place on the model, by default a new model is returned
 
-- **fuse_custom_config_dict** - custom configuration for fusion
+- **fuser_func** – Function that takes in a list of modules and outputs a list of fused modules of the same length. For example, fuser_func([convModule, BNModule]) returns the list [ConvBNModule, nn.Identity()] Defaults to torch.ao.quantization.fuse_known_modules
+
+- **fuse_custom_config_dict** – custom configuration for fusion
 
 ```python
 # Example of fuse_custom_config_dict
@@ -339,7 +365,7 @@ fuse_custom_config_dict = {
 }
 ```
 
-**Returns**
+**Return **
 
 model with fused modules. A new copy is created if inplace=True.
 
@@ -365,50 +391,64 @@ Examples:
 
 ```python
 horizon_plugin_pytorch.quantization.prepare_qat(model: torch.nn.modules.module.Module, mapping: Optional[Dict[Type[torch.nn.modules.module.Module], Type[torch.nn.modules.module.Module]]] = None, inplace: bool = False, optimize_graph: bool = False, hybrid: bool = False, optimize_kwargs: Optional[Dict[str, Tuple]] = None)
-```准备qat。
 
-为量化感知训练准备一个模型的副本，并将其转换为量化版本。
+```
 
-量化配置应事先分配给.qconfig属性中的各个子模块。
+Prepare qat.
 
-**参数**
+Prepare a copy of the model for quantization-aware training and converts it to quantized version.
 
-- **model** - 要就地修改的输入模型
-- **mapping** - 将浮点模块映射到要替换的量化模块的字典。
-- **inplace** - 在原地执行模型转换，原始模块被改变。
-- **optimize_graph** - 是否对原始模型进行一些处理以达到特定目的。目前仅支持使用torch.fx来修复cat输入比例（仅在Bernoulli上使用）。
-- **hybrid** - 是否生成混合模型，其中部分中间操作在浮点数中计算。现在对此功能有一些限制：1.混合模型不能通过check_model，并且不能编译。2.某些量化操作无法直接接受来自浮点操作的输入，用户需要手动插入QuantStub。
-- **optimize_kwargs** - 优化图的字典，格式如下：
+Quantization configuration should be assigned preemptively to individual submodules in .qconfig attribute.
 
-```Python
+**parameters**
+
+- **model** – input model to be modified in-place
+
+- **mapping** – dictionary that maps float modules to quantized modules to be replaced.
+
+- **inplace** – carry out model transformations in-place, the original module is mutated
+
+- **optimize_graph** – whether to do some process on origin model for special purpose. Currently only support using torch.fx to fix cat input scale(only used on Bernoulli)
+
+- **hybrid** – whether to generate a hybrid model that some intermediate operation is computed in float. There are some constraints for this functionality now: 1. The hybrid model cannot pass check_model and cannot be compiled. 2. Some quantized operation cannot directly accept input from float operation, user need to manually insert QuantStub.
+
+- **optimize_kwargs** –
+
+a dict for optimize graph with the following format:
+
+```python
 optimize_kwargs = {
-    # 可选，指定要进行的优化类型。目前只支持“ uniff_inputs_scale”
+    # optional, specify which type of optimization to do. Only
+    # support "unify_inputs_scale" now
     "opt_types": ("unify_inputs_scale",),
 
-    # 可选，以限定名称开头的模块进行优化
+    # optional, modules start with qualified name to optimize
     "module_prefixes": ("backbone.conv",),
 
-    # 可选，将优化的模块类型
+    # optional, modules in these types will be optimize
     "module_types": (horizon.nn.qat.conv2d,),
 
-    # 可选，要优化的函数
+    # optional, functions to optimize
     "functions": (torch.clamp,),
 
-    # 可选，要优化的方法。目前仅支持FloatFunctional方法
+    # optional, methods to optimize. Only support
+    # FloatFunctional methods now
     "methods": ("add",),
 }
 ```
 
-```Python
+```python
 
 horizon_plugin_pytorch.quantization.prepare_qat_fx(model: Union[torch.nn.modules.module.Module, torch.fx.graph_module.GraphModule], qconfig_dict: Optional[Dict[str, Any]] = None, prepare_custom_config_dict: Optional[Dict[str, Any]] = None, optimize_graph: bool = False, hybrid: bool = False, hybrid_dict: Optional[Dict[str, List]] = None) → horizon_plugin_pytorch.quantization.fx.graph_module.ObservedGraphModule
 ```
 
-为量化感知训练准备模型。**Parameters**
+Prepare a model for quantization aware training.
 
-- **model** - torch.nn.Module model or GraphModule model (maybe from fuse_fx)
+**parameters**
 
-- **qconfig_dict** -
+- **model** – torch.nn.Module model or GraphModule model (maybe from fuse_fx)
+
+- **qconfig_dict** –
 
 qconfig_dict is a dictionary with the following configurations:
 
@@ -439,7 +479,7 @@ qconfig_dict = {
 }
 ```
 
-- **prepare_custom_config_dict** -
+- **prepare_custom_config_dict** –
 
 customization configuration dictionary for quantization tool:
 
@@ -451,29 +491,31 @@ prepare_custom_config_dict = {
 }
 ```
 
-- **optimize_graph** - whether to do some process on origin model for special purpose. Currently only support using torch.fx to fix cat input scale(only used on Bernoulli)- **hybrid** - 在混合模式下准备模型。默认值为False，模型完全在BPU上运行。如果模型通过模型转换量化或包含一些CPU操作，则应该设置为True。在混合模式下，不受BPU支持的操作和用户指定的操作将在CPU上运行。如何设置qconfig：混合模式下的qconfig与非混合模式下的qconfig相同。对于BPU操作，我们应确保该操作的输入被量化，其前一个非量化操作的激活qconfig即使是一个CPU操作，也不应为None。如何指定CPU操作：在hybrid_dict中定义CPU module_name或module_type。
+- **optimize_graph** – whether to do some process on origin model for special purpose. Currently only support using torch.fx to fix cat input scale(only used on Bernoulli)
 
-- **hybrid_dict** -
+- **hybrid** – Whether prepare model in hybrid mode. Default value is False and model runs on BPU completely. It should be True if the model is quantized by model convert or contains some CPU ops. In hybrid mode, ops which aren’t supported by BPU and ops which are specified by the user will run on CPU. How to set qconfig: Qconfig in hybrid mode is the same as qconfig in non-hybrid mode. For BPU op, we should ensure the input of this op is quantized, the activation qconfig of its previous non-quantstub op should not be None even if its previous non-quantstub op is a CPU op. How to specify CPU op: Define CPU module_name or module_type in hybrid_dict.
 
-hybrid_dict是一个字典，用于定义用户指定的CPU操作：
+- **hybrid_dict** –
+
+hybrid_dict is a dictionary to define user-specified CPU op:
 
 ```python
 hybrid_dict = {
-    # 可选，用于模块类型
+    # optional, used for module types
     "module_type": [torch.nn.Conv2d, ...],
 
-    # 可选，用于模块名称
+    # optional, used for module names
     "module_name": ["foo.bar", ...],
 }
-# 优先级（从低到高）：module_type，module_name
-# 要将函数或方法设置为CPU操作，请将其封装为一个模块。
+# priority (in increasing order): module_type, module_name
+# To set a function or method as CPU op, wrap it as a module.
 ```
 
-**返回**
+**Return **
 
-带有伪量化模块（由qconfig_dict配置）的GraphModule，准备进行量化感知训练
+A GraphModule with fake quant modules (configured by qconfig_dict), ready for quantization aware training
 
-示例：prepare_qat_fx示例：
+Example: prepare_qat_fx example:
 
 ```python
 
@@ -489,31 +531,36 @@ def train_loop(model, train_data):
 
 qconfig_dict = {"": qconfig}
 prepared_model = prepare_qat_fx(float_model, qconfig_dict)
-# 运行QAT训练
+# Run QAT training
 train_loop(prepared_model, train_loop)
 ```
 
-torch.fx的扩展追踪器和包装器。
+Extended tracer and wrap of torch.fx.
 
-该文件定义了一个继承自torch.fx.Tracer的追踪器和一个扩展的包装器，允许包装用户定义的模块或方法，帮助用户通过torch.fx对自己的模块进行优化。
+This file defines a inherit tracer of torch.fx.Tracer and a extended wrap to allow wrapping of user-defined Module or method, which help users do some optimization of their own module by torch.fx
 
 ```python
 horizon_plugin_pytorch.utils.fx_helper.wrap(skip_compile: bool = False)
-```Extend torch.fx.warp.
+```
+
+Extend torch.fx.warp.
 
 This function can be:
 - 1) called or used as a decorator on a string to register a builtin function as a “leaf function”
+
 - 2) called or used as a decorator on a function to register this function as a “leaf function”
+
 - 3) called or used as a decorator on subclass of torch.nn.Module to register this module as a “leaf module”, and register all user defined method in this class as “leaf method”
+
 - 4) called or used as a decorator on a class method to register it as “leaf method”
 
-**Parameters**
+**parameters**
 
 skip_compile – Whether the wrapped part should not be compiled.
 
-**Returns**
+**Return **
 
-The actual decorator.
+The actural decorator.
 
 **Return Type**
 
@@ -528,7 +575,7 @@ horizon_plugin_pytorch.utils.onnx_helper.export_to_onnx(model, args, f, export_p
 
 Export a (float or qat)model into ONNX format.
 
-**Parameters**
+**parameters**
 
 - **model** (torch.nn.Module/torch.jit.ScriptModule/ScriptFunction) – the model to be exported.
 
@@ -544,27 +591,29 @@ Export a (float or qat)model into ONNX format.
 
     The tuple should contain model inputs such that model(*args) is a valid invocation of the model. Any non-Tensor arguments will be hard-coded into the exported model; any Tensor arguments will become inputs of the exported model, in the order they occur in the tuple.
 
-    b. A TENSOR:```python
-args = torch.Tensor([1])
-```
+    b. A TENSOR:
 
-This is equivalent to a 1-ary tuple of that Tensor.
+    ```python
+        args = torch.Tensor([1])
+    ```
 
-c. A TUPLE OF ARGUMENTS ENDING WITH A DICTIONARY OF NAMED ARGUMENTS:
+    This is equivalent to a 1-ary tuple of that Tensor.
 
-```python
-args = (x,
-        {'y': input_y,
-        'z': input_z})
-```
+    c. A TUPLE OF ARGUMENTS ENDING WITH A DICTIONARY OF NAMED ARGUMENTS:
 
-All but the last element of the tuple will be passed as non-keyword arguments, and named arguments will be set from the last element. If a named argument is not present in the dictionary, it is assigned the default value, or None if a default value is not provided.
+    ```python
+        args = (x,
+                {'y': input_y,
+                'z': input_z})
+    ```
+
+    All but the last element of the tuple will be passed as non-keyword arguments, and named arguments will be set from the last element. If a named argument is not present in the dictionary , it is assigned the default value, or None if a default value is not provided.
 
 - **f** – a file-like object or a string containing a file name. A binary protocol buffer will be written to this file.
 
 - **export_params** (bool, default True) – if True, all parameters will be exported.
 
-- **verbose** (bool, default False) – if True, prints a description of the model being exported to stdout, doc_string will be added to graph. doc_string may contain mapping of module scope to node name in future torch onnx.
+- **verbose** (bool, default False) – if True, prints a description of the model being exported to stdout, doc_string will be added to graph. doc_string may contaion mapping of module scope to node name in future torch onnx.
 
 - **training** (enum, default TrainingMode.EVAL) –
 
@@ -572,7 +621,7 @@ All but the last element of the tuple will be passed as non-keyword arguments, a
 
     ``TrainingMode.EVAL``: export the model in inference mode.
 
-    ``TrainingMode.PRESERVE``: export the model in inference mode.
+    ``TrainingMode.PRESERVE``: export the model in inference mode
 
     ``TrainingMode.TRAINING``: export the model in training mode. Disables optimizations which might interfere with training.
 
@@ -586,13 +635,15 @@ All but the last element of the tuple will be passed as non-keyword arguments, a
 
     ``OperatorExportTypes.ONNX_FALLTHROUGH``: Try to convert all ops to standard ONNX ops in the default opset domain.
 
-    ``OperatorExportTypes.ONNX_ATEN``: All ATen ops (in the TorchScript namespace "aten") are exported as ATen ops.
+    ``OperatorExportTypes.ONNX_ATEN``: All ATen ops (in the TorchScript namespace “aten”) are exported as ATen ops.
 
-    ``OperatorExportTypes.ONNX_ATEN_FALLBACK``: Try to export each ATen op (in the TorchScript namespace "aten") as a regular ONNX op. If we are unable to do so, fall back to exporting an ATen op.
+    ``OperatorExportTypes.ONNX_ATEN_FALLBACK``: Try to export each ATen op (in the TorchScript namespace “aten”) as a regular ONNX op. If we are unable to do so,fall back to exporting an ATen op.
 
 - **opset_version** (int, default 11) – by default we export the model to the opset version of the onnx submodule.
 
-- **do_constant_folding** (bool, default False) – Apply the constant-folding optimization. Constant-folding will replace some of the ops that have all constant inputs with pre-computed constant nodes.- **dynamic_axes** (dict<str, list(int)/dict<int, str>>, default empty dict) –
+- **do_constant_folding** (bool, default False) – Apply the constant-folding optimization. Constant-folding will replace some of the ops that have all constant inputs with pre-computed constant nodes.
+
+- **dynamic_axes** (dict<str, list(int)/dict<int, str>>, default empty dict) –
 
     By default the exported model will have the shapes of all input and output tensors set to exactly match those given in args (and example_outputs when that arg is required). To specify axes of tensors as dynamic (i.e. known only at run-time), set dynamic_axes to a dict with schema:
 
@@ -613,7 +664,7 @@ All but the last element of the tuple will be passed as non-keyword arguments, a
     If a custom opset is referenced by model but not mentioned in this dictionary, the opset version is set to 1.
 
 
-## TorchScript Model Save and Load
+## TorchScript model saving and loading
 
 ```python
 horizon_plugin_pytorch.jit.load(f, map_location=None, _extra_files=None)
@@ -623,15 +674,15 @@ Load ScriptModule previously saved with horizon.jit.save.
 
 In addition to loaded plugin version comparsion with current plugin version, this function is same as torch.jit.save.
 
-**Parameters**
+**parameters**
 
-- **f** – a file-like object (has to implement read, readline, tell, and seek), or a string containing a file name
+- **f** – a file-like object(has to implement read, readline, tell, and seek), or a string containing a file name
 
 - **map_location** (string or torch.device) – A simplified version of map_location in torch.jit.save used to dynamically remap storages to an alternative set of devices.
 
 - **_extra_files** (dictionary of filename to content) – The extra filenames given in the map would be loaded and their content would be stored in the provided map.
 
-**Returns**
+**Return **
 
 A ScriptModule object.
 
@@ -641,16 +692,18 @@ horizon_plugin_pytorch.jit.save(m, f, _extra_files=None)
 
 Save ScriptModule.
 
-In addition to plugin version saved, this function is same as torch.jit.save.**Parameters**
+In addition to plugin version saved, this function is same as torch.jit.save.
 
-- **m** - A ScriptModule to save.
+**parameters**
 
-- **f** - A file-like object (has to implement write and flush) or a string containing a file name.
+- **m** – A ScriptModule to save.
 
-- **_extra_files** - Map from filename to contents which will be stored as part of f.
+- **f** – A file-like object (has to implement write and flush) or a string containing a file name.
+
+- **_extra_files** – Map from filename to contents which will be stored as part of f.
 
 
-## Horizon Operators
+## Horizon operator
 
 ```python
 horizon_plugin_pytorch.nn.functional.filter(*inputs: Union[Tuple[torch.Tensor], Tuple[horizon_plugin_pytorch.qtensor.QTensor]], threshold: float, idx_range: Optional[Tuple[int, int]] = None) → List[List[torch.Tensor]]
@@ -662,15 +715,15 @@ The output order is different with bpu, because that the compiler do some optimi
 
 All inputs are filtered along HW by the max value within a range in channel dim of the first input. Each NCHW input is splited, transposed and flattened to List[Tensor[H * W, C]] first. If input is QTensor, the output will be dequantized.
 
-**Parameters**
+**parameters**
 
-- **inputs** - Data in NCHW format. Each input shold have the same size in N, H, W. The output will be selected according to the first input.
+- **inputs** – Data in NCHW format. Each input shold have the same size in N, H, W. The output will be selected according to the first input.
 
-- **threshold** - Threshold, the lower bound of output.
+- **threshold** – Threshold, the lower bound of output.
 
-- **idx_range** - The index range of values counted in compare of the first input. Defaults to None which means use all the values.
+- **idx_range** – The index range of values counted in compare of the first input. Defaults to None which means use all the values.
 
-**Returns**
+**Return **
 
 A list with same length of batch size, and each element contains:
 
@@ -682,33 +735,35 @@ A list with same length of batch size, and each element contains:
 
 (multi) data: Filtered data in the shape of [M, C].
 
-**Return type**
+**Return Type**
 
 Union[List[List[Tensor]], List[List[QTensor]]]
 
 ```python
 horizon_plugin_pytorch.nn.functional.point_pillars_preprocess(points_list: List[torch.Tensor], pc_range: torch.Tensor, voxel_size: torch.Tensor, max_voxels: int, max_points_per_voxel: int, use_max: bool, norm_range: torch.Tensor, norm_dims: torch.Tensor) → Tuple[torch.Tensor, torch.Tensor]
-```Preprocess PointPillars.
+```
 
-**Parameters**
+Preprocess PointPillars.
 
-- **points_list** - [(M1, ndim), (M2, ndim),...], List of PointCloud data.
+**parameters**
 
-- **pc_range** - (6,), indicate voxel range, format: [x_min, y_min, z_min, x_max, y_max, z_max]
+- **points_list** – [(M1, ndim), (M2, ndim),…], List of PointCloud data.
 
-- **voxel_size** - (3,), xyz, indicate voxel size.
+- **pc_range** – (6,), indicate voxel range, format: [x_min, y_min, z_min, x_max, y_max, z_max]
 
-- **max_voxels** - Indicate maximum voxels.
+- **voxel_size** – (3,), xyz, indicate voxel size.
 
-- **max_points_per_voxel** - Indicate maximum points contained in a voxel.
+- **max_voxels** – Indicate maximum voxels.
 
-- **use_max** - Whether to use max_voxels, for deploy should be True.
+- **max_points_per_voxel** – Indicate maximum points contained in a voxel.
 
-- **norm_range** - Feature range, like [x_min, y_min, z_min, ..., x_max, y_max, z_max, ...].
+- **use_max** – Whether to use max_voxels, for deploy should be True.
 
-- **norm_dims** - Dims to do normalize.
+- **norm_range** – Feature range, like [x_min, y_min, z_min, …, x_max, y_max, z_max, …].
 
-**Returns**
+- **norm_dims** – Dims to do normalize.
+
+**Return **
 
 (features, coords), encoded feature and coordinates in (idx, z, y, x) format.
 
@@ -721,9 +776,9 @@ class horizon_plugin_pytorch.nn.BgrToYuv444(channel_reversal: bool = False)
 
 Convert image color format from bgr to yuv444.
 
-**Parameters**
+**parameters**
 
-- **channel_reversal** - Color channel order, set to True when used on RGB input. Defaults to False.
+- **channel_reversal** – Color channel order, set to True when used on RGB input. Defaults to False.
 
 ```python
 forward(input: torch.Tensor)
@@ -737,7 +792,9 @@ class horizon_plugin_pytorch.nn.Correlation(kernel_size: int = 1, max_displaceme
 
 Perform multiplicative patch comparisons between two feature maps.
 
-![qat_correlation](./image/expert/qat_correlation.png)**Parameters**
+![qat_correlation](./image/expert/qat_correlation.png)
+
+**parameters**
 
 - **kernel_size** – kernel size for Correlation must be an odd number
 
@@ -757,13 +814,13 @@ forward(data1: Union[torch.Tensor, horizon_plugin_pytorch.qtensor.QTensor], data
 
 Forward for Horizon Correlation.
 
-**Parameters**
+**parameters**
 
 - **data1** – shape of [N,C,H,W]
 
 - **data2** – shape of [N,C,H,W]
 
-**Returns**
+**Return **
 
 output
 
@@ -779,91 +836,95 @@ General post process for object detection models.
 
 Compatible with YOLO, SSD, RetinaNet, Faster-RCNN (RPN & RCNN), etc. Note that this is a float OP, please use after DequantStubs.
 
-**Parameters**
+**parameters**
 
 - **score_threshold** – Filter boxes whose score is lower than this. Defaults to 0.
 
-- **regression_scale** – Scale to be multiplied to box regressions. Defaults to None.
+- **regression_scale** – Scale to be multiplyed to box regressions. Defaults to None.
 
-- **background_class_idx** – Specify the class index to be ignored. Defaults to None.- **size_threshold** – 过滤高度或宽度小于此数值的框。默认为None。
+- **background_class_idx** – Specify the class index to be ignored. Defaults to None.
 
-- **image_size** – 将框裁剪到图像尺寸。默认为None。
+- **size_threshold** – Filter bixes whose height or width smaller than this. Defaults to None.
 
-- **pre_decode_top_n** – 在解码之前，按照目标检测概率（得分向量的第一个元素）获取前n个框。默认为None。
+- **image_size** – Clip boxes to image sizes. Defaults to None.
 
-- **post_decode_top_n** – 在解码之后，按照得分获取前n个框。默认为None。
+- **pre_decode_top_n** – Get top n boxes by objectness (first element in the score vector) before decode. Defaults to None.
 
-- **iou_threshold** – NMS的IoU阈值。默认为None。
+- **post_decode_top_n** – Get top n boxes by score after decode. Defaults to None.
 
-- **pre_nms_top_n** – 在NMS之前，按照得分获取前n个框。默认为None。
+- **iou_threshold** – IoU threshold for nms. Defaults to None.
 
-- **post_nms_top_n** – 在NMS之后，按照得分获取前n个框。默认为None。
+- **pre_nms_top_n** – Get top n boxes by score before nms. Defaults to None.
 
-- **nms_on_each_level** – 是否在每个级别上进行独立的NMS。默认为False。
+- **post_nms_top_n** – Get top n boxes by score after nms. Defaults to None.
 
-- **mode** – 仅支持“normal”和“yolo”。如果设置为“yolo”：1. 框将根据目标检测概率而不是分类得分进行过滤。2. 回归中的dx、dy将被视为绝对偏移量。3. 目标检测概率将与分类得分相乘。默认为“normal”。
+- **nms_on_each_level** – Whether do nms on each level seperately. Defaults to False.
+
+- **mode** – Only support ‘normal’ and ‘yolo’. If set to ‘yolo’: 1. Box will be filtered by objectness rathen than classification scores. 2. dx, dy in regressions will be treated as absolute offset. 3. Objectness will be multiplyed to classification scores. Defaults to ‘normal’.
 
 ```python
 forward(boxes: List[torch.Tensor], scores: List[torch.Tensor], regressions: List[torch.Tensor], image_shapes: Optional[torch.Tensor] = None) → Tuple[Tuple[torch.Tensor], Tuple[torch.Tensor], Tuple[torch.Tensor]]
 ```
 
-DetectionPostProcess的前向传递。
+Forward pass of DetectionPostProcess.
 
 ```python
 class horizon_plugin_pytorch.nn.DetectionPostProcessV1(num_classes: int, box_filter_threshold: float, class_offsets: List[int], use_clippings: bool, image_size: Tuple[int, int], nms_threshold: float, pre_nms_top_k: int, post_nms_top_k: int, nms_padding_mode: Optional[str] = None, nms_margin: float = 0.0, use_stable_sort: Optional[bool] = None, bbox_min_hw: Tuple[float, float] = (0, 0))
 ```
 
-用于目标检测模型的后处理。仅支持bernoulli2模型。
+Post process for object detection models. Only supported on bernoulli2.
 
-该操作在BPU上实现，因此预计比CPU实现更快。此操作需要输入缩放因子为1 / 2 ** 4，或者将应用重新缩放到输入数据。因此，您可以将之前操作（例如Conv2d）的输出尺度手动设置为1 / 2 ** 4，以避免重新缩放并获得最佳性能和准确性。
+This operation is implemented on BPU, thus is expected to be faster than cpu implementation. This operation requires input_scale = 1 / 2 ** 4, or a rescale will be applied to the input data. So you can manually set the output scale of previous op (Conv2d for example) to 1 / 2 ** 4 to avoid the rescale and get best performance and accuracy.
 
-与DetectionPostProcess的主要区别：
+Major differences with DetectionPostProcess:
 
-1. 每个锚点只会生成一个预测框，但在DetectionPostProcess中，每个锚点会为每个类别生成一个框（共num_classes个框）。
-2. NMS有一个margin参数，仅当box1.score - box2.score > margin时，box2才会被box1压制（DetectionPostProcess中，box1.score > box2.score）。
-3. 可以为输出类别索引添加偏移量（使用class_offsets）。
+1. Each anchor will generate only one pred bbox totally, but in DetectionPostProcess each anchor will generate one bbox for each class (num_classes bboxes totally).
+2. NMS has a margin param, box2 will only be supressed by box1 when box1.score - box2.score > margin (box1.score > box2.score in DetectionPostProcess).
+3. A offset can be added to the output class indices ( using class_offsets).
 
-**参数**
+**parameters**
 
-- **num_classes** – 类别数。
+- **num_classes** – Class number.
 
-- **box_filter_threshold** – 通过最大得分过滤框的默认阈值。
+- **box_filter_threshold** – Default threshold to filter box by max score.
 
-- **class_offsets** – 要为每个分支输出类别索引添加的偏移量。
+- **class_offsets** – Offset to be added to output class index for each branch.
 
-- **use_clippings** – 是否将框裁剪到图像尺寸。如果输入被填充，可以通过提供图像尺寸将框裁剪到真实内容。
+- **use_clippings** – Whether clip box to image size. If input is padded, you can clip box to real content by providing image size.
 
-- **image_size** – 固定的图像尺寸（h，w），如果输入具有不同的尺寸，则设置为None。- **nms_threshold** – IoU阈值用于nms。
+- **image_size** – Fixed image size in (h, w), set to None if input have different sizes.
 
-- **nms_margin** – 只有在box1.score - box2.score > nms_margin时，才会抑制box2。
+- **nms_threshold** – IoU threshold for nms.
 
-- **pre_nms_top_k** – nms之前每个图像中的最大边界框数量。
+- **nms_margin** – Only supress box2 when box1.score - box2.score > nms_margin
 
-- **post_nms_top_k** – 每个图像中输出的最大边界框数量。
+- **pre_nms_top_k** – Maximum number of bounding boxes in each image before nms.
 
-- **nms_padding_mode** – 将bbox填充以匹配输出的边界框数目到post_nms_top_k的方式，可以是None，“pad_zero”或“rollover”。
+- **post_nms_top_k** – Maximum number of output bounding boxes in each image.
 
-- **bbox_min_hw** – 所选边界框的最小高度和宽度。
+- **nms_padding_mode** – The way to pad bbox to match the number of output bounding bouxes to post_nms_top_k, can be None, “pad_zero” or “rollover”.
+
+- **bbox_min_hw** – Minimum height and width of selected bounding boxes.
 
 ```python
 forward(data: List[torch.Tensor], anchors: List[torch.Tensor], image_sizes: Tuple[int, int] = None) → torch.Tensor
 ```
 
-DetectionPostProcessV1的前向传递。
+Forward pass of DetectionPostProcessV1.
 
-**参数**
+**parameters**
 
 - **data** – (N, (4 + num_classes) * anchor_num, H, W)
 
 - **anchors** – (N, anchor_num * 4, H, W)
 
-- **image_sizes** – 默认为None。
+- **image_sizes** – Defaults to None.
 
-**返回**
+**Return **
 
-（bbox (x1, y1, x2, y2), score, class_idx）的列表。
+list of (bbox (x1, y1, x2, y2), score, class_idx).
 
-**返回类型**
+**Return Type**
 
 List[Tuple[Tensor, Tensor, Tensor]]
 
@@ -873,15 +934,17 @@ class horizon_plugin_pytorch.nn.PointPillarsScatter(output_shape=None)
 forward(voxel_features: torch.Tensor, coords: torch.Tensor, output_shape: Optional[Union[torch.Tensor, list, tuple]] = None) → torch.Tensor
 ```
 
-Horizon PointPillarsScatter的前向传递。
+Forward of Horizon PointPillarsScatter.
 
-**参数**
+**parameters**
 
-- **voxel_features** – [M, …]，M之后的维度将被展平。
+- **voxel_features** – [M, …], dimention after M will be flattened.
 
-- **coords** – [M, (n, …, y, x)]，仅使用N、H和W上的索引。
+- **coords** – [M, (n, …, y, x)], only indices on N, H and W are used.
 
-- **output_shape** – 期望的输出形状。默认为None。**Returns**
+- **output_shape** – Expected output shape. Defaults to None.
+
+**Return **
 
 The NCHW pseudo image.
 
@@ -907,7 +970,7 @@ Bin-sort remaining boxes on score
 
 Apply class-aware NMS and return the firstnms_output_box_num of boxes
 
-**Parameters**
+**parameters**
 
 - **image_size** – a int tuple of (h, w), for fixed image size
 
@@ -929,22 +992,26 @@ forward(boxes: List[torch.Tensor], scores: torch.Tensor, deltas: torch.Tensor, i
 
 Forward of RcnnPostProcess.
 
-**Parameters**- **boxes** - list of box of shape [box_num, (x1, y1, x2, y2)]. can be Tensor(float), QTensor(float, int)
+**parameters**
 
-- **scores** - shape is [num_batch * num_box, num_classes + 1, 1, 1,], dtype is float32
+- **boxes** – list of box of shape [box_num, (x1, y1, x2, y2)]. can be Tensor(float), QTensor(float, int)
 
-- **deltas** - shape is [num_batch * num_box, (num_classes + 1) * 4, 1, 1,], dtype is float32
+- **scores** – shape is [num_batch * num_box, num_classes + 1, 1, 1,], dtype is float32
 
-- **image_sizes** - shape is [num_batch, 2], dtype is int32, for dynamic image size, can be None. Defaults to None
+- **deltas** – shape is [num_batch * num_box, (num_classes + 1) * 4, 1, 1,], dtype is float32
 
-**Returns**
-Output data in format
-[x1, y1, x2, y2, score, class_index], dtype is float32. If the output boxes number is less than post_nms_top_k, they are padded with -1.0.
+- **image_sizes** – shape is [num_batch, 2], dtype is int32, for dynamic image size, can be None. Defaults to None
+
+**Return **
+
+output data in format
+[x1, y1, x2, y2, score, class_index], dtype is float32 if the output boxes number is less than post_nms_top_k, they are padded with -1.0
 
 **Return Type**
+
 Tensor[num_batch, post_nms_top_k, 6]
 
-Horizon plugin.
+horizon plugin.
 
 ```python
 horizon_plugin_pytorch.bgr2centered_gray(input: torch.Tensor) → torch.Tensor
@@ -952,15 +1019,18 @@ horizon_plugin_pytorch.bgr2centered_gray(input: torch.Tensor) → torch.Tensor
 
 Convert color space.
 
-Convert images from BGR format to centered gray.
+Convert images from BGR format to centered gray
 
-**Parameters**
-- **input** - input image in BGR format of shape [N, 3, H, W], ranging 0~255
+**parameters**
 
-**Returns**
-Centered gray image of shape [N, 1, H, W], ranging -128~127.
+- **input** – input image in BGR format of shape [N, 3, H, W], ranging 0~255
+
+**Return **
+
+centered gray image of shape [N, 1, H, W], ranging -128~127
 
 **Return Type**
+
 Tensor
 
 ```python
@@ -969,17 +1039,19 @@ horizon_plugin_pytorch.bgr2centered_yuv(input: torch.Tensor, swing: str = 'studi
 
 Convert color space.
 
-Convert images from BGR format to centered YUV444 BT.601.
+Convert images from BGR format to centered YUV444 BT.601
 
-**Parameters**- **input** – 输入图像的BGR格式，范围在0~255之间
+**parameters**
 
-- **swing** – YUV Studio摆动的“studio”（Y: -112~107, U, V: -112~112）。YUV全摆动的“full”（Y, U, V: -128~127）。默认为“studio”。
+- **input** – input image in BGR format, ranging 0~255
 
-**Returns**
+- **swing** – “studio” for YUV studio swing (Y: -112~107, U, V: -112~112). “full” for YUV full swing (Y, U, V: -128~127). default is “studio”
 
-居中的YUV图像
+**Return **
 
-**返回类型**
+centered YUV image
+
+**Return Type**
 
 Tensor
 
@@ -987,19 +1059,19 @@ Tensor
 horizon_plugin_pytorch.bgr2gray(input: torch.Tensor) → torch.Tensor
 ```
 
-颜色空间转换。
+Convert color space.
 
-将图像从BGR格式转换为灰度
+Convert images from BGR format to gray
 
-**参数**
+**parameters**
 
-- **input** – 输入图像的BGR格式，形状为[N, 3, H, W]，范围在0~255之间
+- **input** – input image in BGR format of shape [N, 3, H, W], ranging 0~255
 
-**返回**
+**Return **
 
-形状为[N, 1, H, W]的灰度图像，范围在0~255之间
+gray image of shape [N, 1, H, W], ranging 0~255
 
-**返回类型**
+**Return Type**
 
 Tensor
 
@@ -1007,45 +1079,97 @@ Tensor
 horizon_plugin_pytorch.bgr2rgb(input: torch.Tensor) → torch.Tensor
 ```
 
-颜色空间转换。
+Convert color space.
 
-将图像从BGR格式转换为RGB
+Convert images from BGR format to RGB
 
-**参数**
+**parameters**
 
-- **input** – 形状为[N, 3, H, W]的BGR格式图像
+- **input** – image in BGR format with shape [N, 3, H, W]
 
-**返回**
+**Return **
 
-形状为[N, 3, H, W]的RGB格式图像
+image in RGB format with shape [N, 3, H, W]
 
-**返回类型**TensorQTensor
+**Return Type**
+
+Tensor
+
+```python
+horizon_plugin_pytorch.bgr2yuv(input: torch.Tensor, swing: str = 'studio') → torch.Tensor
+```
+
+Convert color space.
+
+Convert images from BGR format to YUV444 BT.601
+
+**parameters**
+
+- **input** – input image in BGR format, ranging 0~255
+
+- **swing** – “studio” for YUV studio swing (Y: 16~235, U, V: 16~240). “full” for YUV full swing (Y, U, V: 0~255). default is “studio”
+
+**Return **
+
+YUV image
+
+**Return Type**
+
+Tensor
+
+```python
+horizon_plugin_pytorch.centered_yuv2bgr(input: horizon_plugin_pytorch.qtensor.QTensor, swing: str = 'studio', mean: Union[List[float], torch.Tensor] = (128.0,), std: Union[List[float], torch.Tensor] = (128.0,), q_scale: Union[float, torch.Tensor] = 0.0078125) → horizon_plugin_pytorch.qtensor.QTensor
+```
+
+Convert color space.
+
+Convert images from centered YUV444 BT.601 format to transformed and quantized BGR. Only use this operator in the quantized model. Insert it after QuantStub. Pass the scale of QuantStub to the q_scale argument and set scale of QuantStub to 1 afterwards.
+
+**parameters**
+
+- **input** – Input images in centered YUV444 BT.601 format, centered by the pyramid with -128.
+
+- **swing** – “studio” for YUV studio swing (Y: -112~107, U, V: -112~112). “full” for YUV full swing (Y, U, V: -128~127). default is “studio”
+
+- **mean** – BGR mean, a list of float, or torch.Tensor, can be a scalar [float], or [float, float, float] for per-channel mean.
+
+- **std** – BGR standard deviation, a list of float, or torch.Tensor, can be a scalar [float], or [float, float, float] for per-channel std.
+
+- **q_scale** – BGR quantization scale.
+
+**Return **
+
+Transformed and quantized image in BGR color, dtype is qint8.
+
+**Return Type**
+
+QTensor
 
 ```python
 horizon_plugin_pytorch.centered_yuv2rgb(input: horizon_plugin_pytorch.qtensor.QTensor, swing: str = 'studio', mean: Union[List[float], torch.Tensor] = (128.0,), std: Union[List[float], torch.Tensor] = (128.0,), q_scale: Union[float, torch.Tensor] = 0.0078125) → horizon_plugin_pytorch.qtensor.QTensor
 ```
 
-转换颜色空间。
+Convert color space.
 
-将图像从中心化的YUV444 BT.601格式转换为转换和量化的RGB。只在量化模型中使用此操作符。将其插入在QuantStub之后。将QuantStub的比例传递给q_scale参数，并在此后将QuantStub的比例设置为1。
+Convert images from centered YUV444 BT.601 format to transformed and quantized RGB. Only use this operator in the quantized model. Insert it after QuantStub. Pass the scale of QuantStub to the q_scale argument and set scale of QuantStub to 1 afterwards.
 
-**Parameters**
+**parameters**
 
-- **input**：以中心化的YUV444 BT.601格式表示的输入图像，由金字塔中心化，范围为-128。
+- **input** – Input images in centered YUV444 BT.601 format, centered by the pyramid with -128.
 
-- **swing**：YUV studio swing的“studio”（Y：-112~107，U，V：-112~112）。“full”表示完全振荡的YUV（Y，U，V：-128~127）。默认为“studio”。
+- **swing** – “studio” for YUV studio swing (Y: -112~107, U, V: -112~112). “full” for YUV full swing (Y, U, V: -128~127). default is “studio”
 
-- **mean**：RGB均值，是一个浮点数列表或torch.Tensor，可以是标量[float]或[ float, float, float]表示的每通道均值。
+- **mean** – RGB mean, a list of float, or torch.Tensor, can be a scalar [float], or [float, float, float] for per-channel mean.
 
-- **std**：RGB标准差，是一个浮点数列表或torch.Tensor，可以是标量[float]或[ float, float, float]表示的每通道标准差。
+- **std** – RGB standard deviation, a list of float, or torch.Tensor, can be a scalar [float], or [float, float, float] for per-channel std.
 
-- **q_scale**：RGB量化比例。
+- **q_scale** – RGB quantization scale.
 
-**Returns**
+**Return **
 
-转换和量化后的RGB颜色图像，dtype是qint8。
+Transformed and quantized image in RGB color, dtype is qint8.
 
-**Returns Type**
+**Return Type**
 
 QTensor
 
@@ -1053,21 +1177,23 @@ QTensor
 horizon_plugin_pytorch.rgb2bgr(input: torch.Tensor) → torch.Tensor
 ```
 
-转换颜色空间。
+Convert color space.
 
-将图像从RGB格式转换为BGR。
+Convert images from RGB format to BGR
 
-**Parameters**
+**parameters**
 
-- **input**：RGB格式的图像，形状为[N, 3, H, W]。
+- **input** – image in RGB format with shape [N, 3, H, W]
 
-**Returns**
+**Return **
 
-形状为[N, 3, H, W]的BGR格式图像。
+image in BGR format with shape [N, 3, H, W]
 
-**Returns Type**
+**Return Type**
 
-Tensor```python
+Tensor
+
+```python
 horizon_plugin_pytorch.rgb2centered_gray(input: torch.Tensor) → torch.Tensor
 ```
 
@@ -1075,15 +1201,15 @@ Convert color space.
 
 Convert images from RGB format to centered gray
 
-**Parameters**
+**parameters**
 
 - **input** – input image in RGB format of shape [N, 3, H, W], ranging 0~255
 
-**Returns**
+**Return **
 
 centered gray image of shape [N, 1, H, W], ranging -128~127
 
-**Return type**
+**Return Type**
 
 Tensor
 
@@ -1095,17 +1221,17 @@ Convert color space.
 
 Convert images from RGB format to centered YUV444 BT.601
 
-**Parameters**
+**parameters**
 
 - **input** – input image in RGB format, ranging 0~255
 
 - **swing** – “studio” for YUV studio swing (Y: -112~107, U, V: -112~112). “full” for YUV full swing (Y, U, V: -128~127). default is “studio”
 
-**Returns**
+**Return **
 
 centered YUV image
 
-**Return type**
+**Return Type**
 
 Tensor
 
@@ -1115,11 +1241,13 @@ horizon_plugin_pytorch.rgb2gray(input: torch.Tensor) → torch.Tensor
 
 Convert color space.
 
-Convert images from RGB format to gray**Parameters**
+Convert images from RGB format to gray
 
-- **input** - input image in RGB format of shape [N, 3, H, W], ranging 0~255
+**parameters**
 
-**Returns**
+- **input** – input image in RGB format of shape [N, 3, H, W], ranging 0~255
+
+**Return **
 
 gray image of shape [N, 1, H, W], ranging 0~255
 
@@ -1135,13 +1263,13 @@ Convert color space.
 
 Convert images from RGB format to YUV444 BT.601
 
-**Parameters**
+**parameters**
 
-- **input** - input image in RGB format, ranging 0~255
+- **input** – input image in RGB format, ranging 0~255
 
-- **swing** - “studio” for YUV studio swing (Y: 16~235, U, V: 16~240). “full” for YUV full swing (Y, U, V: 0~255). default is “studio”
+- **swing** – “studio” for YUV studio swing (Y: 16~235, U, V: 16~240). “full” for YUV full swing (Y, U, V: 0~255). default is “studio”
 
-**Returns**
+**Return **
 
 YUV image
 
@@ -1159,63 +1287,67 @@ Check if nn.Module or jit.ScriptModule can be compiled by HBDK.
 
 Dump advices for improving performance on BPU.
 
-**Parameters**
+**parameters**
 
-- **module** (nn.Module or jit.ScriptModule.) -
+- **module** (nn.Module or jit.ScriptModule.) –
 
-- **example_inputs** (A tuple of example inputs, in torch.tensor format.) – For jit.trace and shape inference.- **march** (指定bpu的目标march) - 有效的选项有bayes和bernoulli2。如果未提供，则使用horizon插件的全局march。
+- **example_inputs** (A tuple of example inputs, in torch.tensor format.) – For jit.trace and shape inference.
 
-- **input_source** (指定输入特征的来源(ddr/resizer/pyramid)) -
+- **march** (Specify the target march of bpu.) – Valid options are bayes and bernoulli2. If not provided, use horizon plugin global march.
 
-- **advice** (如果模型的层变慢超过指定的时间（以微秒为单位），打印HBDK编译器提供的用于提高bpu上模型利用率的建议) -
+- **input_source** (Specify input features' sources(ddr/resizer/pyramid)) –
 
-- **check_quanti_param** (检查量化参数) -
+- **advice** (Print HBDK compiler advices for improving the utilization of the) – model on bpu if layers of the model become slow by more than the specified time (in microseconds)
 
-**Returns**
+- **check_quanti_param** (Check quanti param) –
 
-标志 - 如果通过，则为0，否则不通过。
+**Return **
 
-**Return type**
+flag – 0 if pass, otherwise not.
 
-整数
+**Return Type**
+
+int
 
 ```python
 horizon_plugin_pytorch.quantization.compile_model(module: Union[torch.jit._script.ScriptModule, torch.nn.modules.module.Module], example_inputs: tuple, hbm: str, march: Optional[str] = None, name: Optional[str] = None, input_source: Union[Sequence[str], str] = 'ddr', input_layout: Optional[str] = None, output_layout: str = 'NCHW', opt: Union[str, int] = 'O2', balance_factor: int = 2, progressbar: bool = True, jobs: int = 16, debug: bool = True, extra_args: Optional[list] = None)
 ```
 
-编译nn.Module或jit.ScriptModule。
+Compile the nn.Module or jit.ScriptModule.
 
-**Parameters**
+**parameters**
 
-- **module** (nn.Module或jit.ScriptModule） -
+- **module** (nn.Module or jit.ScriptModule.) –
 
-- **example_inputs** （示例输入的元组，以torch.tensor格式） - 用于jit.trace和形状推断。
+- **example_inputs** (A tuple of example inputs, in torch.tensor format.) – For jit.trace and shape inference.
 
-- **hbm** （指定hbdk-cc的输出路径） -
+- **hbm** (Specify the output path of hbdk-cc.) –
 
-- **march** (指定bpu的目标march） - 有效的选项有bayes和bernoulli2。如果未提供，则使用horizon插件的全局march。
+- **march** (Specify the target march of bpu.) – Valid options are bayes and bernoulli2. If not provided, use horizon plugin global march.
 
-- **name** （模型的名称，记录在hbm中） - 可以通过运行时的hbdk-disas或hbrtGetModelNamesInHBM获得。
+- **name** (Name of the model, recorded in hbm.) – Can be obtained by hbdk-disas or hbrtGetModelNamesInHBM in runtime.
 
-- **input_source** (指定输入特征的来源(ddr/resizer/pyramid)) -
+- **input_source** (Specify input features' sources(ddr/resizer/pyramid)) –
 
-- **input_layout** (指定所有模型输入的输入布局) - 可用的布局为NHWC、NCHW、BPU_RAW。
+- **input_layout** (Specify input layout of all model inputs.) – Available layouts are NHWC, NCHW, BPU_RAW.
 
-- **output_layout** (指定所有模型输入的输出布局) - 可用的布局为NHWC、NCHW、BPU_RAW。
+- **output_layout** (Specify input layout of all model inputs.) – Available layouts are NHWC, NCHW, BPU_RAW.
 
-- **opt** (指定优化选项) - 可用的选项为O0、O1、O2、O3、ddr、fast、balance。
+- **opt** (Specify optimization options.) – Available options are O0, O1, O2, O3, ddr, fast, balance.
 
-- **balance_factor** (当优化选项为'balance'时指定平衡比例) -
+- **balance_factor** (Specify the balance ratio when optimization options is) – ‘balance’.
 
-- **progressbar** (显示编译进度以缓解焦虑) -
+- **progressbar** (Show compilation progress to alleviate anxiety.) –
 
-- **jobs** (指定在编译器优化期间启动的线程数) - 默认值为'16'。0表示使用所有可用的硬件并发性。
+- **jobs** (Specify number of threads launched during compiler optimization.) – Default is ‘16’. 0 means use all available hardware concurrency.
 
-- **debug** (在hbm中启用调试信息) -- **extra_args**（指定在“hbdk-cc -h”中列出的额外参数。） - 格式为字符串列表：例如，['--ability-entry'，str(entry_value)，...]
+- **debug** (Enable debugging info in hbm.) –
 
-**Returns**
+- **extra_args** (specify extra args listed in "hbdk-cc -h".) – format in list of string: e.g. [’–ability-entry’, str(entry_value), …]
 
-flag - 如果通过，则为0，否则为否。
+**Return **
+
+flag – 0 if pass, otherwise not.
 
 **Return Type**
 
@@ -1225,83 +1357,125 @@ int
 horizon_plugin_pytorch.quantization.export_hbir(module: Union[torch.jit._script.ScriptModule, torch.nn.modules.module.Module], example_inputs: tuple, hbir: str, march: Optional[str] = None)
 ```
 
-将nn.Module或jit.ScriptModule导出为hbdk3.HBIR。
+Export the nn.Module or jit.ScriptModule to hbdk3.HBIR.
 
-**Parameters**
+**parameters**
 
-- **module**（nn.Module或jit.ScriptModule。） -
+- **module** (nn.Module or jit.ScriptModule.) –
 
-- **example_inputs**（示例输入的元组，以torch.tensor格式。） - 用于jit.trace和形状推断。
+- **example_inputs** (A tuple of example inputs, in torch.tensor format.) – For jit.trace and shape inference.
 
-- **hbir**（指定hbir的输出路径。） -
+- **hbir** (Specify the output path of hbir.) –
 
-- **march**（指定导出hbir的march。） - 有效选项为bayes和bernoulli2。如果未提供，则使用horizon插件全局march。
+- **march** (Specify march to export hbir.) – Valid options are bayes and bernoulli2. If not provided, use horizon plugin global march.
 
-**Returns**
+**Return **
 **Return Type**
 
-输入名称和输出名称
+input names and output names
 
 ```python
 horizon_plugin_pytorch.quantization.perf_model(module: Union[torch.jit._script.ScriptModule, torch.nn.modules.module.Module], example_inputs: tuple, march: Optional[str] = None, out_dir: str = '.', name: Optional[str] = None, hbm: Optional[str] = None, input_source: Union[Sequence[str], str] = 'ddr', input_layout: Optional[str] = None, output_layout: str = 'NCHW', opt: Union[str, int] = 'O3', balance_factor: int = 2, progressbar: bool = True, jobs: int = 16, layer_details: bool = False, extra_args: Optional[list] = None)
 ```
 
-估算nn.Module或jit.ScriptModule的性能。
+Estimate the performance of nn.Module or jit.ScriptModule.
 
-**Parameters**
+**parameters**
 
-- **module**（nn.Module或jit.ScriptModule。） -
+- **module** (nn.Module or jit.ScriptModule.) –
 
-- **example_inputs**（示例输入的元组，以torch.tensor格式。） - 用于jit.trace和形状推断。
+- **example_inputs** (A tuple of example inputs, in torch.tensor format.) – For jit.trace and shape inference.
 
-- **march**（指定bpu目标march。） - 有效选项为bayes和bernoulli2。如果未提供，则使用horizon插件全局march。
+- **march** (Specify the target march of bpu.) – Valid options are bayes and bernoulli2. If not provided, use horizon plugin global march.
 
-- **out_dir**（指定保存性能结果的输出目录。） -
+- **out_dir** (Specify the output directry to hold the performance results.) –
 
-- **name**（模型的名称，记录在hbm中。） - 可以通过运行时的hbdk-disas或hbrtGetModelNamesInHBM获得。
+- **name** (Name of the model, recorded in hbm.) – Can be obtained by hbdk-disas or hbrtGetModelNamesInHBM in runtime.
 
-- **hbm**（指定hbdk-cc的输出路径。） -- **input_source** (指定输入特征的来源(ddr/resizer/pyramid)) –
+- **hbm** (Specify the output path of hbdk-cc.) –
 
-- **input_layout** (指定模型所有输入的输入布局。) – 可用的布局为NHWC，NCHW，BPU_RAW。
+- **input_source** (Specify input features' sources(ddr/resizer/pyramid)) –
 
-- **output_layout** (指定模型所有输出的输出布局。) – 可用的布局为NHWC，NCHW，BPU_RAW。
+- **input_layout** (Specify input layout of all model inputs.) – Available layouts are NHWC, NCHW, BPU_RAW.
 
-- **opt** (指定优化选项。) – 可用的选项有O0，O1，O2，O3，ddr，fast，balance。
+- **output_layout** (Specify input layout of all model inputs.) – Available layouts are NHWC, NCHW, BPU_RAW.
 
-- **balance_factor** (当优化选项为'balance'时，指定平衡比例。) –
+- **opt** (Specify optimization options.) – Available options are O0, O1, O2, O3, ddr, fast, balance.
 
-- **progressbar** (显示编译进度以缓解焦虑。) –
+- **balance_factor** (Specify the balance ratio when optimization options is) – ‘balance’.
 
-- **jobs** (指定编译器优化期间启动的线程数。) – 默认为'16'。0表示使用所有可用的硬件并发。
+- **progressbar** (Show compilation progress to alleviate anxiety.) –
 
-- **layer_details** (显示层的性能详细信息。(仅供开发人员使用)) –
+- **jobs** (Specify number of threads launched during compiler optimization.) – Default is ‘16’. 0 means use all available hardware concurrency.
 
-- **extra_args** (指定在"hbdk-cc -h"中列出的额外参数。) – 以字符串列表的格式: 例如 [’–ability-entry’, str(entry_value), …]
+- **layer_details** (show layer performance details. (dev use only)) –
 
-**返回**
-**返回类型**
+- **extra_args** (specify extra args listed in "hbdk-cc -h".) – format in list of string: e.g. [’–ability-entry’, str(entry_value), …]
 
-性能详细信息的json字典。或失败时的错误代码。
+**Return **
+**Return Type**
+
+Performance details in json dict. Or error code when fail.
 
 ```python
 horizon_plugin_pytorch.quantization.visualize_model(module: Union[torch.jit._script.ScriptModule, torch.nn.modules.module.Module], example_inputs: tuple, march: Optional[str] = None, save_path: Optional[str] = None, show: bool = True)
 ```
 
-以HBDK的视角可视化nn.Module或jit.ScriptModule。
+Visualize nn.Module or jit.ScriptModule at the view of HBDK.
 
-**参数**
+**parameters**
 
-- **module** (nn.Module或jit.ScriptModule。) –
+- **module** (nn.Module or jit.ScriptModule.) –
 
-- **example_inputs** (示例输入的元组，以torch.tensor格式。) – 用于jit.trace和形状推断。
+- **example_inputs** (A tuple of example inputs, in torch.tensor format.) – For jit.trace and shape inference.
 
-- **march** (指定bpu的目标march。) – 有效选项为bayes和bernoulli2。如果未提供，则使用horizon plugin的全局march。
+- **march** (Specify the target march of bpu.) – Valid options are bayes and bernoulli2. If not provided, use horizon plugin global march.
 
-- **save_path** (指定保存绘图图像的路径。) –
+- **save_path** (Specify path to save the plot image.) –
 
-- **show** (通过显示器显示绘制的图像。) – 确保X服务器的配置正确。
+- **show** (Display the plotted image via display.) – Make sure X-server is correctly configured.
 
-**返回**
-**返回类型**
+**Return **
+**Return Type**
 
-NonePlease translate the Chinese parts in the following content into English while keeping the original format and content:
+None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

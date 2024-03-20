@@ -94,7 +94,9 @@ tinycap ./4chn_test.wav -D 0 -d 0 -c 4 -b 16 -r 48000 -p 512 -n 4 -t 5
 tinyplay ./2chn_test.wav -D 0 -d 1
 ```
 
-### Audio Resampling TestingThe playback and capture signals of this audio board are using recording channels 7&8, so the 8-channel recording command needs to be used for capturing.
+### Audio Resampling Testing
+
+The playback and capture signals of this audio board are using recording channels 7&8, so the 8-channel recording command needs to be used for capturing.
 
 - Start 8-channel microphone recording
 ```shell
@@ -139,7 +141,9 @@ Enter `3 Interface Options`->`I5 Audio` and select `WM8960 Audio HAT`:
 
 ### Uninstallation Method
 1. Configure the audio board using `srpi-config`:
-Enter `3 Interface Options`->`I5 Audio` and select `UNSET` to uninstall the audio driver and related configurations.### Audio Nodes
+Enter `3 Interface Options`->`I5 Audio` and select `UNSET` to uninstall the audio driver and related configurations.
+
+### Audio Nodes
 The playback node for this audio board on `RDK X3` is `pcmC0D0p`, and the recording node is `pcmC0D1c`.
 
 ### Recording and Playback Test
@@ -187,7 +191,16 @@ tinyplay ./2chn_test.wav -D 0 -d 0
 
 If you have a USB sound card and want it to coexist with the above-mentioned audio sub-board, please follow the tutorial below:
 
-1. Make sure the audio sub-board is enabled according to the instructions above.2. Connect the USB sound card and observe the newly added nodes under `/dev/snd` after the driver is loaded. Taking the WM8960 + USB full-duplex sound card as an example, the nodes `pcmC1D0c pcmC1D0p` represent the USB sound card node, which is shared by full-duplex.
+1. Make sure the audio sub-board is enabled according to the instructions above.
+
+2. Connect the USB sound card and observe the newly added nodes under `/dev/snd` after the driver is loaded. Taking the WM8960 + USB full-duplex sound card as an example,
+
+```
+    root@ubuntu:~# ls /dev/snd/
+    by-path  controlC0  pcmC0D0c  pcmC0D0p  pcmC0D1c  pcmC0D1p  pcmC1D0c  pcmC1D0p  timer
+```
+
+the nodes `pcmC1D0c pcmC1D0p` represent the USB sound card node, which is shared by full-duplex.
 
 3. Modify `/etc/pulse/default.pa` and add the corresponding node information below `load-module module-alsa-source`:
 ```apacheconf

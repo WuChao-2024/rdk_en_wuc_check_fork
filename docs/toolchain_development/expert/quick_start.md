@@ -359,6 +359,7 @@ Float Epoch 28: evaluation Acc@1 78.060 Acc@5 98.550
 Full cifar-10 train set: Loss 0.711 Acc@1 75.662 Acc@5 98.218
 ........................................
 Float Epoch 29: evaluation Acc@1 77.580 Acc@5 98.610
+```
 
 ## Calibration{#Calibration}
 
@@ -389,72 +390,72 @@ After the model transformation is complete and the floating-point training is co
     # Convert the model to calibration state to calculate the numerical distribution characteristics of data at each location
     calib_model = prepare_qat_fx(# The output model will share the attributes of the input model to avoid affecting the subsequent use of float_model. A 'deepcopy' is performed here.
 
-copy.deepcopy(float_model),
-{
-    "": default_calib_8bit_fake_quant_qconfig,
-    "module_name": {
-        # When the output layer of the model is Conv or Linear, 'out_qconfig' can be used to configure high-precision output.
-        "classifier": default_calib_8bit_weight_32bit_out_fake_quant_qconfig,
+    copy.deepcopy(float_model),
+    {
+        "": default_calib_8bit_fake_quant_qconfig,
+        "module_name": {
+            # When the output layer of the model is Conv or Linear, 'out_qconfig' can be used to configure high-precision output.
+            "classifier": default_calib_8bit_weight_32bit_out_fake_quant_qconfig,
+        },
     },
-},
-).to(
-    device
-)  # The 'prepare_qat_fx' interface does not guarantee that the output model's device is completely consistent with the input model.
+    ).to(
+        device
+    )  # The 'prepare_qat_fx' interface does not guarantee that the output model's device is completely consistent with the input model.
 
-# Prepare the dataset
-calib_data_loader, eval_data_loader = prepare_data_loaders(
-    data_path, calib_batch_size, eval_batch_size
-)
-
-# Perform the Calibration process (no need for backward)
-# Note the control over the model's state, the model needs to be in 'eval' state to ensure that the behavior of BatchNorm matches the requirements.
-calib_model.eval()
-set_fake_quantize(calib_model, FakeQuantState.CALIBRATION)
-with torch.no_grad():
-    cnt = 0
-    for image, target in calib_data_loader:
-        image, target = image.to(device), target.to(device)
-        calib_model(image)
-        print(".", end="", flush=True)
-        cnt += image.size(0)
-        if cnt >= num_examples:
-            break
-    print()
-
-# Test the precision of fake quantization
-# Note the control over the model's state
-calib_model.eval()
-set_fake_quantize(calib_model, FakeQuantState.VALIDATION)
-
-top1, top5 = evaluate(
-    calib_model,
-    eval_data_loader,
-    device,
-)
-print(
-    "Calibration: evaluation Acc@1 {:.3f} Acc@5 {:.3f}".format(
-        top1.avg, top5.avg
+    # Prepare the dataset
+    calib_data_loader, eval_data_loader = prepare_data_loaders(
+        data_path, calib_batch_size, eval_batch_size
     )
-)# Save Calibration Model Parameters
-torch.save(
-    calib_model.state_dict(),
-    os.path.join(model_path, "calib-checkpoint.ckpt"),
-)
+
+    # Perform the Calibration process (no need for backward)
+    # Note the control over the model's state, the model needs to be in 'eval' state to ensure that the behavior of BatchNorm matches the requirements.
+    calib_model.eval()
+    set_fake_quantize(calib_model, FakeQuantState.CALIBRATION)
+    with torch.no_grad():
+        cnt = 0
+        for image, target in calib_data_loader:
+            image, target = image.to(device), target.to(device)
+            calib_model(image)
+            print(".", end="", flush=True)
+            cnt += image.size(0)
+            if cnt >= num_examples:
+                break
+        print()
+
+    # Test the precision of fake quantization
+    # Note the control over the model's state
+    calib_model.eval()
+    set_fake_quantize(calib_model, FakeQuantState.VALIDATION)
+
+    top1, top5 = evaluate(
+        calib_model,
+        eval_data_loader,
+        device,
+    )
+    print(
+        "Calibration: evaluation Acc@1 {:.3f} Acc@5 {:.3f}".format(
+            top1.avg, top5.avg
+        )
+    )# Save Calibration Model Parameters
+    torch.save(
+        calib_model.state_dict(),
+        os.path.join(model_path, "calib-checkpoint.ckpt"),
+    )
 
 ```
 
 ```shell
-Files already downloaded and verified
-Files already downloaded and verified
+    Files already downloaded and verified
+    Files already downloaded and verified
 
-/home/users/yushu.gao/horizon/qat_logger/horizon_plugin_pytorch/quantization/observer_v2.py:405: UserWarning: _aminmax is deprecated as of PyTorch 1.11 and will be removed in a future release. Use aminmax instead. This warning will only appear once per process. (Triggered internally at ../aten/src/ATen/native/TensorCompare.cpp:568.)
-min_val_cur, max_val_cur = torch._aminmax(
-/home/users/yushu.gao/horizon/qat_logger/horizon_plugin_pytorch/quantization/observer_v2.py:672: UserWarning: _aminmax is deprecated as of PyTorch 1.11 and will be removed in a future release. Use aminmax instead. This warning will only appear once per process. (Triggered internally at ../aten/src/ATen/native/ReduceAllOps.cpp:45.)
-min_val_cur, max_val_cur = torch._aminmax(x)
+    /home/users/yushu.gao/horizon/qat_logger/horizon_plugin_pytorch/quantization/observer_v2.py:405: UserWarning: _aminmax is deprecated as of PyTorch 1.11 and will be removed in a future release. Use aminmax instead. This warning will only appear once per process. (Triggered internally at ../aten/src/ATen/native/TensorCompare.cpp:568.)
+    min_val_cur, max_val_cur = torch._aminmax(
+    /home/users/yushu.gao/horizon/qat_logger/horizon_plugin_pytorch/quantization/observer_v2.py:672: UserWarning: _aminmax is deprecated as of PyTorch 1.11 and will be removed in a future release. Use aminmax instead. This warning will only appear once per process. (Triggered internally at ../aten/src/ATen/native/ReduceAllOps.cpp:45.)
+    min_val_cur, max_val_cur = torch._aminmax(x)
 
-....................................................................................................................................................................................................
-........................................
-Calibration: evaluation Acc@1 77.890 Acc@5 98.640
+    ....................................................................................................................................................................................................
+    ........................................
+    Calibration: evaluation Acc@1 77.890 Acc@5 98.640
 
 ```
 
@@ -467,78 +468,78 @@ Quantization-aware training inserts fake quantization nodes into the model to ma
 
 ```python
 
-######################################################################
-# The following parameters can be modified according to your needs
-# 1. Batch size used during training
-train_batch_size = 256
-# 2. Batch size used during validation
-eval_batch_size = 256
-# 3. Number of epochs for training
-epoch_num = 3
-######################################################################
+    ######################################################################
+    # The following parameters can be modified according to your needs
+    # 1. Batch size used during training
+    train_batch_size = 256
+    # 2. Batch size used during validation
+    eval_batch_size = 256
+    # 3. Number of epochs for training
+    epoch_num = 3
+    ######################################################################
 
-# Prepare the data loaders
-train_data_loader, eval_data_loader = prepare_data_loaders(
-    data_path, train_batch_size, eval_batch_size
-)
+    # Prepare the data loaders
+    train_data_loader, eval_data_loader = prepare_data_loaders(
+        data_path, train_batch_size, eval_batch_size
+    )
 
-# Convert the model to QAT state
-qat_model = prepare_qat_fx(
-```copy.deepcopy(float_model),
-{
-    "": default_qat_8bit_fake_quant_qconfig,
-    "module_name": {
-        "classifier": default_qat_8bit_weight_32bit_out_fake_quant_qconfig,
+    # Convert the model to QAT state
+    qat_model = prepare_qat_fx(
+    copy.deepcopy(float_model),
+    {
+        "": default_qat_8bit_fake_quant_qconfig,
+        "module_name": {
+            "classifier": default_qat_8bit_weight_32bit_out_fake_quant_qconfig,
+        },
     },
-},
-).to(device)
+    ).to(device)
 
-# Load quantization parameters from calibration model
-qat_model.load_state_dict(calib_model.state_dict())
+    # Load quantization parameters from calibration model
+    qat_model.load_state_dict(calib_model.state_dict())
 
-# Perform Quantization-Aware Training (QAT)
-# As a fine-tuning process, QAT generally requires a smaller learning rate
-optimizer = torch.optim.Adam(
-    qat_model.parameters(), lr=1e-3, weight_decay=1e-4
-)
-
-best_acc = 0
-
-for nepoch in range(epoch_num):
-    # Control QAT model's training mode
-    qat_model.train()
-    set_fake_quantize(qat_model, FakeQuantState.QAT)
-
-    train_one_epoch(
-        qat_model,
-        nn.CrossEntropyLoss(),
-        optimizer,
-        None,
-        train_data_loader,
-        device,
+    # Perform Quantization-Aware Training (QAT)
+    # As a fine-tuning process, QAT generally requires a smaller learning rate
+    optimizer = torch.optim.Adam(
+        qat_model.parameters(), lr=1e-3, weight_decay=1e-4
     )
 
-    # Control QAT model's evaluation mode
-    qat_model.eval()
-    set_fake_quantize(qat_model, FakeQuantState.VALIDATION)
+    best_acc = 0
 
-    top1, top5 = evaluate(
-        qat_model,
-        eval_data_loader,
-        device,
-    )
-    print(
-        "QAT Epoch {}: evaluation Acc@1 {:.3f} Acc@5 {:.3f}".format(
-            nepoch, top1.avg, top5.avg
+    for nepoch in range(epoch_num):
+        # Control QAT model's training mode
+        qat_model.train()
+        set_fake_quantize(qat_model, FakeQuantState.QAT)
+
+        train_one_epoch(
+            qat_model,
+            nn.CrossEntropyLoss(),
+            optimizer,
+            None,
+            train_data_loader,
+            device,
         )
+
+        # Control QAT model's evaluation mode
+        qat_model.eval()
+        set_fake_quantize(qat_model, FakeQuantState.VALIDATION)
+
+        top1, top5 = evaluate(
+            qat_model,
+            eval_data_loader,
+            device,
+        )
+        print(
+            "QAT Epoch {}: evaluation Acc@1 {:.3f} Acc@5 {:.3f}".format(
+                nepoch, top1.avg, top5.avg
+            )
+        )
+
+        if top1.avg > best_acc:best_acc = top1.avg
+
+    torch.save(
+        qat_model.state_dict(),
+        os.path.join(model_path, "qat-checkpoint.ckpt"),
     )
-
-    if top1.avg > best_acc:best_acc = top1.avg
-
-torch.save(
-    qat_model.state_dict(),
-    os.path.join(model_path, "qat-checkpoint.ckpt"),
-)
 
 ```
 
@@ -583,22 +584,68 @@ Fixed-point models and quantized models cannot achieve exact numerical consisten
 
     # Test the accuracy of the fixed-point model
     top1, top5 = evaluate(
-quantized_model, 
-eval_data_loader, 
-device, 
-) 
-print( "Quantized model: evaluation Acc@1 {:.3f} Acc@5 {:.3f}".format( top1.avg, top5.avg ) )/home/users/yushu.gao/horizon/qat_logger/horizon_plugin_pytorch/qtensor.py:992: TracerWarning: Converting a tensor to a Python boolean might cause the trace to be incorrect. We can't record the data flow of Python values, so this value will be treated as a constant in the future. This means that the trace might not generalize to other inputs!
+    quantized_model, 
+    eval_data_loader, 
+    device, 
+    ) 
+    print(
+        "Quantized model: evaluation Acc@1 {:.3f} Acc@5 {:.3f}".format(
+            top1.avg, top5.avg
+        )
+    )
+```
+
+
+
+```shell
+[2023-06-29 14:55:05,825] WARNING: AdaptiveAvgPool2d has not collected any statistics of activations and its scale is 1, please check whether this is intended!
+
+........................................
+Quantized model: evaluation Accuracy@1 78.390, Accuracy@5 98.640
+```
+## Model Deployment
+
+After verifying the quantized model's accuracy and ensuring it meets requirements, proceed with deployment steps, including model inspection, compilation, performance testing, and visualization.
+
+:::caution Note
+
+- If desired, you can skip the actual calibration and quantization-aware training processes and directly proceed with model inspection to ensure there are no issues preventing successful compilation.
+- Since the compiler only supports CPUs, both the model and data must be on the CPU.
+:::
+
+```python
+######################################################################
+# Users can modify these parameters as needed
+# 1. Optimization level for compilation, can be 0-3; higher levels result in
+#    faster execution on the board but slower compilation times.
+compile_opt = "O1"
+######################################################################
+
+# `example_input` can also be randomly generated data, but using real data is recommended
+# for more accurate performance testing
+example_input = next(iter(eval_data_loader))[0]
+
+# Trace the model, serialize it, and generate the computation graph. Ensure the model and data are on CPU
+script_model = torch.jit.trace(quantized_model.cpu(), example_input)
+torch.jit.save(script_model, os.path.join(model_path, "int_model.pt"))
+
+# Model inspection
+check_model(script_model, [example_input])
+```
+
+```shell
+/home/users/yushu.gao/horizon/qat_logger/horizon_plugin_pytorch/qtensor.py:992: TracerWarning: Converting a tensor to a Python boolean might cause the trace to be incorrect. We can't record the data flow of Python values, so this value will be treated as a constant in the future. This means that the trace might not generalize to other inputs!
 if scale is not None and scale.numel() > 1:
 /home/users/yushu.gao/horizon/qat_logger/horizon_plugin_pytorch/nn/quantized/conv2d.py:290: TracerWarning: Converting a tensor to a Python boolean might cause the trace to be incorrect. We can't record the data flow of Python values, so this value will be treated as a constant in the future. This means that the trace might not generalize to other inputs!
 per_channel_axis=-1 if self.out_scale.numel() == 1 else 1,
 /home/users/yushu.gao/horizon/qat_logger/horizon_plugin_pytorch/nn/quantized/adaptive_avg_pool2d.py:30: TracerWarning: Converting a tensor to a Python boolean might cause the trace to be incorrect. We can't record the data flow of Python values, so this value will be treated as a constant in the future. This means that the trace might not generalize to other inputs!
 if (
-/home/users/yushu.gao/horizon/qat_logger/horizon_plugin_pytorch/utils/script_quantized_fn.py:224: UserWarning: operator() profile_node %59 : int[] = prim::profile_ivalue(%57) does not have profile information (Triggered internally at ../torch/csrc/jit/codegen/cuda/graph_fuser.cpp:105.)
+/home/users/yushu.gao/horizon/qat_logger/horizon_plugin_pytorch/utils/script_quantized_fn.py:224: UserWarning: operator() profile_node %59 : int[] = prim::profile_ivalue(%57)
+does not have profile information (Triggered internally at ../torch/csrc/jit/codegen/cuda/graph_fuser.cpp:105.)
 return compiled_fn(*args, **kwargs)
 ```
 
 ```shell
-
 This model is supported!
 HBDK model check PASS
 ```
@@ -628,7 +675,7 @@ HBDK model compilation SUCCESS
 
 # Model performance testing
 perf_model(
-    script_model,```
+    script_model,
 [example_input],
 out_dir=os.path.join(model_path, "perf_out"),
 input_source="pyramid",
@@ -679,7 +726,7 @@ HBDK performance estimation SUCCESS
     0.092,
     0.019,
     0.001,
-```0.065,
+    0.065,
     0.078,
     0.11,
     0.108,
@@ -774,55 +821,56 @@ HBDK performance estimation SUCCESS
     1686,
     3146,
     3855,4372,
-2714,
-2180,
-2074,
-2516,
-3674,
-4533,
-3849,
-4317,
-3738,
-3378,
-3901,
-3068,
-4697,
-6180,
-3583,
-3760,
-6467,
-3897,
-3404,
-5554,
-4941,
-2143,
-0,
-2572,
-5019],
-'interval number': 45,
-'interval storing bandwidth (megabytes/s)': [4000,
-3368,
-4334,
-6936,
-5824,
-3695,
-2524,
-3720,
-6066,
-4863,
-2938,
-3924,
-6061,
-4752,
-2250,
-2238,
-3000,
-4500,
-3000,
-1500,
-3000,
-3000,
-3000,3041,
+    2714,
+    2180,
+    2074,
+    2516,
+    3674,
+    4533,
+    3849,
+    4317,
+    3738,
+    3378,
+    3901,
+    3068,
+    4697,
+    6180,
+    3583,
+    3760,
+    6467,
+    3897,
+    3404,
+    5554,
+    4941,
+    2143,
+    0,
+    2572,
+    5019],
+    'interval number': 45,
+    'interval storing bandwidth (megabytes/s)': [4000,
+    3368,
+    4334,
+    6936,
+    5824,
+    3695,
+    2524,
+    3720,
+    6066,
+    4863,
+    2938,
+    3924,
+    6061,
+    4752,
+    2250,
+    2238,
+    3000,
+    4500,
+    3000,
+    1500,
+    3000,
+    3000,
+    3000,
+    3041,
     4458,
     3617,
     3295,
@@ -872,165 +920,166 @@ HBDK performance estimation SUCCESS
         '28,311,552',
         '54 us (0.1% of model)',
         '3132 us (7.0% of model)'],['_features_2_conv_2_hz_conv2d',
- '75,497,472',
- '23 us (0% of model)',
- '1 us (0% of model)'],
-['_features_3_conv_0_0_hz_conv2d',
- '113,246,208',
- '24 us (0% of model)',
- '638 us (1.4% of model)'],
-['_features_3_conv_1_0_hz_conv2d',
- '42,467,328',
- '33 us (0% of model)',
- '3592 us (8.0% of model)'],
-['_features_3_generated_add_0_hz_conv2d',
- '113,246,208',
- '14 us (0% of model)',
- '637 us (1.4% of model)'],
-['_features_4_conv_0_0_hz_conv2d',
- '113,246,208',
- '45 us (0.1% of model)',
- '2433 us (5.4% of model)'],
-['_features_4_conv_1_0_hz_conv2d',
- '10,616,832',
- '63 us (0.1% of model)',
- '2432 us (5.4% of model)'],
-['_features_4_conv_2_hz_conv2d',
- '37,748,736',
- '21 us (0% of model)',
- '1 us (0% of model)'],
-['_features_5_conv_0_0_hz_conv2d',
- '50,331,648',
- '40 us (0% of model)',
- '3 us (0% of model)'],
-['_features_5_conv_1_0_hz_conv2d',
- '14,155,776',
- '45 us (0% of model)',
- '463 us (1.0% of model)'],
-['_features_5_generated_add_0_hz_conv2d',
- '50,331,648',
- '23 us (0% of model)',
- '462 us (1.0% of model)'],
-['_features_6_conv_0_0_hz_conv2d',
- '50,331,648',
- '40 us (0% of model)',
- '3 us (0% of model)'],
-['_features_6_conv_1_0_hz_conv2d',
- '14,155,776',
- '23 us (0% of model)',
- '463 us (1.0% of model)'],
-['_features_6_generated_add_0_hz_conv2d',
- '50,331,648',['23 us (0% of model)',
- '462 us (1.0% of model)'],
-['_features_7_conv_0_0_hz_conv2d',
- '50,331,648',
- '61 us (0.1% of model)',
- '813 us (1.8% of model)'],
-['_features_7_conv_1_0_hz_conv2d',
- '3,538,944',
- '76 us (0.1% of model)',
- '812 us (1.8% of model)'],
-['_features_7_conv_2_hz_conv2d',
- '25,165,824',
- '47 us (0.1% of model)',
- '3 us (0% of model)'],
-['_features_8_conv_0_0_hz_conv2d',
- '50,331,648',
- '76 us (0.1% of model)',
- '5 us (0% of model)'],
-['_features_8_conv_1_0_hz_conv2d',
- '7,077,888',
- '75 us (0.1% of model)',
- '463 us (1.0% of model)'],
-['_features_8_generated_add_0_hz_conv2d',
- '50,331,648',
- '67 us (0.1% of model)',
- '465 us (1.0% of model)'],
-['_features_9_conv_0_0_hz_conv2d',
- '50,331,648',
- '76 us (0.1% of model)',
- '5 us (0% of model)'],
-['_features_9_conv_1_0_hz_conv2d',
- '7,077,888',
- '75 us (0.1% of model)',
- '463 us (1.0% of model)'],
-['_features_9_generated_add_0_hz_conv2d',
- '50,331,648',
- '67 us (0.1% of model)',
- '465 us (1.0% of model)'],
-['_features_10_conv_0_0_hz_conv2d',
- '50,331,648',
- '76 us (0.1% of model)',
- '5 us (0% of model)'],
-['_features_10_conv_1_0_hz_conv2d',
- '7,077,888',
- '51 us (0.1% of model)',
- '463 us (1.0% of model)'],
-['_features_10_generated_add_0_hz_conv2d',
- '50,331,648',
- '67 us (0.1% of model)',
- '465 us (1.0% of model)']['_features_11_conv_0_0_hz_conv2d',
-'50,331,648',
-'76 us (0.1% of model)',
-'5 us (0% of model)'],
+    '75,497,472',
+    '23 us (0% of model)',
+    '1 us (0% of model)'],
+    ['_features_3_conv_0_0_hz_conv2d',
+    '113,246,208',
+    '24 us (0% of model)',
+    '638 us (1.4% of model)'],
+    ['_features_3_conv_1_0_hz_conv2d',
+    '42,467,328',
+    '33 us (0% of model)',
+    '3592 us (8.0% of model)'],
+    ['_features_3_generated_add_0_hz_conv2d',
+    '113,246,208',
+    '14 us (0% of model)',
+    '637 us (1.4% of model)'],
+    ['_features_4_conv_0_0_hz_conv2d',
+    '113,246,208',
+    '45 us (0.1% of model)',
+    '2433 us (5.4% of model)'],
+    ['_features_4_conv_1_0_hz_conv2d',
+    '10,616,832',
+    '63 us (0.1% of model)',
+    '2432 us (5.4% of model)'],
+    ['_features_4_conv_2_hz_conv2d',
+    '37,748,736',
+    '21 us (0% of model)',
+    '1 us (0% of model)'],
+    ['_features_5_conv_0_0_hz_conv2d',
+    '50,331,648',
+    '40 us (0% of model)',
+    '3 us (0% of model)'],
+    ['_features_5_conv_1_0_hz_conv2d',
+    '14,155,776',
+    '45 us (0% of model)',
+    '463 us (1.0% of model)'],
+    ['_features_5_generated_add_0_hz_conv2d',
+    '50,331,648',
+    '23 us (0% of model)',
+    '462 us (1.0% of model)'],
+    ['_features_6_conv_0_0_hz_conv2d',
+    '50,331,648',
+    '40 us (0% of model)',
+    '3 us (0% of model)'],
+    ['_features_6_conv_1_0_hz_conv2d',
+    '14,155,776',
+    '23 us (0% of model)',
+    '463 us (1.0% of model)'],
+    ['_features_6_generated_add_0_hz_conv2d',
+    '50,331,648',['23 us (0% of model)',
+    '462 us (1.0% of model)'],
+    ['_features_7_conv_0_0_hz_conv2d',
+    '50,331,648',
+    '61 us (0.1% of model)',
+    '813 us (1.8% of model)'],
+    ['_features_7_conv_1_0_hz_conv2d',
+    '3,538,944',
+    '76 us (0.1% of model)',
+    '812 us (1.8% of model)'],
+    ['_features_7_conv_2_hz_conv2d',
+    '25,165,824',
+    '47 us (0.1% of model)',
+    '3 us (0% of model)'],
+    ['_features_8_conv_0_0_hz_conv2d',
+    '50,331,648',
+    '76 us (0.1% of model)',
+    '5 us (0% of model)'],
+    ['_features_8_conv_1_0_hz_conv2d',
+    '7,077,888',
+    '75 us (0.1% of model)',
+    '463 us (1.0% of model)'],
+    ['_features_8_generated_add_0_hz_conv2d',
+    '50,331,648',
+    '67 us (0.1% of model)',
+    '465 us (1.0% of model)'],
+    ['_features_9_conv_0_0_hz_conv2d',
+    '50,331,648',
+    '76 us (0.1% of model)',
+    '5 us (0% of model)'],
+    ['_features_9_conv_1_0_hz_conv2d',
+    '7,077,888',
+    '75 us (0.1% of model)',
+    '463 us (1.0% of model)'],
+    ['_features_9_generated_add_0_hz_conv2d',
+    '50,331,648',
+    '67 us (0.1% of model)',
+    '465 us (1.0% of model)'],
+    ['_features_10_conv_0_0_hz_conv2d',
+    '50,331,648',
+    '76 us (0.1% of model)',
+    '5 us (0% of model)'],
+    ['_features_10_conv_1_0_hz_conv2d',
+    '7,077,888',
+    '51 us (0.1% of model)',
+    '463 us (1.0% of model)'],
+    ['_features_10_generated_add_0_hz_conv2d',
+    '50,331,648',
+    '67 us (0.1% of model)',
+    '465 us (1.0% of model)']['_features_11_conv_0_0_hz_conv2d',
+    '50,331,648',
+    '76 us (0.1% of model)',
+    '5 us (0% of model)'],
 
-['_features_11_conv_1_0_hz_conv2d',
-'7,077,888',
-'75 us (0.1% of model)',
-'463 us (1.0% of model)'],
+    ['_features_11_conv_1_0_hz_conv2d',
+    '7,077,888',
+    '75 us (0.1% of model)',
+    '463 us (1.0% of model)'],
 
-['_features_11_conv_2_hz_conv2d',
-'75,497,472',
-'110 us (0.2% of model)',
-'467 us (1.0% of model)'],
+    ['_features_11_conv_2_hz_conv2d',
+    '75,497,472',
+    '110 us (0.2% of model)',
+    '467 us (1.0% of model)'],
 
-['_features_12_conv_0_0_hz_conv2d',
-'113,246,208',
-'43 us (0% of model)',
-'644 us (1.4% of model)'],
+    ['_features_12_conv_0_0_hz_conv2d',
+    '113,246,208',
+    '43 us (0% of model)',
+    '644 us (1.4% of model)'],
 
-['_features_12_conv_1_0_hz_conv2d',
-'10,616,832',
-'46 us (0.1% of model)',
-'1274 us (2.8% of model)'],
+    ['_features_12_conv_1_0_hz_conv2d',
+    '10,616,832',
+    '46 us (0.1% of model)',
+    '1274 us (2.8% of model)'],
 
-['_features_12_generated_add_0_hz_conv2d',
-'113,246,208',
-'37 us (0% of model)',
-'643 us (1.4% of model)'],
+    ['_features_12_generated_add_0_hz_conv2d',
+    '113,246,208',
+    '37 us (0% of model)',
+    '643 us (1.4% of model)'],
 
-['_features_13_conv_0_0_hz_conv2d',
-'113,246,208',
-'43 us (0% of model)',
-'644 us (1.4% of model)'],
+    ['_features_13_conv_0_0_hz_conv2d',
+    '113,246,208',
+    '43 us (0% of model)',
+    '644 us (1.4% of model)'],
 
-['_features_13_conv_1_0_hz_conv2d',
-'10,616,832',
-'55 us (0.1% of model)',
-'1274 us (2.8% of model)'],
+    ['_features_13_conv_1_0_hz_conv2d',
+    '10,616,832',
+    '55 us (0.1% of model)',
+    '1274 us (2.8% of model)'],
 
-['_features_13_generated_add_0_hz_conv2d',
-'113,246,208',
-'31 us (0% of model)',
-'642 us (1.4% of model)'],
+    ['_features_13_generated_add_0_hz_conv2d',
+    '113,246,208',
+    '31 us (0% of model)',
+    '642 us (1.4% of model)'],
 
-['_features_14_conv_0_0_hz_conv2d',
-'113,246,208',
-'67 us (0.1% of model)',
-'644 us (1.4% of model)'],
+    ['_features_14_conv_0_0_hz_conv2d',
+    '113,246,208',
+    '67 us (0.1% of model)',
+    '644 us (1.4% of model)'],
 
-['_features_14_conv_1_0_hz_conv2d',
-'2,654,208',
-'72 us (0.1% of model)',
-'1274 us (2.8% of model)'],
+    ['_features_14_conv_1_0_hz_conv2d',
+    '2,654,208',
+    '72 us (0.1% of model)',
+    '1274 us (2.8% of model)'],
 
-['_features_14_conv_2_hz_conv2d',
-'47,185,920',
-'108 us (0.2% of model)',
-'647 us (1.4% of model)'],
+    ['_features_14_conv_2_hz_conv2d',
+    '47,185,920',
+    '108 us (0.2% of model)',
+    '647 us (1.4% of model)'],
 
-['_features_15_conv_0_0_hz_conv2d',
-'78,643,200'    ['_features_15_conv_1_0_hz_conv2d',
+    ['_features_15_conv_0_0_hz_conv2d',
+    '78,643,200'    
+    ['_features_15_conv_1_0_hz_conv2d',
         '4,423,680',
         '51 us (0.1% of model)',
         '1973 us (4.4% of model)'],

@@ -47,7 +47,10 @@ In order to use the Horizon algorithm toolchain smoothly, Horizon recommends tha
 
 :::tip Tip
   1. If you need more examples of public model conversion, you can execute the command: ``wget -c ftp://xj3ftp@vrftp.horizon.ai/model_convert_sample/horizon_model_convert_sample.tar.gz --ftp-password=xj3ftp@123$%`` to obtain them.
-  2. Horizon also provides a Docker image that supports model conversion. If you need to use the Docker environment, please read the [**Intermediate Guide-Using Docker Environment**](./intermediate/environment_config#using-docker-environment) section.- 2. Create the model conversion environment:
+  2. Horizon also provides a Docker image that supports model conversion. If you need to use the Docker environment, please read the [**Intermediate Guide-Using Docker Environment**](./intermediate/environment_config#using-docker-environment) section.- 
+:::
+
+  2. Create the model conversion environment:
 ```bash
     // horizon_bpu is the name of the environment, you can set it yourself
 
@@ -94,9 +97,13 @@ After successful installation, you can type the command hb_mapper --help to veri
 
   When performing model conversion later, please first use the command "source activate horizon_bpu" or "conda activate horizon_bpu" to enter the model conversion environment!
 
-  The overall size of the Horizon AI Toolchain installation package is about 200M. The download of the installation package and the installation of dependencies are affected by network speed. The entire installation process takes about 20 minutes. Please be patient until the installation is complete.## Quick Experience {#quick_experiments}
+  The overall size of the Horizon AI Toolchain installation package is about 200M. The download of the installation package and the installation of dependencies are affected by network speed. The entire installation process takes about 20 minutes. Please be patient until the installation is complete.
+:::
+  
+  ## Quick Experience {#quick_experiments}
 
 In this chapter, we introduce the basic usage process of the Horizon algorithm toolchain PTQ solution, so that you can quickly get started. Here we take yolov5s model running on the RDK X3 development board as an example to demonstrate the usage for you. For more detailed content of the Horizon algorithm toolchain PTQ solution, please read the [**Advanced Guide - PTQ Principles and Steps**](/toolchain_development/intermediate/ptq_process) chapter.
+
 :::tip Tips
   To convert models supported by RDK Ultra, replace the ``0x_xx_X3.sh`` script command in the steps of the following chapters with the ``0x_xx_Ultra.sh`` script command for model conversion.
 :::
@@ -141,7 +148,8 @@ If the floating-point model sample is ready, follow the steps below to verify th
 
 -   Enter the yolov5s model directory of the floating-point model conversion example
 
-```bashcd yolov5s_v2.0/04_detection/03_yolov5s/mapper
+```bash
+cd yolov5s_v2.0/04_detection/03_yolov5s/mapper
 ```
 
 - Model Validation
@@ -189,7 +197,9 @@ After the command execution is completed, if the following log appears and there
 ```bash
     2022-12-21 22:36:48,087 INFO Convert to runtime bin file sucessfully!
     2022-12-21 22:36:48,087 INFO End Model Convert
-```After the model conversion is completed, the model files and static performance evaluation files will be saved in the `model_output` folder.
+```
+
+After the model conversion is completed, the model files and static performance evaluation files will be saved in the `model_output` folder.
 
 -   torch-jit-export_subgraph_0.html        # Static performance evaluation file (better readability)
 -   torch-jit-export_subgraph_0.json        # Static performance evaluation file

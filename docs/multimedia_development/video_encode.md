@@ -59,6 +59,8 @@ The encoder supports three levels of rate control internally, which are frame le
 
 CBR, VBR, and AVBR can enable QPMAP, and the actual value for each block region is obtained by the following formula:
 
+![image-20220329234019920](./image/video_encode/image-20220329234019920.png)
+
 MQP is the value in the ROI map, RQP is the value obtained by the internal bitrate control of the encoder, and ROIAvaQP is the average QP value in the ROI map.
 
 ### GOP Structure
@@ -76,6 +78,9 @@ The GOP structure table can define a set of periodic GOP structures that will be
 | 2nd_ref_POC    | The POC of the 1st reference picture of L1 in case that Type is equal to B. The POC of the 2nd reference picture of L0 in case that Type is equal to P. Note that reference_L1 can have the same POC as reference in B slice. But for compression efficiency, it is recommended that reference_L1 have a different POC from reference_L0. |
 
 #### GOP Predefined Structures
+
+![VENC_GOP_structure](./image/video_encode/ss_venc_gop_structure.png)
+
 
 The following table provides 8 predefined GOP structures.
 
@@ -139,19 +144,27 @@ Where: [image available for reference, not shown here]- GOP Preset1
 #### Relationship between GOP and I frame period
 The following figure shows the relationship between GOP structure and I frame period.
 
-![VENC_GOP_i-frame](./image/video_encode/ss_venc_gop_i-frame.png)### ROI
+![VENC_GOP_i-frame](./image/video_encode/ss_venc_gop_i-frame.png)
+
+### ROI
 
 The implementation of ROI encoding is similar to QPMAP, and users need to set the QP value for each block according to the raster scan direction. The following figure shows an example of ROI map for H265. For H264 encoding, the size of each block is 16x16, while in H265, it is 32x32. In the ROI map table, each QP value occupies one byte, ranging from 0 to 51.
 
 ROI encoding can work together with CBR and AVBR. When CBR or AVBR is not enabled, the actual QP value for each block region is the value specified in the ROI map. When CBR or AVBR is enabled, the actual value for each block region is obtained by the following formula:
 
+![image-20220405152959958](./image/video_encode/image-20220405152959958.png)
+
 MQP is the value in the ROI map, RQP is the value obtained by the encoder's internal rate control, and ROIAvaQP is the average QP value in the ROI map.
+
+![VENC_H265_ROI_map](./image/video_encode/ss_venc_h265_roi_map.png)
 
 ### Intra Refresh
 Intra Refresh mode improves fault tolerance by periodically inserting intra-coded MB/CTUs into non-I frames. It provides more repair points for the decoder to avoid image corruption caused by temporal errors. Users can specify the number of continuous rows, columns, or step size of MB/CTUs to force the encoder to insert intra-coded units. Users can also specify the size of intra-coded units, which will be determined internally by the encoder.
 
 ### Long-term reference frame
 Users can specify the period of long-term reference frames and the cycle of referring long-term reference frames, as shown in the following figure.
+
+![VENC_long_reference_frame](./image/video_encode/ss_venc_long_reference_frame.png)
 
 ### Smart background encoding
 In video surveillance scenarios, the background is often static. Therefore, it is desired that the encoder can either ignore the background region or use less bitrate to encode it when detecting a background region. In actual scenarios, due to the presence of noise in the camera image, it is not easy to detect the background region. In many cases, the ISP needs to notify the encoder when it detects a background region, which consumes additional bandwidth and system computing resources.
@@ -160,7 +173,11 @@ H264 and H265 encoding provide integrated smart background encoding modes inside
 
 For background region judgment, users can set the maximum pixel difference value (recommended value 8) and the average pixel difference value (recommended value 1). Users can also adjust the Lambda parameter to influence the mode selection in encoding. When a background region is detected, the encoder internally increases the corresponding Lambda value for each block unit, making the encoder more likely to use ignore mode to encode the block unit. For Lambda control, users can set lambdaQP (recommended value 32) and deltaQP (recommended value 3), and the final Lambda value is calculated according to the following formula:
 
+![image-20220405153105331](./image/video_encode/image-20220405153105331.png)
+
 QP_TO_LAMBDA_TABLE is the Lambda conversion table, which is also used for Lambda conversion in non-background regions.
+
+![VENC_smart_bg_encoding](./image/video_encode/ss_venc_smart_bg_encoding.png)
 
 It should be noted that Smart background encoding does not work when ROI encoding is enabled. The amount of bandwidth saved by this mode is closely related to the set bitrate and I-frame interval. The larger the bitrate and I-frame interval, the more bandwidth can be saved. In addition, in this mode, frames with better image quality can be set as long-term reference frames to improve the quality of the background image and save bitrate.
 
@@ -217,130 +234,179 @@ HB_VENC_GetFd: Get device file handle for encoding channel.
 HB_VENC_CloseFd: Close device file handle for encoding channel.
 HB_VENC_QueryStatus: Query status of encoding channel.
 HB_VENC_InserUserData: Insert user data.
-HB_VENC_SendFrameEx: Send raw image and QpMap table for encoding.| :------: | :-------------------------------------------------------------------------------------------------------------- | :-------: |
-|   VeChn    | Encoding channel number <br/>Value range: [0, VENC_MAX_CHN_NUM). <br/>H264/H265 supports up to 32 channels, JPEG/MJPEG supports up to 64 channels. |   Input    |
-|  pstAttr  | Pointer to encoding channel attributes                                                                                     |   Input    |
+HB_VENC_SendFrameEx: Send raw image and QpMap table for encoding.
+```
 
-【Return Value】
 
-| Return Value |                             Description |
-| :----------: | :---------------------------------------|
-|      0       |                                     Success |
-|   Non-zero  |                           Failure, see error code. |
 
-【Notes】
+### HB_VENC_CreateChn
+**Function Declaration**
+```C
+int32_t HB_VENC_CreateChn(VENC_CHN VeChn, const VENC_CHN_ATTR_S *pstAttr);
+```
+**Function Description**
+> Creates an encoding channel.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description                                                                                                       | Input/Output |
+| :------------- | :--------------------------------------------------------------------------------------------------------- | :----------- |
+|   VeChn        | Channel number for encoding.<br/>Range: [0, VENC_MAX_CHN_NUM).<br/>H264/H265 supports up to 32 channels, JPEG/MJPEG up to 64 channels. |     Input    |
+|   pstAttr      | Pointer to the encoding channel attributes                                                                                        |     Input    |
+
+**Return Values**
+
+| Return Value | Description |
+| :----------: | :---------- |
+|       0      |         Success |
+| Non-zero     | Failure, refer to error codes. |
+
+**Note**
 > None
 
-【Reference Code】
-> Reference code for HB_VENC_GetStream function
+**Reference Code**
+> See HB_VENC_GetStream for reference code.
+
+
 
 ### HB_VENC_DestroyChn
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VENC_DestroyChn(VENC_CHN VeChn);
 ```
-【Function Description】
-> Destroy the encoding channel
+**Function Description**
+> Destroys an encoding channel.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name |                                          Description | Input/Output |
-| :------------: | :--------------------------------------------------- | :----------: |
-|     VeChn      | Encoding channel number <br/>Value range: [0, VENC_MAX_CHN_NUM) |   Input    |
+| Parameter Name | Description                                            | Input/Output |
+| :------------- | :----------------------------------------------------- | :----------: |
+| VeChn          | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |      Input   |
 
-【Return Value】
+**Return Values**
 
-| Return Value |                            Description |
-| :----------: | :--------------------------------------|
-|      0       |                                    Success |
-|   Non-zero  |                           Failure, see error code. |
+| Return Value | Description                                      |
+| :---------: | :----------------------------------------------- |
+|     0      | Success                                          |
+| Non-zero    | Failure, refer to the error code.                |
 
-【Notes】
+**Note**
 > None
 
-【Reference Code】
-> Reference code for HB_VENC_GetStream function
+**Reference Code**
+> HB_VENC_GetStream reference code
 
 ### HB_VENC_ResetChn
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VENC_ResetChn(VENC_CHN VeChn);
 ```
-【Function Description】【函数声明】
-```C
-int32_t HB_VENC_StopRecvFrame(VENC_CHN VeChn);
-```
-【功能描述】
-> 停止编码通道接收输入图像。
+**Function Description**
+> Resets an encoding channel.
 
-【参数描述】
+**Parameter Descriptions**
 
-| 参数名称 | 描述                                             | 输入/输出 |
-| :------: | :----------------------------------------------- | :-------: |
-|  VeChn   | 编码通道号。<br/>取值范围：[0, VENC_MAX_CHN_NUM) |   输入    |
+| Parameter Name | Description                                            | Input/Output |
+| :------------- | :----------------------------------------------------- | :----------: |
+| VeChn          | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |      Input   |
 
-【返回值】
+**Return Values**
 
-| 返回值 |               描述 |
-| :----: | :-----------------|
-|   0    |               成功 |
-|  非0   | 失败，参见错误码。 |
+| Return Value | Description                                      |
+| :---------: | :----------------------------------------------- |
+|     0      | Success                                          |
+| Non-zero    | Failure, refer to the error code.                |
 
-【注意事项】
-> 需要在HB_VENC_SetChnAttr设置完通道属性后，才能调用。
-
-【参考代码】
-> HB_VENC_GetStream参考代码【Function Declaration】
-```C
-int32_t HB_VENC_StopRecvFrame(VENC_CHN VeChn);
-```
-【Description】
-> Stop the encoding channel from receiving input images.
-
-【Parameter Description】
-
-| Parameter | Description                                            | Input/Output |
-| :-------: | :----------------------------------------------------- | :----------: |
-|   VeChn   | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |    Input     |
-
-【Return Value】
-
-| Return Value |            Description |
-| :----------: | :---------------------|
-|      0       |           Success    |
-|    non-zero  | Failure, see error code for details. |
-
-【Note】
+**Note**
 > None
 
-【Reference Code】
-> Reference code for HB_VENC_GetStream
+**Reference Code**
+> HB_VENC_GetStream reference code
+
+### HB_VENC_StartRecvFrame
+**Function Declaration**
+```C
+int32_t HB_VENC_StartRecvFrame(VENC_CHN VeChn, const VENC_RECV_PIC_PARAM_S *pstRecvParam);
+```
+**Function Description**
+> Enables receiving input images for the encoding channel.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description                                             | Input/Output |
+| :------------- | :----------------------------------------------------- | :----------: |
+| VeChn          | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |      Input   |
+| pstRecvParam   | Pointer to the receive image parameter structure, used to specify the number of frames to be received. | Input       |
+
+**Return Values**
+
+| Return Value | Description                                      |
+| :---------: | :----------------------------------------------- |
+|     0      | Success                                          |
+| Non-zero    | Failure, refer to the error code.                |
+
+**Note**
+> This function must be called after setting channel attributes with HB_VENC_SetChnAttr.
+
+**Reference Code**
+> HB_VENC_GetStream reference code
+
+### HB_VENC_StopRecvFrame
+**Function Declaration**
+```C
+int32_t HB_VENC_StopRecvFrame(VENC_CHN VeChn);
+```
+**Function Description**
+> Stops receiving input images for the encoding channel.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description                                             | Input/Output |
+| :------------- | :----------------------------------------------------- | :----------: |
+| VeChn          | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |      Input   |
+
+**Return Values**
+
+| Return Value | Description                                      |
+| :---------: | :----------------------------------------------- |
+|     0      | Success                                          |
+| Non-zero    | Failure, refer to the error code.                |
+
+**Note**
+> None
+
+**Reference Code**
+> HB_VENC_GetStream reference code
 
 ### HB_VENC_SetChnAttr
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VENC_SetChnAttr(VENC_CHN VeChn, const VENC_CHN_ATTR_S *pstChnAttr);
 ```
-【Description】
-> Set the encoding attributes of the encoding channel.
+**Function Description**
+> Sets the encoding attributes for an encoding channel.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-|  Parameter Name | Description                                            | Input/Output |
-| :-------------: | :----------------------------------------------------- | :----------: |
-|     VeChn       | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |    Input     |
-|   pstChnAttr    | Pointer to the encoding channel attributes           |    Input     |
+| Parameter Name | Description                                             | Input/Output |
+| :------------- | :----------------------------------------------------- | :----------: |
+| VeChn          | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |      Input   |
+| pstChnAttr     | Pointer to the encoding channel attribute structure.      |      Input   |
 
-【Return Value】
+**Return Values**
 
-| Return Value |            Description |
-| :----------: | :---------------------|
-|      0       |           Success    |
-|    non-zero  | Failure, see error code for details. |
+| Return Value | Description                                      |
+| :---------: | :----------------------------------------------- |
+|     0      | Success                                          |
+| Non-zero    | Failure, refer to the error code.                |
 
-【Note】
-> The channel needs to be created first using HB_VENC_CreateChn.【参考代码】
-> Reference code for HB_VENC_GetStream
+**Note**
+> A channel must be created using HB_VENC_CreateChn before calling this function.
+
+**Reference Code**
+> HB_VENC_GetStream reference code
+
+
 
 ### HB_VENC_GetChnAttr
 【Function Declaration】
@@ -511,6 +577,7 @@ s32Ret = HB_VP_Exit();
 if (s32Ret == 0) printf("vp exit ok!\n");
 printf("GetStream_Test\n");
 if (inFile) fclose(inFile);
+```
 
 ### HB_VENC_ReleaseStream
 【Function Declaration】
@@ -570,70 +637,122 @@ int32_t HB_VENC_SendFrame(VENC_CHN VeChn, VIDEO_FRAME_S *pstFrame ,int32_t s32Mi
 【Reference Code】
 > HB_VENC_GetStream reference code
 
+
+
 ### HB_VENC_RequestIDR
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VENC_RequestIDR(VENC_CHN VeChn);
 ```
-【Function Description】
+**Function Description**
 > Requests an IDR frame.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter | Description                                                                                           | Input/Output |
-| :-------: | :---------------------------------------------------------------------------------------------------- | :----------: |
-|   VeChn   | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM)                                             |    Input     |
+| Parameter Name | Description                                      | Input/Output |
+| :------------- | :------------------------------------------------ | :----------: |
+| VeChn          | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |     Input    |
 
-【Return Value】| Parameter |         Description        | Input/Output |
-| :-------: | :----------------------- | :----------: |
-|  VeChn    | 编码通道号                |     Input    |
-| pstRoiAttr | 感兴趣区域编码配置参数    |     Input    |
+**Return Values**
 
-【返回值】
-- 返回0表示成功。
-- 非0表示失败，参见错误码。| :--------: | :----------------------------------------------- | :-------: |
-|   VeChn    | Coding channel number.<br/>Value range: [0, VENC_MAX_CHN_NUM) |   Input    |
-| pstRoiAttr | ROI region parameters                                      |   Input    |
+| Return Value | Description |
+| :---------: | :---------: |
+|      0      |   Success  |
+| Non-zero    | Failure, refer to error codes. |
 
-【Return Value】
-
-| Return Value |               Description |
-| :----: | :-----------------|
-|   0    |               Success |
-|  Non-zero   | Failure, see error code. |
-
-【Notes】
+**Note**
 > None
 
-【Reference Code】
-> Reference code for HB_VENC_GetRoiAttr
+**Reference Code**
+```C
+    VENC_CHN VeChn = 0;
+    int32_t s32Ret = 0;
+    int32_t Width = 1920;
+    int32_t Height = 1080;
+    VENC_CHN_ATTR_S m_VencChnAttr;
+    memset(&m_VencChnAttr, 0, sizeof(VENC_CHN_ATTR_S));
+    m_VencChnAttr.stVencAttr.enType = PT_H264;
+    m_VencChnAttr.stVencAttr.u32PicWidth = Width;
+    m_VencChnAttr.stVencAttr.u32PicHeight = Height;
+    m_VencChnAttr.stVencAttr.enMirrorFlip = DIRECTION_NONE;
+    m_VencChnAttr.stVencAttr.enRotation = CODEC_ROTATION_0;
+    m_VencChnAttr.stVencAttr.stCropCfg.bEnable = HB_FALSE;
+    m_VencChnAttr.stVencAttr.stAttrH264.h264_profile = 0;
+    m_VencChnAttr.stVencAttr.stAttrH264.h264_level = 0;
+    m_VencChnAttr.stGopAttr.u32GopPresetIdx = 2;
+    m_VencChnAttr.stGopAttr.s32DecodingRefreshType = 2;
+    m_VencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
+    VENC_RC_ATTR_S *pstRcParam = &(m_VencChnAttr.stRcAttr);
+    s32Ret = HB_VENC_GetRcParam(VeChn, pstRcParam);
+    pstRcParam->stH264Cbr.u32BitRate = 3000;
+    pstRcParam->stH264Cbr.u32FrameRate = 30;
+    pstRcParam->stH264Cbr.u32IntraPeriod = 30;
+    pstRcParam->stH264Cbr.u32VbvBufferSize = 3000;
+    s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
+    HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);
+    s32Ret = HB_VENC_RequestIDR(VeChn);
+    s32Ret = HB_VENC_DestroyChn(VeChn);
+```
+
+
+
+
+### HB_VENC_SetRoiAttr
+**Function Declaration**
+```C
+int32_t HB_VENC_SetRoiAttr(VENC_CHN VeChn, const VENC_ROI_ATTR_S *pstRoiAttr);
+```
+**Function Description**
+> Sets the ROI (Region of Interest) encoding configuration for a video coding channel.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description                                                                                           | Input/Output |
+| :------------: | :---------------------------------------------------------------------------------------------------- | :----------: |
+|    VeChn      | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM)                                            |     Input    |
+|  pstRoiAttr   | Pointer to ROI area parameters                                                                              |     Input    |
+
+**Return Values**
+
+| Return Value | Description                                                                                         |
+| :---------: | :-------------------------------------------------------------------------------------------------- |
+|      0      | Successful                                                                                           |
+| Non-zero    | Failure; see error codes for details                                                               |
+
+**Caution**
+> None
+
+**Reference Code**
+
+HB_VENC_GetRoiAttr reference code
+
 
 ### HB_VENC_GetRoiAttr
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VENC_GetRoiAttr(VENC_CHN VeChn, VENC_ROI_ATTR_S *pstRoiAttr);
 ```
-【Function Description】
-> Get the encoding configuration of the regions of interest for the coding channel.
+**Function Description**
+> Retrieves the ROI (Region of Interest) encoding configuration for a video coding channel.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-|  Parameter Name  | Description                                             | Input/Output |
-| :--------: | :----------------------------------------------- | :-------: |
-|   VeChn    | Coding channel number.<br/>Value range: [0, VENC_MAX_CHN_NUM) |   Input    |
-| pstRoiAttr | Configuration of the corresponding ROI region                                |   Output    |
+| Parameter Name | Description                                                                                           | Input/Output |
+| :------------: | :---------------------------------------------------------------------------------------------------- | :----------: |
+|    VeChn      | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM)                                            |     Input    |
+|  pstRoiAttr   | Pointer to the ROI configuration that will receive the retrieved data                                  |     Output   |
 
-【Return Value】
+**Return Values**
 
-| Return Value |               Description |
-| :----: | :-----------------|
-|   0    |               Success |
-|  Non-zero   | Failure, see error code. |
+| Return Value | Description                                                                                         |
+| :---------: | :-------------------------------------------------------------------------------------------------- |
+|      0      | Successful                                                                                           |
+| Non-zero    | Failure; see error codes for details                                                               |
 
-【Notes】
+**Caution**
 > None
 
-【Reference Code】
+**Example Code**
 ```C
     VENC_CHN VeChn = 0;
     int32_t s32Ret = 0;
@@ -641,58 +760,96 @@ int32_t HB_VENC_GetRoiAttr(VENC_CHN VeChn, VENC_ROI_ATTR_S *pstRoiAttr);
     int32_t Height = 1080;
     VENC_ROI_ATTR_S pstRoiAttrTest1;
     memset(&pstRoiAttrTest1, 0, sizeof(VENC_ROI_ATTR_S));
-``````C
-int32_t HB_VENC_SetH264SliceSplit(VENC_CHN VeChn, const VENC_H264_SLICE_SPLIT_S *pstSliceSplit);
+    uint8_t stroi_map_array1[100] = {0};
+    pstRoiAttrTest1.roi_map_array = stroi_map_array1;
+    VENC_CHN_ATTR_S m_VencChnAttr;
+    memset(&m_VencChnAttr, 0, sizeof(VENC_CHN_ATTR_S));
+    m_VencChnAttr.stVencAttr.enType = PT_H264;
+    m_VencChnAttr.stVencAttr.u32PicWidth = Width;
+    m_VencChnAttr.stVencAttr.u32PicHeight = Height;
+    m_VencChnAttr.stVencAttr.enMirrorFlip = DIRECTION_NONE;
+    m_VencChnAttr.stVencAttr.enRotation = CODEC_ROTATION_0;
+    m_VencChnAttr.stVencAttr.stCropCfg.bEnable = HB_FALSE;
+    m_VencChnAttr.stVencAttr.stAttrH264.h264_profile = 0;
+    m_VencChnAttr.stVencAttr.stAttrH264.h264_level = 0;
+    m_VencChnAttr.stGopAttr.u32GopPresetIdx = 2;
+    m_VencChnAttr.stGopAttr.s32DecodingRefreshType = 2;
+    m_VencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
+    VENC_RC_ATTR_S *pstRcParam = &(m_VencChnAttr.stRcAttr);
+    s32Ret = HB_VENC_GetRcParam(VeChn, pstRcParam);
+    pstRcParam->stH264Cbr.u32BitRate = 3000;
+    pstRcParam->stH264Cbr.u32FrameRate = 30;
+    pstRcParam->stH264Cbr.u32IntraPeriod = 30;
+    pstRcParam->stH264Cbr.u32VbvBufferSize = 3000;
+    s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
+    VENC_ROI_ATTR_S pstRoiAttrTest2;
+    memset(&pstRoiAttrTest1, 0, sizeof(VENC_ROI_ATTR_S));
+    uint8_t stroi_map_array[100] = {0};
+    pstRoiAttrTest2.roi_enable = HB_TRUE;
+    pstRoiAttrTest2.roi_map_array = stroi_map_array;
+    pstRoiAttrTest2.roi_map_array_count = 100;
+
+    s32Ret = HB_VENC_SetRoiAttr(VeChn, &pstRoiAttrTest2);
+    s32Ret = HB_VENC_GetRoiAttr(VeChn, &pstRoiAttrTest1);
+    s32Ret = HB_VENC_DestroyChn(VeChn);
 ```
 
-【Function Description】
-> Set the slice split configuration for H.264 encoding.
 
-【Parameter Description】
 
-|   Parameter    | Description                                   | Input/Output |
-| :------------: | :-------------------------------------------- | :----------: |
-|     VeChn      | Channel number for encoding.<br/>Range: [0, VENC_MAX_CHN_NUM) |    Input     |
-| pstSliceSplit | Parameters for H.264 slice split in the bitstream |    Input     |
+### HB_VENC_SetH264SliceSplit
+**Function Declaration**
+```C
+int32_t HB_VENC_SetH264SliceSplit(VENC_CHN VeChn, const VENC_H264_SLICE_SPLIT_S *pstSliceSplit);
+```
+**Function Description**
+> Configures the H.264 encoding slice splitting parameters.
 
-【Return Value】| Return Value | Description       |
-| :----:       | :---------------  |
-|   0          | Successful        |
-|  Non-zero    | Failed, see error code |
+**Parameter Descriptions**
 
-【Notes】
+| Parameter Name | Description                                             | Input/Output |
+| :-------------: | :------------------------------------------------------ | :----------: |
+|      VeChn      | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |     Input    |
+|   pstSliceSplit  | H.264 stream slice splitting parameters                |     Input    |
+
+**Return Values**
+
+| Return Value | Description |
+| :---------: | :----------|
+|      0      | Success     |
+| Non-zero    | Failure, refer to error code. |
+
+**Caution**
 > None
 
-【Reference Code】
-> HB_VENC_GetH264SliceSplit Reference Code
+**Reference Code**
+HB_VENC_GetH264SliceSplit Reference Code
 
 ### HB_VENC_GetH264SliceSplit
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VENC_GetH264SliceSplit(VENC_CHN VeChn, VENC_H264_SLICE_SPLIT_S *pstSliceSplit);
 ```
+**Function Description**
+> Retrieves the H.264 encoding slice splitting configuration.
 
-【Function Description】
-> Get the slice split configuration of H.264 encoding.
+**Parameter Descriptions**
 
-【Parameter Description】
+| Parameter Name | Description                                             | Input/Output |
+| :-------------: | :------------------------------------------------------ | :----------: |
+|      VeChn      | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |     Input    |
+|   pstSliceSplit  | H.264 stream slice splitting parameters                |     Output   |
 
-|   Parameter Name    | Description                                        | Input/Output |
-| :-----------:       | :-----------------------------------------------  | :-------:    |
-|     VeChn           | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM)      |   Input       |
-| pstSliceSplit       | H.264 stream slice split parameters                 |   Output      |
+**Return Values**
 
-【Return Value】
+| Return Value | Description |
+| :---------: | :----------|
+|      0      | Success     |
+| Non-zero    | Failure, refer to error code. |
 
-| Return Value | Description       |
-| :----:       | :---------------  |
-|   0          | Successful        |
-|  Non-zero    | Failed, see error code |
-
-【Notes】
+**Caution**
 > None
 
-【Reference Code】
+**Reference Code**
 ```C
     VENC_CHN VeChn = 0;
     int32_t Width = 1920;
@@ -705,66 +862,91 @@ int32_t HB_VENC_GetH264SliceSplit(VENC_CHN VeChn, VENC_H264_SLICE_SPLIT_S *pstSl
     memset(&m_VencChnAttr, 0, sizeof(VENC_CHN_ATTR_S));
     m_VencChnAttr.stVencAttr.enType = PT_H264;
     m_VencChnAttr.stVencAttr.u32PicWidth = Width;
-``````C
-m_VencChnAttr.stVencAttr.u32PicHeight = Height;
-m_VencChnAttr.stVencAttr.enMirrorFlip = DIRECTION_NONE;
-m_VencChnAttr.stVencAttr.enRotation = CODEC_ROTATION_0;
-m_VencChnAttr.stVencAttr.stCropCfg.bEnable = HB_FALSE;
-m_VencChnAttr.stVencAttr.stAttrH264.h264_profile = 0;
-m_VencChnAttr.stVencAttr.stAttrH264.h264_level = 0;
-m_VencChnAttr.stGopAttr.u32GopPresetIdx = 2;
-m_VencChnAttr.stGopAttr.s32DecodingRefreshType = 2;
-m_VencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
-VENC_RC_ATTR_S *pstRcParam = &(m_VencChnAttr.stRcAttr);
-s32Ret = HB_VENC_GetRcParam(VeChn, pstRcParam);
-pstRcParam->stH264Cbr.u32BitRate = 3000;
-pstRcParam->stH264Cbr.u32FrameRate = 30;
-pstRcParam->stH264Cbr.u32IntraPeriod = 30;
-pstRcParam->stH264Cbr.u32VbvBufferSize = 3000;
-s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
-HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);  // config
+    m_VencChnAttr.stVencAttr.u32PicHeight = Height;
+    m_VencChnAttr.stVencAttr.enMirrorFlip = DIRECTION_NONE;
+    m_VencChnAttr.stVencAttr.enRotation = CODEC_ROTATION_0;
+    m_VencChnAttr.stVencAttr.stCropCfg.bEnable = HB_FALSE;
+    m_VencChnAttr.stVencAttr.stAttrH264.h264_profile = 0;
+    m_VencChnAttr.stVencAttr.stAttrH264.h264_level = 0;
+    m_VencChnAttr.stGopAttr.u32GopPresetIdx = 2;
+    m_VencChnAttr.stGopAttr.s32DecodingRefreshType = 2;
+    m_VencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
+    VENC_RC_ATTR_S *pstRcParam = &(m_VencChnAttr.stRcAttr);
+    s32Ret = HB_VENC_GetRcParam(VeChn, pstRcParam);
+    pstRcParam->stH264Cbr.u32BitRate = 3000;
+    pstRcParam->stH264Cbr.u32FrameRate = 30;
+    pstRcParam->stH264Cbr.u32IntraPeriod = 30;
+    pstRcParam->stH264Cbr.u32VbvBufferSize = 3000;
+    s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
+    HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);  // config
 
-pstSliceSplit1.h264_slice_mode = HB_TRUE;
-pstSliceSplit1.h264_slice_arg = 10;
-pstSliceSplit1.slice_loop_filter_across_slices_enabled_flag = HB_TRUE;
-s32Ret = HB_VENC_SetH264SliceSplit(VeChn, &pstSliceSplit1);
+    pstSliceSplit1.h264_slice_mode = HB_TRUE;
+    pstSliceSplit1.h264_slice_arg = 10;
+    pstSliceSplit1.slice_loop_filter_across_slices_enabled_flag = HB_TRUE;
+    s32Ret = HB_VENC_SetH264SliceSplit(VeChn, &pstSliceSplit1);
 
-VENC_H264_SLICE_SPLIT_S pstSliceSplit2;
-memset(&pstSliceSplit2, 0, sizeof(VENC_H264_SLICE_SPLIT_S));
-s32Ret = HB_VENC_GetH264SliceSplit(VeChn, &pstSliceSplit2);
-s32Ret = HB_VENC_DestroyChn(VeChn);
-```【Attention】
+    VENC_H264_SLICE_SPLIT_S pstSliceSplit2;
+    memset(&pstSliceSplit2, 0, sizeof(VENC_H264_SLICE_SPLIT_S));
+    s32Ret = HB_VENC_GetH264SliceSplit(VeChn, &pstSliceSplit2);
+    s32Ret = HB_VENC_DestroyChn(VeChn);
+```
+
+
+
+### HB_VENC_SetH264IntraPred
+**Function Declaration**
+```C
+int32_t HB_VENC_SetH264IntraPred(VENC_CHN VeChn, const VENC_H264_INTRA_PRED_S *pstH264IntraPred);
+```
+**Function Description**
+> Configures the intra prediction settings for H.264 encoding.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description                                             | Input/Output |
+| :-------------: | :-------------------------------------------------------- | :----------: |
+|     VeChn      | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |     Input   |
+| pstH264IntraPred | H.264 protocol's intra prediction configuration          |     Input   |
+
+**Return Values**
+
+| Return Value | Description |
+| :---------: | :---------- |
+|     0      | Success     |
+| Non-zero   | Failure, refer to error codes. |
+
+**Note**
 > None
 
-【Reference Code】
-> Reference code for HB_VENC_GetH264IntraPred
+**Reference Code**
+HB_VENC_GetH264IntraPred reference code
 
 ### HB_VENC_GetH264IntraPred
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VENC_GetH264IntraPred(VENC_CHN VeChn, VENC_H264_INTRA_PRED_S *pstH264IntraPred);
 ```
-【Function Description】
-> Get the frame intra prediction configuration for H.264 encoding.
+**Function Description**
+> Retrieves the intra prediction configuration for H.264 encoding.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-|  Name  |              Description             | Input/Output |
-| :----: | :---------------------------------: | :----------: |
-| VeChn  |      Encoding channel number.       |    Input     |
-| pstH264IntraPred | Frame intra prediction configuration for H.264 protocol encoding. |    Output    |
+| Parameter Name | Description                                             | Input/Output |
+| :-------------: | :-------------------------------------------------------- | :----------: |
+|     VeChn      | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |     Input   |
+| pstH264IntraPred | H.264 protocol's intra prediction configuration          |     Output  |
 
-【Return Value】
+**Return Values**
 
-| Return Value |                 Description                 |
-| :----------: | :-----------------------------------------: |
-|       0      |                  Success                    |
-|   Non-zero   | Failed, see error code for more information. |
+| Return Value | Description |
+| :---------: | :---------- |
+|     0      | Success     |
+| Non-zero   | Failure, refer to error codes. |
 
-【Attention】
+**Note**
 > None
 
-【Reference Code】
+**Reference Code**
 ```C
     int32_t s32Ret = 0;
     VENC_CHN VeChn = 0;
@@ -782,270 +964,65 @@ int32_t HB_VENC_GetH264IntraPred(VENC_CHN VeChn, VENC_H264_INTRA_PRED_S *pstH264
     m_VencChnAttr.stVencAttr.enMirrorFlip = DIRECTION_NONE;
     m_VencChnAttr.stVencAttr.enRotation = CODEC_ROTATION_0;
     m_VencChnAttr.stVencAttr.stCropCfg.bEnable = HB_FALSE;
-```    s32Ret = HB_VENC_SetH264Trans(VeChn, &pstH264Trans);Please translate the Chinese parts in the content below into English, while keeping the original format and content:
+    m_VencChnAttr.stVencAttr.stAttrH264.h264_profile = 0;
+    m_VencChnAttr.stVencAttr.stAttrH264.h264_level = 0;
+    m_VencChnAttr.stGopAttr.u32GopPresetIdx = 2;
+    m_VencChnAttr.stGopAttr.s32DecodingRefreshType = 2;
+    m_VencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
+    VENC_RC_ATTR_S *pstRcParam = &(m_VencChnAttr.stRcAttr);
+    s32Ret = HB_VENC_GetRcParam(VeChn, pstRcParam);
+    pstRcParam->stH264Cbr.u32BitRate = 3000;
+    pstRcParam->stH264Cbr.u32FrameRate = 30;
+    pstRcParam->stH264Cbr.u32IntraPeriod = 30;
+    pstRcParam->stH264Cbr.u32VbvBufferSize = 3000;
+    s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
 
-```C
-VENC_CHN VeChn = 0;
-int32_t Width = 1920;
-int32_t Height = 1080;
+    pstH264IntraPred1.constrained_intra_pred_flag = HB_TRUE;
+    s32Ret = HB_VENC_SetH264IntraPred(VeChn, &pstH264IntraPred1);
 
-VENC_H264_TRANS_S pstH264Trans1;
-memset(&pstH264Trans1, 0, sizeof(VENC_H264_TRANS_S));
-VENC_CHN_ATTR_S m_VencChnAttr;
-memset(&m_VencChnAttr, 0, sizeof(VENC_CHN_ATTR_S));
-m_VencChnAttr.stVencAttr.enType = PT_H264;
-m_VencChnAttr.stVencAttr.u32PicWidth = Width;
-m_VencChnAttr.stVencAttr.u32PicHeight = Height;
-m_VencChnAttr.stVencAttr.enMirrorFlip = DIRECTION_NONE;
-m_VencChnAttr.stVencAttr.enRotation = CODEC_ROTATION_0;
-m_VencChnAttr.stVencAttr.stCropCfg.bEnable = HB_FALSE;
-m_VencChnAttr.stVencAttr.stAttrH264.h264_profile = 0;
-m_VencChnAttr.stVencAttr.stAttrH264.h264_level = 0;
-m_VencChnAttr.stGopAttr.u32GopPresetIdx = 2;
-m_VencChnAttr.stGopAttr.s32DecodingRefreshType = 2;
-m_VencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
-VENC_RC_ATTR_S *pstRcParam = &(m_VencChnAttr.stRcAttr);
-s32Ret = HB_VENC_GetRcParam(VeChn, pstRcParam);
-pstRcParam->stH264Cbr.u32BitRate = 3000;
-pstRcParam->stH264Cbr.u32FrameRate = 30;
-pstRcParam->stH264Cbr.u32IntraPeriod = 30;
-pstRcParam->stH264Cbr.u32VbvBufferSize = 3000;
-
-s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
-HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);
-pstH264Trans1.chroma_cb_qp_offset = 5;
-pstH264Trans1.chroma_cr_qp_offset = 5;
-pstH264Trans1.transform_8x8_enable = HB_TRUE;
-pstH264Trans1.user_scaling_list_enable = 1;
-s32Ret = HB_VENC_SetH264Trans(VeChn, &pstH264Trans1);
-VENC_H264_TRANS_S pstH264Trans2;
-memset(&pstH264Trans2, 0, sizeof(VENC_H264_TRANS_S));
-s32Ret = HB_VENC_GetH264Trans(VeChn, &pstH264Trans2);
-s32Ret = HB_VENC_DestroyChn(VeChn);
+    VENC_H264_INTRA_PRED_S pstH264IntraPred2;
+    memset(&pstH264IntraPred2, 0, sizeof(VENC_H264_INTRA_PRED_S));
+    s32Ret = HB_VENC_GetH264IntraPred(VeChn, &pstH264IntraPred2);
+    s32Ret = HB_VENC_DestroyChn(VeChn);
 ```
 
-### HB_VENC_GetH264Trans
-【Function Declaration】
+
+
+
+### HB_VENC_SetH264Trans
+**Function Declaration**
 ```C
-int32_t HB_VENC_GetH264Trans(VENC_CHN VeChn, VENC_H264_TRANS_S *pstH264Trans);
+int32_t HB_VENC_SetH264Trans(VENC_CHN VeChn, const VENC_H264_TRANS_S *pstH264Trans);
 ```
-【Description】
-> Get the transformation and quantization settings for H.264 encoding.
+**Function Description**
+> Configures the H.264 encoding transformation and quantization settings.
 
-【Parameters】
+**Parameter Descriptions**
 
-| Parameter Name | Description                                                | Input/Output |
-| :----------: | :----------------------------------------------- | :-------: |
-|    VeChn     | Encoded channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |   Input    |
-| pstH264Trans | Transformation and quantization properties of H.264 protocol encoding channel |   Output    |
+| Parameter Name | Description                                          | Input/Output |
+| :-------------: | :-------------------------------------------------- | :---------: |
+|    VeChn      | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |    Input   |
+|  pstH264Trans  | H.264 protocol-specific channel transformation and quantization attributes |    Input   |
 
-【Return Value】
+**Return Values**
 
-| Return Value |               Description |
-| :----: | :-----------------|
-|   0    |               Success |
-|  Non-zero   | Failure, refer to the error code. |
+| Return Value | Description                            |
+| :----------: | :-------------------------------------- |
+|      0       | Success                                |
+| Non-zero     | Failure; refer to error codes         |
 
-【Notes】
+**Note**
 > None
 
-【Reference Code】
-> Reference code for HB_VENC_SetH264Trans
-
-### HB_VENC_SetH264Entropy
-【Function Declaration】
-```C
-int32_t HB_VENC_SetH264Entropy(VENC_CHN VeChn, const VENC_H264_ENTROPY_S *pstH264EntropyEnc);
-```
-【Function Description】
-> Set the entropy coding configuration of H.264 encoding.
-
-【Parameter Description】
-
-|     Parameter Name      | Description                                             | Input/Output |
-| :---------------: | :----------------------------------------------- | :-------: |
-|       VeChn       | Encoded channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |   Input    |
-| pstH264EntropyEnc | Entropy coding mode of H.264 protocol encoding channel                   |   Input    |
-
-【Return Value】
-
-| Return Value |               Description |
-| :----: | :-----------------|
-|   0    |               Success |
-|  Non-zero   | Failure, refer to the error code. |
-
-【Notes】
-> None
-
-【Reference Code】
+**Reference Code**
 ```C
     int32_t s32Ret = 0;
     VENC_CHN VeChn = 0;
     int32_t Width = 1920;
     int32_t Height = 1080;
 
-    VENC_H264_ENTROPY_S pstH264EntropyEnc1;
-````memset(&pstH264EntropyEnc1, 0, sizeof(VENC_H264_ENTROPY_S));`
-`memset(&m_VencChnAttr, 0, sizeof(VENC_CHN_ATTR_S));`
-`m_VencChnAttr.stVencAttr.enType = PT_H264;`
-`m_VencChnAttr.stVencAttr.u32PicWidth = Width;`
-`m_VencChnAttr.stVencAttr.u32PicHeight = Height;`
-`m_VencChnAttr.stVencAttr.enMirrorFlip = DIRECTION_NONE;`
-`m_VencChnAttr.stVencAttr.enRotation = CODEC_ROTATION_0;`
-`m_VencChnAttr.stVencAttr.stCropCfg.bEnable = HB_FALSE;`
-`m_VencChnAttr.stVencAttr.stAttrH264.h264_profile = 0;`
-`m_VencChnAttr.stVencAttr.stAttrH264.h264_level = 0;`
-`m_VencChnAttr.stGopAttr.u32GopPresetIdx = 2;`
-`m_VencChnAttr.stGopAttr.s32DecodingRefreshType = 2;`
-`m_VencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;`
-
-`VENC_RC_ATTR_S *pstRcParam = &(m_VencChnAttr.stRcAttr);`
-`s32Ret = HB_VENC_GetRcParam(VeChn, pstRcParam);`
-`pstRcParam->stH264Cbr.u32BitRate = 3000;`
-`pstRcParam->stH264Cbr.u32FrameRate = 30;`
-`pstRcParam->stH264Cbr.u32IntraPeriod = 30;`
-`pstRcParam->stH264Cbr.u32VbvBufferSize = 3000;`
-
-`s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);`
-`HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);`
-`pstH264EntropyEnc1.u32EntropyEncMode = 0;`
-
-`s32Ret = HB_VENC_SetH264Entropy(VeChn, &pstH264EntropyEnc1);`
-
-`VENC_H264_ENTROPY_S pstH264EntropyEnc2;`
-`memset(&pstH264EntropyEnc2, 0, sizeof(VENC_H264_ENTROPY_S));`
-`s32Ret = HB_VENC_GetH264Entropy(VeChn, &pstH264EntropyEnc2);`
-
-`s32Ret = HB_VENC_DestroyChn(VeChn);`
-
-### HB_VENC_GetH264Entropy
-【Function Declaration】
-```C
-int32_t HB_VENC_GetH264Entropy(VENC_CHN VeChn, VENC_H264_ENTROPY_S *pstH264EntropyEnc);
-```
-【Description】
-> Get the entropy encoding configuration of H.264 encoding.
-
-【Parameter Description】
-
-| Parameter Name | Description                                    | Input/Output |
-| :------------: | :--------------------------------------------- | :----------: |
-|     VeChn      | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |   Input    |
-| pstH264EntropyEnc| Entropy encoding mode of H.264 protocol encoding channel |    Output    |
-
-【Return Value】
-
-| Return Value | Description |
-| :----------: | :----------|
-|   Return | Description |
-| :----: | :---------|
-|   0    |   Success |
-|  Non-zero   | Failed, see error code. |
-
-【Notes】
-> None
-
-【Reference Code】
-> Reference code for HB_VENC_SetH264Entropy
-
-### HB_VENC_SetH264Dblk
-【Function Declaration】
-```C
-int32_t HB_VENC_SetH264Dblk(VENC_CHN VeChn, const VENC_H264_DBLK_S *pstH264Dblk);
-```
-【Description】
-> Sets the deblocking configuration for H.264 encoding.
-
-【Parameter Description】
-
-|  Parameter Name   | Description                                             | Input/Output |
-| :---------: | :----------------------------------------------- | :-------: |
-|    VeChn    | Encoding channel number.<br/>Value range: [0, VENC_MAX_CHN_NUM) |   Input    |
-| pstH264Dblk | Deblocking parameters for the H.264 protocol encoding channel |   Input    |
-
-【Return Value】
-
-| Return Value |               Description |
-| :----: | :-----------------|
-|   0    |   Success |
-|  Non-zero   | Failed, see error code. |
-
-【Notes】
-> None
-
-【Reference Code】
-```C
-    int32_t s32Ret = 0;
-    VENC_CHN VeChn = 0;
-    int32_t Width = 1920;
-    int32_t Height = 1080;
-
-    VENC_H264_DBLK_S pstH264Dblk1;
-    memset(&pstH264Dblk1, 0, sizeof(VENC_H264_DBLK_S));
-    VENC_CHN_ATTR_S m_VencChnAttr;
-    memset(&m_VencChnAttr, 0, sizeof(VENC_CHN_ATTR_S));
-    m_VencChnAttr.stVencAttr.enType = PT_H264;
-    m_VencChnAttr.stVencAttr.u32PicWidth = Width;
-    m_VencChnAttr.stVencAttr.u32PicHeight = Height;
-    m_VencChnAttr.stVencAttr.enMirrorFlip = DIRECTION_NONE;
-    m_VencChnAttr.stVencAttr.enRotation = CODEC_ROTATION_0;
-HB_VENC_GetH264Dblk
-【Function Declaration】
-```C
-int32_t HB_VENC_GetH264Dblk(VENC_CHN VeChn, VENC_H264_DBLK_S *pstH264Dblk);
-```
-【Function Description】
-> Get the deblocking configuration of H.264 encoding.
-
-【Parameter Description】
-
-|   Parameter Name   |                      Description                     | Input/Output |
-| :----------------: | :--------------------------------------------------: | :----------: |
-|       VeChn        |    Encoding channel number.<br/>Value range: [0, VENC_MAX_CHN_NUM) |    Input    |
-|   pstH264Dblk  | Deblocking parameters of H.264 protocol encoding channel  |   Output    |
-
-【Return Value】
-
-| Return Value |                           Description                          |
-| :----------: | :-----------------------------------------------------------: |
-|       0      |                            Success                            |
-|   Non-zero   | Failed, see error code for details. |
-
-【Precautions】
-> None### HB_VENC_SetH264Vui
-【Function Declaration】
-```C
-int32_t HB_VENC_SetH264Vui(VENC_CHN VeChn, const VENC_H264_VUI_S *pstH264Vui);
-```
-【Function Description】
-> Set the VUI configuration for H.264 encoding.
-
-【Parameter Description】
-
-| Parameter Name | Description                                              | Input/Output |
-| :------------: | :------------------------------------------------------- | :----------: |
-|     VeChn      | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |    Input     |
-|   pstH264Vui   | Vui parameters of the H.264 protocol encoding channel    |    Input     |
-
-【Return Value】
-
-| Return Value | Description   |
-| :----------: | :------------ |
-|      0       | Success       |
-|   Non-zero   | Failure, see error codes. |
-
-【Notes】
-> The Vui parameters are static and can only be called before HB_VENC_SetChnAttr.
-
-【Reference Code】
-```C
-    int32_t s32Ret = 0;
-    VENC_CHN VeChn = 0;
-    int32_t Width = 1920;
-    int32_t Height = 1080;
-
-    VENC_H264_VUI_S pstH264Vui1;
-    memset(&pstH264Vui1, 0, sizeof(VENC_H264_VUI_S));
+    VENC_H264_TRANS_S pstH264Trans1;
+    memset(&pstH264Trans1, 0, sizeof(VENC_H264_TRANS_S));
     VENC_CHN_ATTR_S m_VencChnAttr;
     memset(&m_VencChnAttr, 0, sizeof(VENC_CHN_ATTR_S));
     m_VencChnAttr.stVencAttr.enType = PT_H264;
@@ -1059,56 +1036,83 @@ int32_t HB_VENC_SetH264Vui(VENC_CHN VeChn, const VENC_H264_VUI_S *pstH264Vui);
     m_VencChnAttr.stGopAttr.u32GopPresetIdx = 2;
     m_VencChnAttr.stGopAttr.s32DecodingRefreshType = 2;
     m_VencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
-``````C
-int32_t HB_VENC_SetH265Vui(VENC_CHN VeChn, const VENC_H265_VUI_S *pstH265Vui);
+    s32Ret = HB_VENC_GetRcParam(VeChn, &m_VencChnAttr.stRcAttr);
+    m_VencChnAttr.stRcAttr.stH264Cbr.u32BitRate = 3000;
+    m_VencChnAttr.stRcAttr.stH264Cbr.u32FrameRate = 30;
+    m_VencChnAttr.stRcAttr.stH264Cbr.u32IntraPeriod = 30;
+    m_VencChnAttr.stRcAttr.stH264Cbr.u32VbvBufferSize = 3000;
+
+    s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
+    HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);
+    pstH264Trans1.chroma_cb_qp_offset = 5;
+    pstH264Trans1.chroma_cr_qp_offset = 5;
+    pstH264Trans1.transform_8x8_enable = HB_TRUE;
+    pstH264Trans1.user_scaling_list_enable = 1;
+    s32Ret = HB_VENC_SetH264Trans(VeChn, &pstH264Trans1);
+    VENC_H264_TRANS_S pstH264Trans2;
+    memset(&pstH264Trans2, 0, sizeof(VENC_H264_TRANS_S));
+    s32Ret = HB_VENC_GetH264Trans(VeChn, &pstH264Trans2);
+    s32Ret = HB_VENC_DestroyChn(VeChn);
 ```
-【功能描述】
-> 设置 H.265 编码的 VUI 配置。
 
-【参数描述】
 
-|   参数名称   | 描述                                             | 输入/输出 |
-| :----------: | :----------------------------------------------- | :-------: |
-|    VeChn     | 编码通道号。<br/>取值范围：[0, VENC_MAX_CHN_NUM) |   输入    |
-| pstH265Vui | H.265 协议编码通道的 Vui 参数                    |   输入    |
 
-【返回值】
-
-| 返回值 |               描述 |
-| :----: | :-----------------|
-|   0    |               成功 |
-|  非0   | 失败，参见错误码。 |
-
-【注意事项】
-> 无
-
-【参考代码】
-> 无```C
-int32_t HB_VENC_SetH265Vui(VENC_CHN VeChn, const VENC_H265_VUI_S *pstH265Vui);
+### HB_VENC_GetH264Vui
+**Function Declaration**
+```C
+int32_t HB_VENC_GetH264Vui(VENC_CHN VeChn, VENC_H264_VUI_S *pstH264Vui);
 ```
-【Function Description】
-> Set the VUI configuration for the H.265 protocol encoding channel
+**Function Description**
+> Retrieves the VUI configuration for H.264 encoding.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-|   Parameter Name   |                    Description                     | Input/Output |
-| :----------------: | :------------------------------------------------: | :----------: |
-|       VeChn        |          Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |    Input     |
-|     pstH265Vui     |        Vui parameter for the H.265 protocol encoding channel         |    Input     |
+| Parameter Name | Description                                                                                     | Input/Output |
+| :------------- | :----------------------------------------------------------------------------------------------- | :----------- |
+|   VeChn        | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM)                                      |     Input    |
+| pstH264Vui      | Pointer to the H.264 protocol's Vui parameters for the encoding channel                       |     Output   |
 
-【Return Value】
+**Return Values**
 
-| Return Value |                   Description                      |
-| :----------: | :------------------------------------------------: |
-|       0      |                   Success                          |
-|     Non-0    |            Failure, refer to the error code         |
+| Return Value | Description                                                                                   |
+| :---------: | :--------------------------------------------------------------------------------------------- |
+|     0      | Success                                                                                       |
+| Non-zero    | Failure, refer to the error code.                                                               |
 
-【Notes】
+**Note**
 > None
 
-【Reference Code】
+**Reference Code**
+HB_VENC_SetH264Vui reference code
+
+### HB_VENC_SetH265Vui
+**Function Declaration**
 ```C
-    int32_t s32Ret = 0;
+int32_t HB_VENC_SetH265Vui(VENC_CHN VeChn, const VENC_H265_VUI_S *pstH265Vui);
+```
+**Function Description**
+> Sets the VUI configuration for H.265 encoding channels.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description                                                                                     | Input/Output |
+| :------------- | :----------------------------------------------------------------------------------------------- | :----------- |
+|   VeChn        | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM)                                      |     Input    |
+| pstH265Vui      | Pointer to the H.265 protocol's Vui parameters for the encoding channel                       |     Input    |
+
+**Return Values**
+
+| Return Value | Description                                                                                   |
+| :---------: | :--------------------------------------------------------------------------------------------- |
+|     0      | Success                                                                                       |
+| Non-zero    | Failure, refer to the error code.                                                               |
+
+**Note**
+> None
+
+**Reference Code**
+```C
+        int32_t s32Ret = 0;
     VENC_CHN VeChn = 0;
     int32_t Width = 1920;
     int32_t Height = 1080;
@@ -1133,96 +1137,130 @@ int32_t HB_VENC_SetH265Vui(VENC_CHN VeChn, const VENC_H265_VUI_S *pstH265Vui);
     pstRcParam->stH265Cbr.u32IntraPeriod = 30;
     pstRcParam->stH265Cbr.u32VbvBufferSize = 3000;
     s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
-```|  参数名称   |               描述                 | 输入/输出 |
-| :---------: | :------------------------------- | :-------: |
-|   VeChn     | 编码通道号。<br/>取值范围：[0, VENC_MAX_CHN_NUM) |   输入    |
-| pstRcParam  | 编码通道的码率控制高级参数         |   输入    |
-【返回值】
+    pstH265Vui1.stVuiTimeInfo.num_ticks_poc_diff_one_minus1 = 1;
+    pstH265Vui1.stVuiTimeInfo.num_units_in_tick = 2000;
+    pstH265Vui1.stVuiTimeInfo.time_scale = 50000;
+    s32Ret = HB_VENC_SetH265Vui(VeChn, &pstH265Vui1);
 
-| 返回值 |               描述 |
-| :----: | :-----------------|
-|   0    |               成功 |
-|  非0   | 失败，参见错误码。 |
+    VENC_H265_VUI_S pstH265Vui2;
+    memset(&pstH265Vui2, 0, sizeof(VENC_H265_VUI_S));
+    s32Ret = HB_VENC_GetH265Vui(VeChn, &pstH265Vui2);
+    HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);
+    s32Ret = HB_VENC_DestroyChn(VeChn);
+```
 
-【注意事项】
-> 无
 
-【参考代码】
+### HB_VENC_GetH265Vui
+**Function Declaration**
 ```C
-VENC_RC_ATTR_S stRcParam;
-memset(&stRcParam, 0, sizeof(VENC_RC_ATTR_S));
-HB_VENC_GetRcParam(VeChn, &stRcParam);
-// 修改stRcParam的相关参数
-s32Ret = HB_VENC_SetRcParam(VeChn, &stRcParam);
-```| Parameter Name | Description                                       | Input/Output |
-| :------------: | :------------------------------------------------ | :----------: |
-|    VeChn       | Encoding channel number.<br/>Value Range: [0, VENC_MAX_CHN_NUM) |   Input   |
-|  pstRcParam    | Advanced parameters of the encoding channel's rate controller   |   Input   |
+int32_t HB_VENC_GetH265Vui(VENC_CHN VeChn, VENC_H265_VUI_S *pstH265Vui);
+```
+**Function Description**
+> Retrieves the VUI configuration for an H.265 encoding channel.
 
-【Return Value】
+**Parameter Descriptions**
 
-| Return Value | Description |
-| :----------: | :---------- |
-|      0       |    Success   |
-|   Non-zero   | Failure, see error codes. |
+| Parameter Name | Description                                      | Input/Output |
+| :------------- | :------------------------------------------------ | :----------- |
+|   VeChn        | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) | Input       |
+| pstH265Vui     | Pointer to the H.265 VUI parameters              | Output      |
 
-【Note】
+**Return Values**
+
+| Return Value | Description                              |
+| :---------- | :----------------------------------------|
+|    0        | Success                                  |
+| Non-zero    | Failure, refer to error codes             |
+
+**Note**
 > None
 
-【Reference Code】
+**Reference Code**
+> Refer to the HB_VENC_SetH265Vui reference code for more details.
+
+### HB_VENC_SetRcParam
+**Function Declaration**
+```C
+int32_t HB_VENC_SetRcParam(VENC_CHN VeChn, const VENC_RC_ATTR_S *pstRcParam);
+```
+**Function Description**
+> Sets advanced rate control parameters for the encoding channel.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description                                      | Input/Output |
+| :------------- | :------------------------------------------------ | :----------- |
+|   VeChn        | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) | Input       |
+| pstRcParam     | Pointer to the advanced rate controller parameters | Input       |
+
+**Return Values**
+
+| Return Value | Description                              |
+| :---------- | :----------------------------------------|
+|    0        | Success                                  |
+| Non-zero    | Failure, refer to error codes             |
+
+**Note**
+> None
+
+**Reference Code**
+> For more information, consult the HB_VENC_SetRcParam reference code.
+
+
 
 ### HB_VENC_GetRcParam
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VENC_GetRcParam(VENC_CHN VeChn, VENC_RC_ATTR_S *pstRcParam);
 ```
-【Function Description】
-> Get advanced parameters of the rate controller for the channel.
+**Function Description**
+> Retrieves the advanced parameters for the channel's rate control.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name | Description                                       | Input/Output |
-| :------------: | :------------------------------------------------ | :----------: |
-|    VeChn       | Encoding channel number.<br/>Value Range: [0, VENC_MAX_CHN_NUM) |   Input   |
-|  pstRcParam    | Advanced parameters of the encoding channel's rate controller   |   Input   |
+| Parameter Name | Description                                             | Input/Output |
+| :------------- | :--------------------------------------------------------------- | :-------: |
+|   VeChn        | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |    Input   |
+| pstRcParam     | Pointer to the advanced rate control parameters for the encoder channel |    Input   |
 
-【Return Value】
+**Return Values**
 
 | Return Value | Description |
-| :----------: | :---------- |
-|      0       |    Success   |
-|   Non-zero   | Failure, see error codes. |
+| :----------: | :----------|
+|      0       | Success     |
+| Non-zero     | Failure; refer to error codes. |
 
-【Note】
+**Note**
 > None
 
-【Reference Code】
+**Reference Code**
 
 ### HB_VENC_SetRefParam
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VENC_SetRefParam(VENC_CHN VeChn, const VENC_REF_PARAM_S *pstRefParam);
 ```
-【Function Description】> Set advanced frame skipping reference parameters for H.264/H.265 encoding channel.
+**Function Description**
+> Sets the advanced frame skipping reference parameters for H.264/H.265 encoding channels.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-|  Parameter Name  | Description                                                      | Input/Output |
-| :--------------: | :--------------------------------------------------------------- | :-----------: |
-|      VeChn       | Encoding channel number.<br/>Value range: [0, VENC_MAX_CHN_NUM) |    Input      |
-|  pstRefParam     | Advanced frame skipping reference parameters for H.264/H.265 encoding channel  |    Input      |
+| Parameter Name   | Description                                             | Input/Output |
+| :--------------: | :----------------------------------------------- | :-------: |
+|     VeChn        | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |    Input   |
+| pstRefParam      | Pointer to the H.264/H.265 advanced frame skipping reference parameters |    Input   |
 
-【Return Value】
+**Return Values**
 
-| Return Value |        Description        |
-| :----------: | :------------------------ |
-|       0      |          Success          |
-|   Non-zero   |    Failure, see error code    |
+| Return Value | Description |
+| :----------: | :----------|
+|      0       | Success     |
+| Non-zero     | Failure; refer to error codes. |
 
-【Notes】
+**Note**
 > None
 
-【Reference Code】
+**Example Code**
 ```C
     int32_t s32Ret = 0;
     VENC_CHN VeChn = 0;
@@ -1253,63 +1291,97 @@ int32_t HB_VENC_SetRefParam(VENC_CHN VeChn, const VENC_REF_PARAM_S *pstRefParam)
     s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
 
     pstRefParam_test1.use_longterm = HB_TRUE;
-```| 参数名称   | 描述                                             | 输入/输出 |
-| :---------: | :----------------------------------------------- | :-------: |
-|    VeChn    | 编码通道号。<br/>取值范围：[0, VENC_MAX_CHN_NUM) |   输入    |
-| bEnableIDR | 是否使能 IDR 帧。<br/>取值范围：HB_TRUE（启用），HB_FALSE（禁用） |   输入    |
+    pstRefParam_test1.longterm_pic_period = 30;
+    pstRefParam_test1.longterm_pic_using_period = 20;
+    s32Ret = HB_VENC_SetRefParam(VeChn, &pstRefParam_test1);
 
-【返回值】
+    VENC_REF_PARAM_S pstRefParam_test2;
+    memset(&pstRefParam_test2, 0x00, sizeof(VENC_REF_PARAM_S));
 
-| 返回值 |               描述 |
-| :----: | :-----------------|
-|   0    |               成功 |
-|  非0   | 失败，参见错误码。 |
+    s32Ret = HB_VENC_GetRefParam(VeChn, &pstRefParam_test2);
+    HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);
+    s32Ret = HB_VENC_DestroyChn(VeChn);
+```
 
-【注意事项】
-> 无
 
-【参考代码】
+
+### HB_VENC_GetRefParam
+**Function Declaration**
 ```C
-HB_VENC_EnableIDR(VeChn, HB_TRUE);
-```【Return Value】
+int32_t HB_VENC_GetRefParam(VENC_CHN VeChn, VENC_REF_PARAM_S *pstRefParam);
+```
+**Function Description**
+> Retrieves the advanced frame skipping reference parameters for H.264/H.265 encoding channels.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description                                            | Input/Output |
+| :------------- | :------------------------------------------------------ | :----------: |
+|    VeChn       | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |     Input    |
+| pstRefParam   | Advanced H.264/H.265 frame skipping reference parameters     |     Output   |
+
+**Return Values**
 
 | Return Value | Description |
-| :----: | :-----------------|
-|   0    |   Success |
-|  Non-zero   |  Failure, see error code. |
+| :---------: | :----------|
+|     0      |         Success        |
+| Non-zero   | Failure; refer to error codes. |
 
-【Notes】
+**Note**
 > None
 
-【Code Reference】
+**Reference Code**
+> Reference code for HB_VENC_SetRefParam
+
+### HB_VENC_EnableIDR
+**Function Declaration**
+```C
+int32_t HB_VENC_EnableIDR(VENC_CHN VeChn, HB_BOOL bEnableIDR);
+```
+**Function Description**
+> Enables IDR frames.
+
+**Parameter Descriptions**
+
+**Return Values**
+
+| Return Value | Description |
+| :---------: | :----------|
+|     0      |         Success        |
+| Non-zero   | Failure; refer to error codes. |
+
+**Note**
 > None
+
+**Reference Code**
+> None (No available example)
 
 ### HB_VENC_SetH265SliceSplit
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VENC_SetH265SliceSplit(VENC_CHN VeChn, const VENC_H265_SLICE_SPLIT_S *pstSliceSplit);
 ```
-【Function Description】
-> Set the slice split configuration of H.265 encoding.
+**Function Description**
+> Sets H.265 slice splitting configurations.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-|   Parameter Name   | Description                                     | Input/Output |
-| :------------: | :--------------------------------------------- | :----------: |
-|     VeChn      | Channel number of the encoding.<br/>Value range: [0, VENC_MAX_CHN_NUM) |    Input     |
-| pstSliceSplit  | Slice split parameters of H.265 bitstream        |    Input     |
+| Parameter Name | Description                                             | Input/Output |
+| :------------- | :------------------------------------------------------ | :----------: |
+|     VeChn     | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |     Input    |
+| pstSliceSplit | H.265 stream slice splitting parameters                  |     Input    |
 
-【Return Value】
+**Return Values**
 
 | Return Value | Description |
-| :----: | :-----------------|
-|   0    |   Success |
-|  Non-zero   |  Failure, see error code. |
+| :---------: | :----------|
+|     0      |         Success        |
+| Non-zero   | Failure; refer to error codes. |
 
-【Notes】
+**Note**
 > None
 
-【Code Reference】
+**Reference Code**
 ```C
     int32_t s32Ret = 0;
     VENC_CHN VeChn = 0;
@@ -1321,86 +1393,91 @@ int32_t HB_VENC_SetH265SliceSplit(VENC_CHN VeChn, const VENC_H265_SLICE_SPLIT_S 
     VENC_CHN_ATTR_S m_VencChnAttr;
     memset(&m_VencChnAttr, 0, sizeof(VENC_CHN_ATTR_S));
     m_VencChnAttr.stVencAttr.enType = PT_H265;
-```m_VencChnAttr.stVencAttr.u32PicWidth = Width;
-m_VencChnAttr.stVencAttr.u32PicHeight = Height;
-m_VencChnAttr.stVencAttr.enMirrorFlip = DIRECTION_NONE;
-m_VencChnAttr.stVencAttr.enRotation = CODEC_ROTATION_0;
-m_VencChnAttr.stVencAttr.stCropCfg.bEnable = HB_FALSE;
-m_VencChnAttr.stGopAttr.u32GopPresetIdx = 2;
-m_VencChnAttr.stGopAttr.s32DecodingRefreshType = 2;
-m_VencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H265CBR;
-VENC_RC_ATTR_S *pstRcParam = &(m_VencChnAttr.stRcAttr);
-s32Ret = HB_VENC_GetRcParam(VeChn, pstRcParam);
-pstRcParam->stH265Cbr.u32BitRate = 3000;
-pstRcParam->stH265Cbr.u32FrameRate = 30;
-pstRcParam->stH265Cbr.u32IntraPeriod = 30;
-pstRcParam->stH265Cbr.u32VbvBufferSize = 3000;
-s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
+    m_VencChnAttr.stVencAttr.u32PicWidth = Width;
+    m_VencChnAttr.stVencAttr.u32PicHeight = Height;
+    m_VencChnAttr.stVencAttr.enMirrorFlip = DIRECTION_NONE;
+    m_VencChnAttr.stVencAttr.enRotation = CODEC_ROTATION_0;
+    m_VencChnAttr.stVencAttr.stCropCfg.bEnable = HB_FALSE;
+    m_VencChnAttr.stGopAttr.u32GopPresetIdx = 2;
+    m_VencChnAttr.stGopAttr.s32DecodingRefreshType = 2;
+    m_VencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H265CBR;
+    VENC_RC_ATTR_S *pstRcParam = &(m_VencChnAttr.stRcAttr);
+    s32Ret = HB_VENC_GetRcParam(VeChn, pstRcParam);
+    pstRcParam->stH265Cbr.u32BitRate = 3000;
+    pstRcParam->stH265Cbr.u32FrameRate = 30;
+    pstRcParam->stH265Cbr.u32IntraPeriod = 30;
+    pstRcParam->stH265Cbr.u32VbvBufferSize = 3000;
+    s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
 
-HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);
-pstSliceSplit1.h265_dependent_slice_arg = 1;
-pstSliceSplit1.h265_dependent_slice_mode = 1;
-pstSliceSplit1.h265_independent_slice_arg = 1;
-pstSliceSplit1.h265_independent_slice_mode = 1;
-s32Ret = HB_VENC_SetH265SliceSplit(VeChn, &pstSliceSplit1);
+    HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);
+    pstSliceSplit1.h265_dependent_slice_arg = 1;
+    pstSliceSplit1.h265_dependent_slice_mode = 1;
+    pstSliceSplit1.h265_independent_slice_arg = 1;
+    pstSliceSplit1.h265_independent_slice_mode = 1;
+    s32Ret = HB_VENC_SetH265SliceSplit(VeChn, &pstSliceSplit1);
 
-VENC_H265_SLICE_SPLIT_S pstSliceSplit2;
-memset(&pstSliceSplit2, 0, sizeof(VENC_H265_SLICE_SPLIT_S));
-s32Ret = HB_VENC_GetH265SliceSplit(VeChn, &pstSliceSplit2);
-s32Ret = HB_VENC_DestroyChn(VeChn);
+    VENC_H265_SLICE_SPLIT_S pstSliceSplit2;
+    memset(&pstSliceSplit2, 0, sizeof(VENC_H265_SLICE_SPLIT_S));
+    s32Ret = HB_VENC_GetH265SliceSplit(VeChn, &pstSliceSplit2);
+    s32Ret = HB_VENC_DestroyChn(VeChn);
+```
+
+
 
 ### HB_VENC_GetH265SliceSplit
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VENC_GetH265SliceSplit(VENC_CHN VeChn, VENC_H265_SLICE_SPLIT_S *pstSliceSplit);
 ```
-【Function Description】
-> Get the H.265 encoding slice split configuration.
+**Function Description**
+> Retrieves the configuration for H.265 slice splitting.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-|  Parameters |                      Description                    | Input/Output |
-| :---------: | :------------------------------------------------: | :----------: |
-|   VeChn     |     Encoding channel number.<br/>Value range: [0, VENC_MAX_CHN_NUM) |    Input     |
-| pstSliceSplit |   H.265 stream slice split parameters              |     Output    |
+| Parameter Name | Description                                             | Input/Output |
+| :------------- | :------------------------------------------------------- | :----------: |
+|     VeChn      | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |      Input   |
+|  pstSliceSplit | H.265 stream's slice splitting parameters                |     Output  |
 
-【Return Value】
+**Return Values**
 
-| Return Value | Description |
-| :----------: | :---------: |
-|      0       |   Success   |
-|    Non-zero  |     Failure, see error code.    |【Attention】
+| Return Value | Description                            |
+| :---------: | :-------------------------------------- |
+|       0     | Success                                |
+| Non-zero    | Failure; see error codes for details.   |
+
+**Note**
 > None
 
-【Reference Code】
-> Reference code for HB_VENC_SetH265SliceSplit
+**Reference Code**
+HB_VENC_SetH265SliceSplit reference code
 
 ### HB_VENC_SetH265PredUnit
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VENC_SetH265PredUnit(VENC_CHN VeChn, const VENC_H265_PU_S *pstPredUnit);
 ```
-【Function Description】
-> Set the PU configuration for H.265 encoding
+**Function Description**
+> Sets the configuration for H.265 prediction unit (PU).
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name | Description                                      | Input/Output |
-| :------------: | :---------------------------------------------- | :----------: |
-|    VeChn       | Encoding channel number.<br/>Value range: [0, VENC_MAX_CHN_NUM) |   Input      |
-| pstPredUnit    | PU configuration for H.265 protocol encoding    |   Input      |
+|  Parameter Name   | Description                                             | Input/Output |
+| :---------------: | :------------------------------------------------------- | :----------: |
+|       VeChn       | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |      Input   |
+|  pstPredUnit      | H.265 protocol's PU configuration for the encoding channel |      Input   |
 
-【Return Value】
+**Return Values**
 
-| Return Value |           Description |
-| :----------: | :------------------- |
-|      0       |           Success    |
-| Non-zero value| Failure, see error code. |
+| Return Value | Description                            |
+| :---------: | :-------------------------------------- |
+|       0     | Success                                |
+| Non-zero    | Failure; see error codes for details.   |
 
-【Attention】
+**Note**
 > None
 
-【Reference Code】
+**Reference Code**
 ```C
     int32_t s32Ret = 0;
     VENC_CHN VeChn = 0;
@@ -1418,83 +1495,87 @@ int32_t HB_VENC_SetH265PredUnit(VENC_CHN VeChn, const VENC_H265_PU_S *pstPredUni
     m_VencChnAttr.stVencAttr.enMirrorFlip = DIRECTION_NONE;
     m_VencChnAttr.stVencAttr.enRotation = CODEC_ROTATION_0;
     m_VencChnAttr.stVencAttr.stCropCfg.bEnable = HB_FALSE;
-```m_VencChnAttr.stGopAttr.u32GopPresetIdx = 2;
-m_VencChnAttr.stGopAttr.s32DecodingRefreshType = 2;
-m_VencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H265CBR;
-VENC_RC_ATTR_S *pstRcParam = &(m_VencChnAttr.stRcAttr);
-s32Ret = HB_VENC_GetRcParam(VeChn, pstRcParam);
-pstRcParam->stH265Cbr.u32BitRate = 3000;
-pstRcParam->stH265Cbr.u32FrameRate = 30;
-pstRcParam->stH265Cbr.u32IntraPeriod = 30;
-pstRcParam->stH265Cbr.u32VbvBufferSize = 3000;
-s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
+    m_VencChnAttr.stGopAttr.u32GopPresetIdx = 2;
+    m_VencChnAttr.stGopAttr.s32DecodingRefreshType = 2;
+    m_VencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H265CBR;
+    VENC_RC_ATTR_S *pstRcParam = &(m_VencChnAttr.stRcAttr);
+    s32Ret = HB_VENC_GetRcParam(VeChn, pstRcParam);
+    pstRcParam->stH265Cbr.u32BitRate = 3000;
+    pstRcParam->stH265Cbr.u32FrameRate = 30;
+    pstRcParam->stH265Cbr.u32IntraPeriod = 30;
+    pstRcParam->stH265Cbr.u32VbvBufferSize = 3000;
+    s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
 
-pstPredUnit1.constrained_intra_pred_flag = 1;
-pstPredUnit1.intra_nxn_enable = 0;
-pstPredUnit1.max_num_merge = 1;
-pstPredUnit1.strong_intra_smoothing_enabled_flag = 1;
+    pstPredUnit1.constrained_intra_pred_flag = 1;
+    pstPredUnit1.intra_nxn_enable = 0;
+    pstPredUnit1.max_num_merge = 1;
+    pstPredUnit1.strong_intra_smoothing_enabled_flag = 1;
 
-s32Ret = HB_VENC_SetH265PredUnit(VeChn, &pstPredUnit1);
+    s32Ret = HB_VENC_SetH265PredUnit(VeChn, &pstPredUnit1);
 
-VENC_H265_PU_S pstPredUnit2;
-memset(&pstPredUnit2, 0, sizeof(VENC_H265_PU_S));
-s32Ret = HB_VENC_GetH265PredUnit(VeChn, &pstPredUnit2);
-HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);
-s32Ret = HB_VENC_DestroyChn(VeChn);
+    VENC_H265_PU_S pstPredUnit2;
+    memset(&pstPredUnit2, 0, sizeof(VENC_H265_PU_S));
+    s32Ret = HB_VENC_GetH265PredUnit(VeChn, &pstPredUnit2);
+    HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);
+    s32Ret = HB_VENC_DestroyChn(VeChn);
+```
+
+
 
 ### HB_VENC_GetH265PredUnit
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VENC_GetH265PredUnit(VENC_CHN VeChn, VENC_H265_PU_S *pstPredUnit);
 ```
-【Function Description】
-> Get PU configuration for H.265 encoding
+**Function Description**
+> Retrieves the configuration for prediction units in H.265 encoding.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-|   Parameter Name   |                  Description                  | Input/Output |
-| :----------------: | :-------------------------------------------: | :----------: |
-|       VeChn        |      Channel number for encoding.<br/>Range: [0, VENC_MAX_CHN_NUM) |    Input     |
-|    pstPredUnit     | PU configuration for H.265 encoding channel  |    Output    |
+| Parameter Name | Description                                                  | Input/Output |
+| :------------- | :------------------------------------------------------------ | :----------: |
+|    VeChn       | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |      Input   |
+|  pstPredUnit   | H.265 protocol's PU configuration                             |     Output   |
 
-【Return Value】
+**Return Values**
 
-| Return Value |       Description        |
-| :----------: | :----------------------: |
-|      0       |         Success          |
-|    Non-zero  |      Failure, see error code.    |
+| Return Value | Description                                    |
+| :----------: | :--------------------------------------------- |
+|      0       | Successful                                     |
+| Non-zero     | Failure; refer to error codes.                  |
 
-【Precautions】
-> None【参考代码】
+**Notes**
+> None
 
-> HB_VENC_SetH265PredUnit Reference Code
+**Reference Code**
+> See HB_VENC_SetH265PredUnit reference code
 
 ### HB_VENC_SetH265Trans
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VENC_SetH265Trans(VENC_CHN VeChn, const VENC_H265_TRANS_S *pstH265Trans);
 ```
-【Function Description】
-> Set the transformation and quantization configuration of H.265 encoding.
+**Function Description**
+> Sets the transformation and quantization configurations for H.265 encoding.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-|   Parameter Name   | Description                                        | Input/Output |
-| :----------------: | :------------------------------------------------- | :----------: |
-|       VeChn        | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |    Input     |
-|   pstH265Trans   | Transformation and quantization configuration of H.265 protocol encoding channel |    Input     |
+|   Parameter Name   | Description                                                  | Input/Output |
+| :----------------: | :------------------------------------------------------------ | :----------: |
+|      VeChn         | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |      Input   |
+|  pstH265Trans     | H.265 protocol's transformation and quantization settings     |     Input    |
 
-【Return Value】
+**Return Values**
 
-| Return Value |               Description |
-| :----------: | :----------------------- |
-|       0      |               Success    |
-|   Non-zero   | Failure, see error code. |
+| Return Value | Description                                    |
+| :----------: | :--------------------------------------------- |
+|      0       | Successful                                     |
+| Non-zero     | Failure; refer to error codes.                  |
 
-【Precautions】
+**Notes**
 > None
 
-【Reference Code】
+**Example Reference Code**
 ```C
     int32_t s32Ret = 0;
     VENC_CHN VeChn = 0;
@@ -1516,46 +1597,78 @@ int32_t HB_VENC_SetH265Trans(VENC_CHN VeChn, const VENC_H265_TRANS_S *pstH265Tra
     m_VencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H265CBR;
     VENC_RC_ATTR_S *pstRcParam = &(m_VencChnAttr.stRcAttr);
     s32Ret = HB_VENC_GetRcParam(VeChn, pstRcParam);
-```Set the deblocking filter parameters for H.265 encoding.
+    pstRcParam->stH265Cbr.u32BitRate = 3000;
+    pstRcParam->stH265Cbr.u32FrameRate = 30;
+    pstRcParam->stH265Cbr.u32IntraPeriod = 30;
+    pstRcParam->stH265Cbr.u32VbvBufferSize = 3000;
+    s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
+    pstH265Trans1.chroma_cb_qp_offset = 6;
+    pstH265Trans1.chroma_cr_qp_offset = 6;
+    pstH265Trans1.user_scaling_list_enable = HB_TRUE;
 
-【参数描述】
+    s32Ret = HB_VENC_SetH265Trans(VeChn, &pstH265Trans1);
+    VENC_H265_TRANS_S pstH265Trans2;
+    memset(&pstH265Trans2, 0, sizeof(VENC_H265_TRANS_S));
+    s32Ret = HB_VENC_GetH265Trans(VeChn, &pstH265Trans2);
+    s32Ret = HB_VENC_DestroyChn(VeChn);
+```
 
-|   Parameter   |                          Description                          | Input/Output |
-| :-----------: | :----------------------------------------------------------: | :----------: |
-|    VeChn      |                Channel ID for encoding.<br/>Range: [0, VENC_MAX_CHN_NUM) |    Input     |
-|  pstH265Dblk  | Deblocking filter parameters for H.265 encoding |    Input     |
 
-【返回值】
 
-| Return value |                          Description                          |
-| :----------: | :----------------------------------------------------------: |
-|      0       |                            Success                             |
-|    Non-0     |                     Failure, see error code                     |
+### HB_VENC_GetH265Trans
+**Function Declaration**
+```C
+int32_t HB_VENC_GetH265Trans(VENC_CHN VeChn, VENC_H265_TRANS_S *pstH265Trans);
+```
+**Function Description**
+> Retrieves the H.265 encoding transformation and quantization configurations.
 
-【注意事项】
+**Parameter Descriptions**
+
+| Parameter Name | Description                                             | Input/Output |
+| :-------------: | :------------------------------------------------------- | :----------: |
+|    VeChn       | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |      Input   |
+|  pstH265Trans  | H.265 protocol's encoding channel transformation/quantization settings |     Output   |
+
+**Return Values**
+
+| Return Value | Description |
+| :---------: | :---------: |
+|      0      |     Success    |
+| Non-zero   |  Failure; refer to error codes. |
+
+**Note**
 > None
 
-【参考代码】
-> There is no example provided for this function> Set deblocking configuration for H.265 encoding.
+**Reference Code**
+HB_VENC_SetH265Trans reference code
 
-【Parameter Description】
+### HB_VENC_SetH265Dblk
+**Function Declaration**
+```C
+int32_t HB_VENC_SetH265Dblk(VENC_CHN VeChn, const VENC_H265_DBLK_S *pstH265Dblk);
+```
+**Function Description**
+> Sets the H.265 encoding deblocking configuration.
 
-|  Parameter Name  | Description                            | Input/Output |
-| :--------------: | :------------------------------------- | :----------: |
-|     VeChn        | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |    Input     |
-|  pstH265Dblk     | Deblocking configuration for H.265 protocol encoding channel |    Input     |
+**Parameter Descriptions**
 
-【Return Value】
+| Parameter Name | Description                                             | Input/Output |
+| :-------------: | :------------------------------------------------------- | :----------: |
+|    VeChn       | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |      Input   |
+| pstH265Dblk    | H.265 protocol's encoding channel deblocking configuration |     Input   |
 
-| Return Value |             Description               |
-| :----------: | :----------------------------------- |
-|      0       |             Success                   |
-|    Non-zero  | Failure, see error code.              |
+**Return Values**
 
-【Note】
+| Return Value | Description |
+| :---------: | :---------: |
+|      0      |     Success    |
+| Non-zero   |  Failure; refer to error codes. |
+
+**Note**
 > None
 
-【Reference Code】
+**Example Reference Code**
 ```C
     int32_t s32Ret = 0;
     VENC_CHN VeChn = 0;
@@ -1586,32 +1699,71 @@ int32_t HB_VENC_SetH265Trans(VENC_CHN VeChn, const VENC_H265_TRANS_S *pstH265Tra
 
     HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);
     pstH265Dblk1.slice_beta_offset_div2 = 3;
-```pstH265Sao | H.265 协议编码通道的 SAO 配置                |   输入    |
+    pstH265Dblk1.slice_tc_offset_div2 = 3;
+    pstH265Dblk1.slice_deblocking_filter_disabled_flag = 1;
+    s32Ret = HB_VENC_SetH265Dblk(VeChn, &pstH265Dblk1);
+    VENC_H265_DBLK_S pstH265Dblk2;
+    memset(&pstH265Dblk2, 0, sizeof(VENC_H265_DBLK_S));
+    s32Ret = HB_VENC_GetH265Dblk(VeChn, &pstH265Dblk2);
+    s32Ret = HB_VENC_DestroyChn(VeChn);
+```
 
-【返回值】
 
-| 返回值 |               描述 |
-| :----: | :-----------------|
-|   0    |               成功 |
-|  非0   | 失败，参见错误码。 |
 
-【注意事项】
-> 无
+### HB_VENC_GetH265Dblk
+**Function Declaration**
+```C
+int32_t HB_VENC_GetH265Dblk(VENC_CHN VeChn, VENC_H265_DBLK_S *pstH265Dblk);
+```
+**Function Description**
+> Retrieves the deblocking configuration for H.265 encoding.
 
-【参考代码】
-> 无| pstH265Sao | Sao configuration for H.265 protocol encoded channel                    |   Input    |
+**Parameter Descriptions**
 
-【Return Value】
+| Parameter Name | Description                                    | Input/Output |
+| :------------- | :---------------------------------------------- | :----------: |
+|    VeChn       | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |     Input    |
+| pstH265Dblk    | H.265 protocol's deblocking configuration pointer |     Output   |
 
-| Return Value |               Description |
-| :----: | :-----------------|
-|   0    |               Success |
-|  Non-zero   | Failure, see error code. |
+**Return Values**
 
-【Notes】
+| Return Value | Description                              |
+| :----------- | :----------------------------------------|
+|      0       | Successful                                |
+| Non-zero     | Failure, refer to error codes            |
+
+**Notes**
 > None
 
-【Reference Code】
+**Reference Code**
+> See reference code for HB_VENC_SetH265Dblk
+
+### HB_VENC_SetH265Sao
+**Function Declaration**
+```C
+int32_t HB_VENC_SetH265Sao(VENC_CHN VeChn, const VENC_H265_SAO_S *pstH265Sao);
+```
+**Function Description**
+> Sets the SAO (Sample Adaptive Offset) configuration for H.265 encoding.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description                                             | Input/Output |
+| :------------- | :------------------------------------------------------- | :----------: |
+|    VeChn       | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |     Input    |
+| pstH265Sao     | H.265 protocol's SAO configuration                     |     Input    |
+
+**Return Values**
+
+| Return Value | Description                              |
+| :----------- | :----------------------------------------|
+|      0       | Successful                                |
+| Non-zero     | Failure, refer to error codes            |
+
+**Notes**
+> None
+
+**Reference Code**
 ```C
     int32_t s32Ret = 0;
     VENC_CHN VeChn = 0;
@@ -1648,83 +1800,135 @@ int32_t HB_VENC_SetH265Trans(VENC_CHN VeChn, const VENC_H265_TRANS_S *pstH265Tra
     s32Ret = HB_VENC_GetH265Sao(VeChn, &pstH265Sao2);
     HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);
     s32Ret = HB_VENC_DestroyChn(VeChn);
-```### HB_VENC_GetH265Sao
-【Function declaration】
+```
+
+
+
+### HB_VENC_GetH265Sao
+**Function Declaration**
 ```C
 int32_t HB_VENC_GetH265Sao(VENC_CHN VeChn, VENC_H265_SAO_S *pstH265Sao);
 ```
-【Function description】
-> Get the SAO configuration of H.265 encoding.
+**Function Description**
+> Retrieves the SAO configuration for H.265 encoding.
 
-【Parameter description】
+**Parameter Descriptions**
 
-| Parameter name | Description                                          | Input/Output |
-| :------------: | :--------------------------------------------------- | :----------: |
-|    VeChn       | Encoding channel number.<br/>Valid values: [0, VENC_MAX_CHN_NUM) |   Input      |
-|  pstH265Sao    | SAO configuration for H.265 protocol encoding channel |   Output     |
+| Parameter Name | Description                                                                                              | Input/Output |
+| :------------: | -------------------------------------------------------------------------------------------------------- | :----------: |
+|    VeChn      | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM)                                                       |     Input    |
+|  pstH265Sao   | Pointer to the H.265 protocol's SAO configuration for the encoding channel                                      |     Output   |
 
-【Return value】
+**Return Values**
 
-| Return value |        Description       |
-| :----------: | :---------------------- |
-|     0        |        Success           |
-|   Non-zero   |    Failure, see error codes. |
+| Return Value | Description                                                                                           |
+| :---------: | --------------------------------------------------------------------------------------------------- |
+|     0      | Success                                                                                               |
+| Non-zero   | Failure; see error codes for details.                                                                   |
 
-【Notes】
+**Notes**
 > None
 
-【Reference code】
-> Reference code for HB_VENC_SetH265Sao
+**Reference Code**
+
+HB_VENC_SetH265Sao reference code
 
 ### HB_VENC_SetIntraRefresh
-【Function declaration】
+**Function Declaration**
 ```C
 int32_t HB_VENC_SetIntraRefresh(VENC_CHN VeChn, const HB_VENC_INTRA_REFRESH_S *pstIntraRefresh);
 ```
-【Function description】
-> Set the parameters for refreshing P frames by inserting Islice.
+**Function Description**
+> Sets the parameters for I slice refresh in P frames.
 
-【Parameter description】
+**Parameter Descriptions**
 
-| Parameter name | Description                                          | Input/Output |
-| :------------: | :--------------------------------------------------- | :----------: |
-|    VeChn       | Encoding channel number.<br/>Valid values: [0, VENC_MAX_CHN_NUM) |   Input      |
-| pstIntraRefresh| Islice refreshing parameters                         |   Input      |
+| Parameter Name     | Description                                                                                             | Input/Output |
+| :----------------- | ------------------------------------------------------------------------------------------------------- | :----------: |
+|      VeChn        | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM)                                                   |     Input    |
+|  pstIntraRefresh  | Pointer to the structure containing I slice refresh settings                                               |     Input    |
 
-【Return value】
+**Return Values**
 
-| Return value |        Description       |
-| :----------: | :---------------------- |
-|     0        |        Success           |
-|   Non-zero   |    Failure, see error codes. |This function is used to get the intra refresh settings of a specified video encoding channel.
+| Return Value | Description                                                                                           |
+| :---------: | --------------------------------------------------------------------------------------------------- |
+|     0      | Success                                                                                               |
+| Non-zero   | Failure; see error codes for details.                                                                   |
 
-【参数说明】
-- VeChn: 视频编码通道号
-- pstIntraRefresh: 指向保存获取到的参数信息的结构体指针
-
-【返回值】
-- 0: 成功
-- 非0: 失败> Get parameters of P frame brushing Islice.
-
-【Parameter Description】
-
-| Parameter Name | Description                                         | Input/Output |
-| :------------: | :-------------------------------------------------- | :----------: |
-|     VeChn      | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |    Input     |
-| pstIntraRefresh   | Parameters for brushing Islice                      |    Output    |
-
-【Return Value】
-
-| Return Value | Description |
-| :----------: | :---------- |
-|      0       | Success     |
-|    Non-zero  | Failure, see error code. |
-
-【Notes】
+**Notes**
 > None
 
-【Reference Code】
-> Reference code for HB_VENC_SetIntraRefresh
+**Reference Code**
+```C
+    int32_t s32Ret = 0;
+    VENC_CHN VeChn = 0;
+    int32_t Width = 1920;
+    int32_t Height = 1080;
+
+    VENC_INTRA_REFRESH_S pstIntraRefresh1;
+    memset(&pstIntraRefresh1, 0, sizeof(VENC_INTRA_REFRESH_S));
+
+    VENC_CHN_ATTR_S m_VencChnAttr;
+    memset(&m_VencChnAttr, 0, sizeof(VENC_CHN_ATTR_S));
+    m_VencChnAttr.stVencAttr.enType = PT_H264;
+    m_VencChnAttr.stVencAttr.u32PicWidth = Width;
+    m_VencChnAttr.stVencAttr.u32PicHeight = Height;
+    m_VencChnAttr.stVencAttr.enMirrorFlip = DIRECTION_NONE;
+    m_VencChnAttr.stVencAttr.enRotation = CODEC_ROTATION_0;
+    m_VencChnAttr.stVencAttr.stCropCfg.bEnable = HB_FALSE;
+    m_VencChnAttr.stVencAttr.stAttrH264.h264_profile = 0;
+    m_VencChnAttr.stVencAttr.stAttrH264.h264_level = 0;
+    m_VencChnAttr.stGopAttr.u32GopPresetIdx = 2;
+    m_VencChnAttr.stGopAttr.s32DecodingRefreshType = 2;
+    m_VencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
+    VENC_RC_ATTR_S *pstRcParam = &(m_VencChnAttr.stRcAttr);
+    s32Ret = HB_VENC_GetRcParam(VeChn, pstRcParam);
+    pstRcParam->stH264Cbr.u32BitRate = 3000;
+    pstRcParam->stH264Cbr.u32FrameRate = 30;
+    pstRcParam->stH264Cbr.u32IntraPeriod = 30;
+    pstRcParam->stH264Cbr.u32VbvBufferSize = 3000;
+    s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
+    pstIntraRefresh1.bRefreshEnable = HB_TRUE;
+    pstIntraRefresh1.enIntraRefreshMode = INTRA_REFRESH_COLUMN;
+    pstIntraRefresh1.u32RefreshNum = 2;
+    s32Ret = HB_VENC_SetIntraRefresh(VeChn, &pstIntraRefresh1);
+    VENC_INTRA_REFRESH_S pstIntraRefresh2;
+    memset(&pstIntraRefresh2, 0, sizeof(VENC_INTRA_REFRESH_S));
+    s32Ret = HB_VENC_GetIntraRefresh(VeChn, &pstIntraRefresh2);
+    HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);
+    s32Ret = HB_VENC_DestroyChn(VeChn);
+```
+
+
+### HB_VENC_GetIntraRefresh
+**Function Declaration**
+```C
+int32_t HB_VENC_GetIntraRefresh(VENC_CHN VeChn, VENC_INTRA_REFRESH_S *pstIntraRefresh);
+```
+**Function Description**
+> Retrieves the parameters for the I slice in a P frame.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description                                                                                     | Input/Output |
+| :------------- | :----------------------------------------------------------------------------------------------- | :----------- |
+|     VeChn      | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM)                                     |    Input     |
+|  pstIntraRefresh | Structure containing the I slice refresh parameters                                             |    Output    |
+
+**Return Values**
+
+| Return Value | Description |
+| :---------: | :---------- |
+|     0      | Success     |
+| Non-zero    | Failure; see error codes. |
+
+**Note**
+> None
+
+**Reference Code (HB_VENC_SetIntraRefresh example)**
+> HB_VENC_SetIntraRefresh Reference Code
+
+
 
 ### HB_VENC_SetCuPrediction
 【Function Declaration】
@@ -1752,54 +1956,103 @@ int32_t HB_VENC_SetCuPrediction(VENC_CHN VeChn, const VENC_CU_PREDICTION_S * pst
 > None
 
 【Reference Code】
-```C
+```
     int32_t s32Ret = 0;
-``````C
-VENC_CU_PREDICTION_S pstCuPrediction2;
-memset(&pstCuPrediction2, 0, sizeof(VENC_CU_PREDICTION_S));
-s32Ret = HB_VENC_GetCuPrediction(VeChn, &pstCuPrediction2);
-```| pstCuPrediction | Tendency parameter for CU mode selection | Output |
+    VENC_CHN VeChn = 0;
+    int32_t Width = 1920;
+    int32_t Height = 1080;
 
-【Return Value】
+    VENC_CU_PREDICTION_S pstCuPrediction1;
+    memset(&pstCuPrediction1, 0, sizeof(VENC_CU_PREDICTION_S));
+    VENC_CHN_ATTR_S m_VencChnAttr;
+    memset(&m_VencChnAttr, 0, sizeof(VENC_CHN_ATTR_S));
+    m_VencChnAttr.stVencAttr.enType = PT_H265;
+    m_VencChnAttr.stVencAttr.u32PicWidth = Width;
+    m_VencChnAttr.stVencAttr.u32PicHeight = Height;
+    m_VencChnAttr.stVencAttr.enMirrorFlip = DIRECTION_NONE;
+    m_VencChnAttr.stVencAttr.enRotation = CODEC_ROTATION_0;
+    m_VencChnAttr.stVencAttr.stCropCfg.bEnable = HB_FALSE;
+    m_VencChnAttr.stGopAttr.u32GopPresetIdx = 2;
+    m_VencChnAttr.stGopAttr.s32DecodingRefreshType = 2;
+    m_VencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H265CBR;
+    VENC_RC_ATTR_S *pstRcParam = &(m_VencChnAttr.stRcAttr);
+    s32Ret = HB_VENC_GetRcParam(VeChn, pstRcParam);
+    pstRcParam->stH265Cbr.u32BitRate = 3000;
+    pstRcParam->stH265Cbr.u32FrameRate = 30;
+    pstRcParam->stH265Cbr.u32IntraPeriod = 30;
+    pstRcParam->stH265Cbr.u32VbvBufferSize = 3000;
+    s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
 
-| Return Value | Description |
-| :----: | :-----------------|
-|   0    | Success |
-|  Non-zero   | Failure, see error code. |
+    HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);
+    pstCuPrediction1.mode_decision_enable = HB_TRUE;
+    pstCuPrediction1.pu04_delta_rate = 2;
+    pstCuPrediction1.cu32_merge_delta_rate = 3;
+    s32Ret = HB_VENC_SetCuPrediction(VeChn, &pstCuPrediction1);
 
-【Note】
+    VENC_CU_PREDICTION_S pstCuPrediction2;
+    memset(&pstCuPrediction2, 0, sizeof(VENC_CU_PREDICTION_S));
+    s32Ret = HB_VENC_GetCuPrediction(VeChn, &pstCuPrediction2);
+    s32Ret = HB_VENC_DestroyChn(VeChn);
+```
+
+
+
+### HB_VENC_GetCuPrediction
+**Function Declaration:**
+```C
+int32_t HB_VENC_GetCuPrediction(VENC_CHN VeChn, VENC_CU_PREDICTION_S * pstCuPrediction);
+```
+**Function Description:**
+> Retrieves the tendency configuration for CU modes.
+
+**Parameter Descriptions:**
+
+| Parameter Name | Description                                                                                   | Input/Output |
+| :------------- | :--------------------------------------------------------------------------------------------- | :----------- |
+|    VeChn       | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM)                                      |    Input    |
+| pstCuPrediction | Pointer to the CU prediction preference parameters                                            |    Output   |
+
+**Return Values:**
+
+| Return Value | Description                           |
+| :---------: | :---------------------------------- |
+|      0      | Successful                           |
+| Non-zero    | Failure, refer to error codes        |
+
+**Caution:**
 > None
 
-【Reference Code】
-> Reference code for HB_VENC_SetCuPrediction
+**Reference Code:**
+> See the reference code for HB_VENC_SetCuPrediction
 
 ### HB_VENC_SetJpegParam
-【Function Declaration】
+**Function Declaration:**
 ```C
 int32_t HB_VENC_SetJpegParam(VENC_CHN VeChn, const VENC_JPEG_PARAM_S * pstJpegParam);
 ```
-【Description】
-> Set the advanced parameters for JPEG protocol encoding channel.
+**Function Description:**
+> Sets advanced parameters for JPEG protocol encoding channels.
 
-【Parameter Description】
+**Parameter Descriptions:**
 
-|   Parameter Name   | Description                                             | Input/Output |
-| :----------: | :----------------------------------------------- | :-------: |
-|    VeChn     | Encoding channel number.<br/>Value range: [0, VENC_MAX_CHN_NUM) |   Input    |
-| pstJpegParam | Pointer to the encoding channel attributes                                 |   Input    |
+| Parameter Name | Description                                                                                         | Input/Output |
+| :------------- | :-------------------------------------------------------------------------------------------------- | :----------- |
+|    VeChn       | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM)                                          |    Input    |
+| pstJpegParam  | Pointer to the JPEG encoding channel attributes                                                       |    Input    |
 
-【Return Value】
+**Return Values:**
 
-| Return Value | Description |
-| :----: | :-----------------|
-|   0    | Success |
-|  Non-zero   | Failure, see error code. |
+| Return Value | Description                           |
+| :---------: | :---------------------------------- |
+|      0      | Successful                           |
+| Non-zero    | Failure, refer to error codes        |
 
-【Note】
+**Caution:**
 > None
 
-【Reference Code】
-> Reference code for HB_VENC_SetJpegParam
+**Reference Code:**
+> Refer to the reference code for HB_VENC_SetJpegParam
+
 
 ### HB_VENC_GetJpegParam
 【Function Declaration】
@@ -1856,7 +2109,7 @@ int32_t HB_VENC_SetJpegParam(VENC_CHN VeChn, const VENC_MJPEG_PARAM_S * pstMjpeg
 ```C
     int32_t s32Ret = 0;
     VENC_CHN VeChn0 = 0;
-```VENC_CHN VeChn1 = 1;
+    VENC_CHN VeChn1 = 1;
 
     int32_t Width = 1920;
     int32_t Height = 1080;
@@ -1905,7 +2158,10 @@ int32_t HB_VENC_SetJpegParam(VENC_CHN VeChn, const VENC_MJPEG_PARAM_S * pstMjpeg
     HB_VENC_SetMjpegParam(VeChn1, &pstMjpegParam);
     HB_VENC_GetMjpegParam(VeChn1, &pstMjpegParam);
     s32Ret = HB_VENC_DestroyChn(VeChn0);
-    s32Ret = HB_VENC_DestroyChn(VeChn1);### HB_VENC_GetMjpegParam
+    s32Ret = HB_VENC_DestroyChn(VeChn1);
+```
+
+### HB_VENC_GetMjpegParam
 【Function Declaration】
 ```C
 int32_t HB_VENC_GetMjpegParam(VENC_CHN VeChn, VENC_MJPEG_PARAM_S *pstMjpegParam);
@@ -1933,105 +2189,159 @@ int32_t HB_VENC_GetMjpegParam(VENC_CHN VeChn, VENC_MJPEG_PARAM_S *pstMjpegParam)
 【Reference Code】
 > Reference code of HB_VENC_SetMjpegParam
 
+
+
 ### HB_VENC_GetFd
-【Function Declaration】
+**Function Declaration:**
 ```C
-int32_t HB_VENC_GetFd(VENC_CHN VeChn, int32_t *fd);
+int32_t HB_VENC_GetFd(VENC_CHN VeChn, int32_t *fd)
 ```
-【Function Description】
-> Get the device file handle corresponding to the encoding channel.
+**Function Description:**
+> Retrieves the file descriptor for the encoding channel.
 
-【Parameter Description】
+**Parameter Descriptions:**
 
-| Parameter Name | Description                                               | Input/Output |
-| :------------: | :-------------------------------------------------------- | :-----------: |
-|     VeChn      | Encoding channel number. <br/>Range: [0, VENC_MAX_CHN_NUM) |     Input     |
-|       fd       | Return encoding channel file handle                       |     Input     |
+| Parameter Name | Description                                             | Input/Output |
+| :------------- | :--------------------------------------------------------------- | :-------: |
+| VeChn          | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |   Input    |
+| fd             | Pointer to return the encoding channel file descriptor         |   Input    |
 
-【Return Value】
+**Return Values:**
 
-| Return Value | Description     |
-| :----------: | :-------------- |
-|      0       | Success         ||  HB_VENC_CloseFd  |
-【Function Declaration】
-```C
-int32_t HB_VENC_GetFd(VENC_CHN VeChn, int32_t fd)
-```【Function Description】
-> Close the device file handle corresponding to the encoding channel.
+| Return Value | Description |
+| :---------: | :---------: |
+|     0      | Success    |
+| Non-zero    | Failure, refer to error codes. |
 
-【Parameter Description】
-
-| Parameter Name | Description                                       | Input/Output |
-| :------------: | :------------------------------------------------ | :----------: |
-|    VeChn       | Encoding channel number.<br/>Value range: [0, VENC_MAX_CHN_NUM) |     Input    |
-|      fd        | Input encoding channel file handle                |     Input    |
-
-【Return Value】
-
-| Return Value |      Description    |
-| :----------: | :------------------ |
-|       0      |      Success        |
-|     Non-zero | Failed, refer to error code. |
-
-【Note】
+**Note:**
 > None
 
-【Reference Code】
-> Reference code for HB_VENC_GetFd
+**Reference Code:**
+```C
+    int32_t s32Ret = 0;
+    VENC_CHN VeChn = 0;
+    int32_t Width = 1920;
+    int32_t Height = 1080;
+    int32_t Test_fd1 = 0;
+    int32_t Test_fd2 = 0;
+
+    VENC_CU_PREDICTION_S pstCuPrediction1;
+    memset(&pstCuPrediction1, 0, sizeof(VENC_CU_PREDICTION_S));
+    VENC_CHN_ATTR_S m_VencChnAttr;
+    memset(&m_VencChnAttr, 0, sizeof(VENC_CHN_ATTR_S));
+    m_VencChnAttr.stVencAttr.enType = PT_H264;
+    m_VencChnAttr.stVencAttr.u32PicWidth = Width;
+    m_VencChnAttr.stVencAttr.u32PicHeight = Height;
+    m_VencChnAttr.stVencAttr.enMirrorFlip = DIRECTION_NONE;
+    m_VencChnAttr.stVencAttr.enRotation = CODEC_ROTATION_0;
+    m_VencChnAttr.stVencAttr.stCropCfg.bEnable = HB_FALSE;
+    m_VencChnAttr.stVencAttr.stAttrH264.h264_profile = 0;
+    m_VencChnAttr.stVencAttr.stAttrH264.h264_level = 0;
+    m_VencChnAttr.stGopAttr.u32GopPresetIdx = 2;
+    m_VencChnAttr.stGopAttr.s32DecodingRefreshType = 2;
+    m_VencChnAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
+    VENC_RC_ATTR_S *pstRcParam = &(m_VencChnAttr.stRcAttr);
+    s32Ret = HB_VENC_GetRcParam(VeChn, pstRcParam);
+    pstRcParam->stH264Cbr.u32BitRate = 3000;
+    pstRcParam->stH264Cbr.u32FrameRate = 30;
+    pstRcParam->stH264Cbr.u32IntraPeriod = 30;
+    pstRcParam->stH264Cbr.u32VbvBufferSize = 3000;
+
+    s32Ret = HB_VENC_CreateChn(VeChn, &m_VencChnAttr);
+    HB_VENC_SetChnAttr(VeChn, &m_VencChnAttr);
+    s32Ret = HB_VENC_GetFd(VeChn, &Test_fd1);
+    s32Ret = HB_VENC_GetFd(VeChn, &Test_fd2);
+    s32Ret = HB_VENC_CloseFd(VeChn, Test_fd1);
+    s32Ret = HB_VENC_CloseFd(VeChn, Test_fd2);
+    s32Ret = HB_VENC_DestroyChn(VeChn);
+```
+
+### HB_VENC_CloseFd
+**Function Declaration:**
+```C
+int32_t HB_VENC_CloseFd(VENC_CHN VeChn, int32_t fd)
+```
+**Function Description:**
+> Closes the device file handle associated with the encoding channel.
+
+**Parameter Descriptions:**
+
+| Parameter Name | Description                                             | Input/Output |
+| :------------- | :--------------------------------------------------------------- | :-------: |
+| VeChn          | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |   Input    |
+| fd             | Input encoding channel file descriptor                     |   Input    |
+
+**Return Values:**
+
+| Return Value | Description |
+| :---------: | :---------: |
+|     0      | Success    |
+| Non-zero    | Failure, refer to error codes. |
+
+**Note:**
+> None
+
+**Reference Code (HB_VENC_GetFd):**
+> See the previous reference code for HB_VENC_GetFd.
 
 ### HB_VENC_QueryStatus
-【Function Declaration】
+**Function Declaration:**
 ```C
-int32_t HB_VENC_QueryStatus(VENC_CHN VeChn, , VENC_CHN_STATUS_S *pstStatus)
+int32_t HB_VENC_QueryStatus(VENC_CHN VeChn, VENC_CHN_STATUS_S *pstStatus)
 ```
-【Function Description】
-> Get the status of the encoding channel.
+**Function Description:**
+> Queries the status of the encoding channel.
 
-【Parameter Description】
+**Parameter Descriptions:**
 
-| Parameter Name | Description                                       | Input/Output |
-| :------------: | :------------------------------------------------ | :----------: |
-|    VeChn       | Encoding channel number.<br/>Value range: [0, VENC_MAX_CHN_NUM) |     Input    |
-| pstStatus      | Pointer to the status of the encoding channel     |     Input    |
+| Parameter Name | Description                                             | Input/Output |
+| :------------- | :--------------------------------------------------------------- | :-------: |
+| VeChn          | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |   Input    |
+| pstStatus      | Pointer to the encoding channel status structure            |   Input    |
 
-【Return Value】
+**Return Values:**
 
-| Return Value |      Description    |
-| :----------: | :------------------ |
-|       0      |      Success        |
-|     Non-zero | Failed, refer to error code. |
+| Return Value | Description |
+| :---------: | :---------: |
+|     0      | Success    |
+| Non-zero    | Failure, refer to error codes. |
 
-【Note】
+**Note:**
 > None
 
-【Reference Code】### HB_VENC_InserUserData
-【Function Declaration】
+**Reference Code:**
+
+### HB_VENC_InserUserData
+**Function Declaration:**
 ```C
 int32_t HB_VENC_InserUserData(VENC_CHN VeChn, uint8_t *pu8Data,
                             uint32_t u32Len)
 ```
-【Function Description】
-> Insert user data into encoding channel.
+**Function Description:**
+> Inserts user data into the encoding channel.
 
-【Parameter Description】
+**Parameter Descriptions:**
 
-| Parameter Name | Description                                                | Input/Output |
-| :------------: | :-------------------------------------------------------- | :----------: |
-|     VeChn      | Encoding channel number.<br/>Value Range: [0, VENC_MAX_CHN_NUM) |     Input    |
-|    pu8Data     | Pointer to the user data                                  |     Input    |
-|     u32Len     | Length of the user data                                   |     Input    |
+| Parameter Name | Description                                             | Input/Output |
+| :------------- | :--------------------------------------------------------------- | :-------: |
+| VeChn          | Encoding channel number.<br/>Range: [0, VENC_MAX_CHN_NUM) |   Input    |
+| pu8Data        | Pointer to user data                                      |   Input    |
+| u32Len         | Length of user data                                       |   Input    |
 
-【Return Value】
+**Return Values:**
 
-| Return Value |       Description      |
-| :----------: | :--------------------- |
-|      0       |        Success         |
-|     Non-0    | Failure, see error code.|
+| Return Value | Description |
+| :---------: | :---------: |
+|     0      | Success    |
+| Non-zero    | Failure, refer to error codes. |
 
-【Notes】
+**Note:**
 > None
 
-【Reference Code】
+**Reference Code:**
+> See the previous reference code for HB_VENC_GetFd, as no separate reference code is provided for this function.
+
+
 
 ### HB_VENC_SetChnParam
 【Function Declaration】
@@ -2151,7 +2461,8 @@ int32_t HB_VENC_SendFrameEx(VENC_CHN VeChn, const USER_FRAME_INFO_S *pstFrame, i
 
 【Parameter Description】
 
-|   Parameter Name   | Description                                    | Input/Output || :---------: | :----------------------------------------------- | :-------: |
+|   Parameter Name   | Description | Input/Output |
+| :---------: | :----------------------------------------------- | :-------: |
 |    VeChn    | Channel number for encoding. <br/>Value range: [0, VENC_MAX_CHN_NUM) |   Input    |
 |  pstFrame   | Pointer to the structure of original image information.                           |   Input    |
 | s32MilliSec | Timeout                                     |   Input    |
@@ -2301,9 +2612,11 @@ typedef enum HB_PIXEL_FORMAT_E {
     HB_PIXEL_FORMAT_NV24,
     HB_PIXEL_FORMAT_NV42,
     HB_PIXEL_FORMAT_YUV440P,
-```HB_PIXEL_FORMAT_YUV400,
+    HB_PIXEL_FORMAT_YUV400,
     HB_PIXEL_FORMAT_TOTAL,
 } PIXEL_FORMAT_E;
+```
+
 
 ### PAYLOAD_TYPE_E
 【Description】
@@ -2350,7 +2663,7 @@ typedef enum {
     PT_MPEG2VIDEO = 36,
     PT_AAC = 37,
     PT_WMA9STD = 38,
-```PT_HEAAC = 39,
+    PT_HEAAC = 39,
     PT_PCM_VOICE = 40,
     PT_PCM_AUDIO = 41,
     PT_AACLC = 42,
@@ -2389,6 +2702,7 @@ typedef enum {
     PT_AMRWB = 1003,
     PT_BUTT
 } PAYLOAD_TYPE_E;
+```
 
 【Member Description】
 
@@ -2449,10 +2763,12 @@ typedef enum HB_VENC_H264_PROFILE_E {
     HB_H264_PROFILE_MP,
     HB_H264_PROFILE_EXTENDED,
     HB_H264_PROFILE_HP,
-```HB_H264_PROFILE_HIGH10,
+    HB_H264_PROFILE_HIGH10,
 	HB_H264_PROFILE_HIGH422,
 	HB_H264_PROFILE_HIGHT444
 } VENC_H264_PROFILE_E;
+```
+
 
 ### HB_VENC_H264_LEVEL
 【Description】
@@ -2489,26 +2805,68 @@ typedef enum HB_VENC_H264_LEVEL {
 【Structure Definition】
 ```C
 typedef enum HB_VENC_H265_LEVEL {
-	HB_H265_LEVEL_UNSPECIFIED,
-	HB_H265_LEVEL1 = 30,
-	HB_H265_LEVEL2 = 60,
-	HB_H265_LEVEL2_1 = 63,
-	HB_H265_LEVEL3 = 90,
-	HB_H265_LEVEL3_1 = 93,
-	HB_H265_LEVEL4 = 120,
-	HB_H265_LEVEL4_1 = 123,
-	HB_H265_LEVEL5 = 150,
-```typedef struct HB_VENC_ATTR_H265_S {
-    VENC_H265_PROFILE_E h265_profile;
-    HB_H265_LEVEL_E h265_level;
-} VENC_ATTR_H265_S;
+    HB_H265_LEVEL_UNSPECIFIED,
+    HB_H265_LEVEL1 = 30,
+    HB_H265_LEVEL2 = 60,
+    HB_H265_LEVEL2_1 = 63,
+    HB_H265_LEVEL3 = 90,
+    HB_H265_LEVEL3_1 = 93,
+    HB_H265_LEVEL4 = 120,
+    HB_H265_LEVEL4_1 = 123,
+    HB_H265_LEVEL5 = 150,
+    HB_H265_LEVEL5_1 = 153,
+} HB_H265_LEVEL_E;
 ```
-【成员说明】
 
-|     成员      |             含义              |
-| :-----------: | :---------------------------: |
-| h265_profile  | H265 profile，不可动态配置。  |
-|  h265_level   |  H265 level，不可动态配置。   |typedef struct HB_VENC_ATTR_H265_S {
+
+
+### CODEC_RECT_S
+**Description**
+> Defines a structure for rectangle region information.
+
+**Struct Definition**
+```C
+typedef struct HB_CODEC_RECT_S {
+    int32_t s32X;
+    int32_t s32Y;
+    uint32_t u32Width;
+    uint32_t u32Height;
+} CODEC_RECT_S;
+```
+**Member Descriptions**
+
+|   Member    |  Meaning  |
+| :-------: | :----: |
+|   s32X    | Horizontal coordinate |
+|   s32Y    | Vertical coordinate |
+| u32Width  | Width |
+| u32Height | Height |
+
+### VENC_ATTR_H264_S
+**Description**
+> Defines a structure for H.264 encoding attributes.
+
+**Struct Definition**
+```C
+typedef struct HB_VENC_ATTR_H264_S {
+    VENC_H264_PROFILE_E h264_profile;
+    HB_H264_LEVEL_E h264_level;
+} VENC_ATTR_H264_S;
+```
+**Member Descriptions**
+
+|     Member     |             Meaning             |
+| :----------: | :--------------------------: |
+| h264_profile | H264 profile, cannot be dynamically configured. |
+|  h264_level  | H264 level, cannot be dynamically configured. |
+
+### VENC_ATTR_H265_S
+**Description**
+> Defines a structure for H.265 encoding attributes.
+
+**Struct Definition**
+```C
+typedef struct HB_VENC_ATTR_H265_S {
     HB_BOOL main_still_picture_profile_enable;
     int32_t s32h265_tier;
     HB_BOOL transform_skip_enabled_flag;
@@ -2517,64 +2875,108 @@ typedef enum HB_VENC_H265_LEVEL {
     uint32_t wpp_Enable;
     HB_H265_LEVEL_E h265_level;
 } VENC_ATTR_H265_S;
-
-【Member Description】
+```
+**Member Descriptions**
 
 |               Member                |                         Meaning                          |
 | :-------------------------------: | :---------------------------------------------------: |
-| main_still_picture_profile_enable |  Enable H265 main still picture profile, not dynamically configurable.  |
-|           s32h265_tier            |           Set H265 tier information, not dynamically configurable.           |
-|    transform_skip_enabled_flag    | Whether to enable transform skip for intra CU, not dynamically configurable.  |
-|           lossless_mode           |           Enable lossless encoding mode, not dynamically configurable.            |
-|            tmvp_Enable            | Enable temporal motion vector prediction, not dynamically configurable. |
-|            wpp_Enable             |                Enable weighted prediction, not dynamically configurable.                |
-|            h265_level             |               H265 level, not dynamically configurable.               |
+| main_still_picture_profile_enable | Enables H265 main still picture profile, cannot be dynamically configured. |
+|           s32h265_tier            | Sets H265 tier information, cannot be dynamically configured. |
+|    transform_skip_enabled_flag    | Enables transform skip for intra CU, cannot be dynamically configured. |
+|           lossless_mode           | Enables lossless encoding mode, cannot be dynamically configured. |
+|            tmvp_Enable            | Enables temporal motion vector prediction, cannot be dynamically configured. |
+|            wpp_Enable             | Enables wpp, cannot be dynamically configured. |
+|            h265_level             | H265 level, cannot be dynamically configured. |
+
+
 
 ### VENC_ATTR_MJPEG_S
-【Description】
-> Definition of MJPEG encoding attribute structure.
 
-【Structure Definition】
+**Description**
+> Defines the structure for MJPEG encoding attributes.
+
+**Structure Definition**
 ```C
 typedef struct HB_VENC_ATTR_MJPEG_S {
     uint32_t restart_interval;
     HB_BOOL huff_table_valid;
-	uint8_t huff_luma_dc_bits[16];
-	uint8_t huff_luma_dc_val[16];
-	uint8_t huff_luma_ac_bits[16];
-	uint8_t huff_luma_ac_val[256];
-	uint8_t huff_chroma_dc_bits[16];
-	uint8_t huff_chroma_ac_bits[16];
-	uint8_t huff_chroma_dc_val[16];
-	uint8_t huff_chroma_ac_val[256];
-	HB_BOOL extended_sequential;
+    uint8_t huff_luma_dc_bits[16];
+    uint8_t huff_luma_dc_val[16];
+    uint8_t huff_luma_ac_bits[16];
+    uint8_t huff_luma_ac_val[256];
+    uint8_t huff_chroma_dc_bits[16];
+    uint8_t huff_chroma_ac_bits[16];
+    uint8_t huff_chroma_dc_val[16];
+    uint8_t huff_chroma_ac_val[256];
+    HB_BOOL extended_sequential;
 } VENC_ATTR_MJPEG_S;
 ```
 
-【Member Description】
+**Member Descriptions**
 
-|        Member         |                           Meaning                            |
-| :-----------------: | :-------------------------------------------------------: |
-|  restart_interval   | Specify the number of MCU included in an independent scan sequence, not dynamically configurable. |
-|  huff_table_valid   |             Whether to enable huffman table, not dynamically configurable.             |
-|  huff_luma_dc_bits  |        Huffman Luma DC bit length table, not dynamically configurable.        ||        Member         |                              Meaning                              |
-| :-------------------: | :---------------------------------------------------------------: |
-|     dcf_enable        |              Whether to enable dcf, cannot be dynamically configured.              |
-|  restart_interval     | Number of MCU included in an independent scan sequence, cannot be dynamically configured.   |
-|   quality_factor      | Quality factor, the larger the value, the lower the compression ratio, the smaller the encoding quality loss, can be dynamically configured. |
-|  huff_table_valid     |               Whether to enable Huffman table, cannot be dynamically configured.               |
-|  huff_luma_dc_bits    |          Huffman luminance DC bit length table, cannot be dynamically configured.           |
-|  huff_luma_dc_val     |           Huffman luminance DC huffvalue table, cannot be dynamically configured.           |
-|  huff_luma_ac_bits    |          Huffman luminance AC bit length table, cannot be dynamically configured.          |
-|  huff_luma_ac_val     |           Huffman luminance AC huffvalue table, cannot be dynamically configured.           |
-| huff_chroma_dc_bits   |          Huffman chroma DC bit length table, cannot be dynamically configured.          |
-| huff_chroma_ac_bits   |          Huffman chroma AC bit length table, cannot be dynamically configured.           |
-| huff_chroma_dc_val    |           Huffman chroma DC huffvalue table, cannot be dynamically configured.           |
-| huff_chroma_ac_val    |           Huffman chroma AC huffvalue table, cannot be dynamically configured.           |
-| extended_sequential   |              12-bit mode, cannot be dynamically configured.              |【Description】
-> Define the structure of the encoder properties.
+| **Member**          |                          **Meaning**                           |
+| :------------------: | :--------------------------------------------------------: |
+| restart_interval   | The number of MCU (Motion Compensation Unit) in an independent scan sequence, not dynamically configurable. |
+| huff_table_valid   | Enables/disables the Huffman table, not dynamically configurable. |
+| huff_luma_dc_bits  | Huffman brightness DC bit length table, not dynamically configurable. |
+| huff_luma_dc_val   | Huffman brightness DC huffvalue table, not dynamically configurable. |
+| huff_luma_ac_bits  | Huffman brightness AC bit length table, not dynamically configurable. |
+| huff_luma_ac_val   | Huffman brightness AC huffvalue table, not dynamically configurable. |
+| huff_chroma_dc_bits | Huffman chroma DC bit length table, not dynamically configurable. |
+| huff_chroma_ac_bits | Huffman chroma AC bit length table, not dynamically configurable. |
+| huff_chroma_dc_val  | Huffman chroma DC huffvalue table, not dynamically configurable. |
+| huff_chroma_ac_val  | Huffman chroma AC huffvalue table, not dynamically configurable. |
+| extended_sequential | A 12-bit mode, not dynamically configurable. |
 
-【Structure Definition】
+
+
+### VENC_ATTR_JPEG_S
+**Description**
+> Defines the structure for JPEG encoding attributes.
+
+**Structure Definition**
+```C
+typedef struct HB_VENC_ATTR_JPEG_S {
+    HB_BOOL dcf_enable;
+    uint32_t restart_interval;
+    uint32_t quality_factor;
+    HB_BOOL huff_table_valid;
+    uint8_t huff_luma_dc_bits[16];
+    uint8_t huff_luma_dc_val[16];
+    uint8_t huff_luma_ac_bits[16];
+    uint8_t huff_luma_ac_val[256];
+    uint8_t huff_chroma_dc_bits[16];
+    uint8_t huff_chroma_ac_bits[16];
+    uint8_t huff_chroma_dc_val[16];
+    uint8_t huff_chroma_ac_val[256];
+    HB_BOOL extended_sequential;
+} VENC_ATTR_JPEG_S;
+```
+**Member Descriptions**
+
+| **Member**       | **Meaning**                                                                                   |
+| :--------------: | :-----------------------------------------------------------------------------------------------: |
+| dcf_enable       | Enables DCF (Difference Coefficient Format), not dynamically configurable.                        |
+| restart_interval | Number of MCU (Minimum Coding Units) in an independent scan sequence, not configurable.          |
+| quality_factor   | Quality factor, larger values result in lower compression rate, less loss, and better quality, dynamic. |
+| huff_table_valid | Enables Huffman tables, not configurable.                                                       |
+| huff_luma_dc_bits | Huffman luma DC bit length table, not configurable.                                            |
+| huff_luma_dc_val | Huffman luma DC huffvalue table, not configurable.                                             |
+| huff_luma_ac_bits | Huffman luma AC bit length table, not configurable.                                           |
+| huff_luma_ac_val | Huffman luma AC huffvalue table, not configurable.                                             |
+| huff_chroma_dc_bits | Huffman chroma DC bit length table, not configurable.                                          |
+| huff_chroma_ac_bits | Huffman chroma AC bit length table, not configurable.                                         |
+| huff_chroma_dc_val | Huffman chroma DC huffvalue table, not configurable.                                          |
+| huff_chroma_ac_val | Huffman chroma AC huffvalue table, not configurable.                                         |
+| extended_sequential | 12-bit mode, not configurable.                                                                |
+
+
+
+### VENC_ATTR_S
+**Description**
+> Defines the structure for encoder attributes.
+
+**Struct Definition**
 ```C
 typedef struct HB_VENC_ATTR_S {
     PAYLOAD_TYPE_E enType;
@@ -2600,31 +3002,34 @@ typedef struct HB_VENC_ATTR_S {
     };
 } VENC_ATTR_S;
 ```
+**Member Descriptions**
 
-【Member Description】
+| **Member** | **Meaning** |
+| --- | --- |
+| enType | Encoding protocol type, cannot be dynamically configured. |
+| u32PicWidth | Encoded image width, cannot be dynamically configured. |
+| u32PicHeight | Encoded image height, cannot be dynamically configured. |
+| enPixelFormat | Pixel format, cannot be dynamically configured. |
+| u32FrameBufferCount | Number of input FrameBuffer caches, cannot be dynamically configured. |
+| u32BitStreamBufferCount | Number of output bitstream buffer zones, cannot be dynamically configured. |
+| HB_BOOL bExternalFreamBuffer | Whether to use user-provided input buffer, cannot be dynamically configured. |
+| u32BitStreamBufSize | Size of the output bitstream buffer, cannot be dynamically configured. |
+| enRotation | Rotation property, cannot be dynamically configured. |
+| enMirrorFlip | Mirroring property, cannot be dynamically configured. |
+| stCropCfg | Cropping configuration, cannot be dynamically configured. |
+| bEnableUserPts | Whether to use user-provided PTS, cannot be dynamically configured. |
+| vlc_buf_size | Sets the size of the encoding task's VLC buffer, cannot be dynamically configured. |
+| s32BufJoint | Whether to use contiguous memory caching for multiple frames, cannot be dynamically configured. |
+| s32BufJointSize | Size of contiguous memory, range 4MB - 50MB |
+| stAttrH264/stAttrMjpeg<br/>stAttrJpeg/stAttrH265 | Encoder attributes specific to a certain protocol, cannot be dynamically configured. |
 
-|       Member       |                            Meaning                            |
-| :----------------: | :------------------------------------------------------------: |
-|       enType       |    Encoding protocol type, cannot be configured dynamically.    |
-|    u32PicWidth     |     Encoded image width, cannot be configured dynamically.     |
-|    u32PicHeight    |    Encoded image height, cannot be configured dynamically.     |
-|   enPixelFormat   |       Pixel format, cannot be configured dynamically.          |
-| u32FrameBufferCount |  Number of input framebuffer buffers, cannot be configured dynamically. |
-| u32BitStreamBufferCount | Number of output bitstream buffers, cannot be configured dynamically. |
-| bExternalFreamBuffer | Use user allocated input buffer, cannot be configured dynamically. |
-| u32BitStreamBufSize | Size of the output bitstream buffer, cannot be configured dynamically. |
-|    enRotation     |         Rotation property, cannot be configured dynamically.         |
-|   enMirrorFlip    |         Mirror property, cannot be configured dynamically.         |
-|     stCropCfg     |         Crop configuration, cannot be configured dynamically.         |
-|   bEnableUserPts   |       Whether to use user pts, cannot be configured dynamically.        |
-|    vlc_buf_size     |          Set the vlc buffer size for encoding task, cannot be configured dynamically.          |
-|    s32BufJoint     |      Whether to use continuous memory cache for multiple frames, cannot be configured dynamically.       |
-|   s32BufJointSize  |        Size of continuous memory used, range: 4M-50M        |
-| stAttrH264/stAttrMjpeg/<br/>stAttrJpeg/stAttrH265 |    Encoder properties of a certain protocol, cannot be configured dynamically.    |### VENC_RC_MODE_E
-[Description]
-> Enumeration of RC modes.
 
-[Structure Definition]
+
+### VENC_RC_MODE_E
+**Description**
+> Enum for RC (Rate Control) modes.
+
+**Struct Definition**
 ```C
 typedef enum HB_VENC_RC_MODE_E {
     VENC_RC_MODE_NONE = -1,
@@ -2642,35 +3047,35 @@ typedef enum HB_VENC_RC_MODE_E {
     VENC_RC_MODE_BUTT,
 } VENC_RC_MODE_E;
 ```
-[Member Description]
+**Member Descriptions**
 
-|          Member          |       Meaning       |
-| :----------------------: | :----------------: |
-|  VENC_RC_MODE_H264CBR    |   H264 CBR mode.   |
-|  VENC_RC_MODE_H264VBR    |   H264 VBR mode.   |
-|  VENC_RC_MODE_H264AVBR   |  H264 AVBR mode.   |
-| VENC_RC_MODE_H264FIXQP   |  H264 Fixqp mode.  |
-| VENC_RC_MODE_H264QPMAP   | H.264 QPMAP mode.  |
-| VENC_RC_MODE_MJPEGFIXQP  | MJPEG Fixqp mode.  |
-|  VENC_RC_MODE_H265CBR    |   H265 CBR mode.   |
-|  VENC_RC_MODE_H265VBR    |   H265 VBR mode.   |
-|  VENC_RC_MODE_H265AVBR   |   H265 VBR mode.   |
-| VENC_RC_MODE_H265FIXQP   |  H265 Fixqp mode.  |
-| VENC_RC_MODE_H265QPMAP   |  H265 QPMAP mode.  |
+|       Member       |             Meaning              |
+| :-----------------: | :------------------------------: |
+| VENC_RC_MODE_H264CBR | H264 Constant Bit Rate (CBR) mode. |
+| VENC_RC_MODE_H264VBR | H264 Variable Bit Rate (VBR) mode. |
+| VENC_RC_MODE_H264AVBR | H264 Adaptive Variable Bit Rate (AVBR) mode. |
+| VENC_RC_MODE_H264FIXQP | H264 Fixed Quantization Parameter (Fixqp) mode. |
+| VENC_RC_MODE_H264QPMAP | H.264 QP Mapping mode. |
+| VENC_RC_MODE_MJPEGFIXQP | MJPEG Fixed Quantization Parameter (Fixqp) mode. |
+| VENC_RC_MODE_H265CBR | H265 Constant Bit Rate (CBR) mode. |
+| VENC_RC_MODE_H265VBR | H265 Variable Bit Rate (VBR) mode. |
+| VENC_RC_MODE_H265AVBR | H265 Adaptive Variable Bit Rate (AVBR) mode. |
+| VENC_RC_MODE_H265FIXQP | H265 Fixed Quantization Parameter (Fixqp) mode. |
+| VENC_RC_MODE_H265QPMAP | H265 QP Mapping mode. |
+
+
 
 ### VENC_H264_CBR_S
-[Description]
-> Definition of H.264 encoding channel CBR attribute structure.
+**Description**
+> Defines the structure for H.264 encoding channel Constant Bit Rate (CBR) attributes.
 
-[Structure Definition]
+**Structure Definition**
 ```C
 typedef struct HB_VENC_H264_CBR_S {
     uint32_t u32IntraPeriod;
     uint32_t u32IntraQp;
     uint32_t u32BitRate;
     uint32_t u32FrameRate;
-    uint32_t u32InitialRcQp;
-```uint32_t u32BitRate;
     uint32_t u32InitialRcQp;
     uint32_t u32VbvBufferSize;
     HB_BOOL bMbLevelRcEnable;
@@ -2685,32 +3090,62 @@ typedef struct HB_VENC_H264_CBR_S {
     uint32_t u32MaxDeltaQp;
     HB_BOOL bQpMapEnable;
 } VENC_H264_CBR_S;
+```
+**Member Descriptions**
 
-【Member Description】
+| **Member**      | **Meaning**                                                                                   |
+| :-------------: | :----------------------------------------------------------------------------------------------- |
+| u32IntraPeriod  | Intra-frame interval, dynamically configurable.                                          |
+| u32IntraQp       | I-frame QP value, dynamically configurable, lower values indicate better image quality.         |
+| u32BitRate      | Target average bitrate, in kbps, dynamically configurable.                                 |
+| u32FrameRate    | Target frame rate, in fps, dynamically configurable.                                      |
+| u32InitialRcQp  | Initial QP value for rate control, fixed and not dynamically configurable (must be within [0,51]). |
+| u32VbvBufferSize | Actual VBV buffer size, proportional to bit_rate * vbv_buffer_size / 1000 (kb). Smaller sizes improve rate control accuracy but reduce image quality, while larger sizes improve quality but lead to more bitrate fluctuations. Dynamic configuration allowed. |
+| bMbLevelRcEnable | Enables H264 rate control at macroblock level, providing higher precision but potentially lower image quality. ROI encoding incompatible; disabled when ROI is enabled. Not dynamically configurable. |
+| u32MaxIQp        | Maximum I-frame QP value, dynamically configurable.                                          |
+| u32MinIQp        | Minimum I-frame QP value, dynamically configurable.                                          |
+| u32MaxPQp        | Maximum P-frame QP value, dynamically configurable.                                          |
+| u32MinPQp        | Minimum P-frame QP value, dynamically configurable.                                          |
+| u32MaxBQp        | Maximum B-frame QP value, dynamically configurable.                                          |
+| u32MinBQp        | Minimum B-frame QP value, dynamically configurable.                                          |
+| bHvsQpEnable    | Enables H264 rate control at sub-macroblock level for improved subjective image quality.          |
+| s32HvsQpScale   | Effective when hvs_qp_enable is enabled, represents the QP scaling factor, dynamically configurable. |
+| u32MaxDeltaQp    | Maximum deviation range for HVS QP values when hvs_qp_enable is enabled, dynamically configurable. |
+| bQpMapEnable    | Enables QP map, dynamically configurable.                                                  |
 
-|       Member       |Meaning|
-| :--------------: | :---------------------: |
-|  u32IntraPeriod  |The interval between I frames, dynamically configurable.|
-|    u32IntraQp    |The QP value of I frames, dynamically configurable. The smaller the value, the better the image quality.|
-|    u32BitRate    |The target average bit rate, in kbps, dynamically configurable.|
-|   u32FrameRate   |The target frame rate, in fps, dynamically configurable.|
-|  u32InitialRcQp  |The initial QP value for rate control. If the value is not within the range [0,51], the encoder will determine the initial value internally, and it cannot be dynamically configured.|
-| u32VbvBufferSize |The actual size of the VBV buffer space in bits is bit_rate * vbv_buffer_size / 1000 (kb). The size of this buffer affects the image encoding quality and rate control accuracy. When the buffer is small, the rate control accuracy is high, but the image encoding quality is poor. When the buffer is large, the image encoding quality is high, but the rate fluctuates greatly. Dynamically configurable. |
-| bMbLevelRcEnable |H264 rate control can work at the macroblock level, which can achieve higher precision rate control, but it will reduce the image encoding quality. This mode cannot work together with ROI encoding. When ROI encoding is enabled, this function is automatically disabled. Not dynamically configurable.|
-|    u32MaxIQp     |The maximum QP value of I frames, dynamically configurable.|
-|    u32MinIQp     |The minimum QP value of I frames, dynamically configurable.|
-|    u32MaxPQp     |The maximum QP value of P frames, dynamically configurable.|
-|    u32MinPQp     |The minimum QP value of P frames, dynamically configurable.|
-|    u32MaxBQp     |The maximum QP value of B frames, dynamically configurable.|
-|    u32MinBQp     |The minimum QP value of B frames, dynamically configurable.|
-|   bHvsQpEnable   |H264 rate control can work at the sub-macroblock level, which can adjust the QP value of sub-macroblocks and improve the subjective image quality. Dynamically configurable.|
-|  s32HvsQpScale   |Valid when hvs_qp_enable is enabled, this value represents the QP scaling factor. Dynamically configurable.|
-|  u32MaxDeltaQp   |Valid when hvs_qp_enable is enabled, specifies the maximum deviation range of HVS qp value. Dynamically configurable.|
-|   bQpMapEnable   |Whether to enable Qp map, dynamically configurable.|
+Note: The rate control module adjusts QP values based on the configured bitrate. If the calculated bitrate is less than the set value, it reduces QP, potentially resulting in an image below expectations if QP falls below the minimum (qpmin). If the bitrate is higher than the set value, it increases QP, but if it exceeds the maximum (qpmax), QP cannot be increased further, causing the bitrate to remain above the target.
 
-Note: The rate control module calculates the bit rate. If the bit rate is smaller than the set bit rate, it will decrease the QP value. If the QP value is smaller than qpmin, it cannot be adjusted, resulting in the image not achieving the expected quality. If the bit rate is larger than the set bit rate, it will increase the QP value. If the QP value is larger than qpmax, it cannot be adjusted, and the bit rate will always be larger than the set bit rate, unable to achieve the set bit rate./*** Struct definition ***/
-typedef struct HB_VENC_H264_AVBR_S
-{
+
+
+### VENC_H264_VBR_S
+**Description**
+> Defines the structure for H.264 encoding channel's VBR attributes.
+
+**Structure Definition**
+```C
+typedef struct HB_VENC_H264_VBR_S {
+    uint32_t u32IntraPeriod;
+    uint32_t u32IntraQp;
+    uint32_t u32FrameRate;
+    HB_BOOL bQpMapEnable;
+} VENC_H264_VBR_S;
+```
+**Member Descriptions**
+
+| **Member** | **Meaning** |
+| --- | --- |
+| u32IntraPeriod | I-frame interval, dynamically configurable. |
+| u32IntraQp | I-frame QP value, dynamically configurable. |
+| u32FrameRate | Frame rate, dynamically configurable. |
+| bQpMapEnable | Enables Qp map, dynamically configurable. |
+
+### VENC_H264_AVBR_S
+**Description**
+> Defines the structure for H.264 encoding channel's AVBR attributes.
+
+**Structure Definition**
+```C
+typedef struct HB_VENC_H264_AVBR_S {
     uint32_t u32IntraPeriod;
     uint32_t u32IntraQp;
     uint32_t u32BitRate;
@@ -2729,35 +3164,84 @@ typedef struct HB_VENC_H264_AVBR_S
     uint32_t u32MaxDeltaQp;
     HB_BOOL bQpMapEnable;
 } VENC_H264_AVBR_S;
+```
+**Member Descriptions**
 
-/*** Member Description ***/
-| Member Name      | Meaning                      |
-| :--------------: | :--------------------------: |
-| u32IntraPeriod   | I-frame interval, dynamically configurable. |
-| u32IntraQp       | QP value for I-frame, dynamically configurable. |
-| u32BitRate       | Target average bitrate in kbps, dynamically configurable. |
-| u32FrameRate     | Target frame rate in fps, dynamically configurable. |
-| u32InitialRcQp   | Initial QP value for rate control. If the value is not within the range of [0,51], the encoder will determine the initial value internally. Cannot be dynamically configured. |
-| u32VbvBufferSize | The actual size of the VBV buffer is calculated by bit_rate * vbv_buffer_size / 1000 (kb). The size of this buffer affects the image quality and the accuracy of rate control. When the buffer is small, the rate control accuracy is high, but the image quality is poor. When the buffer is large, the image quality is high but the rate fluctuation is large. Dynamically configurable. |
-| bMbLevelRcEnable | The rate control of H.264 can work at the macroblock level. This mode can achieve higher accuracy rate control but sacrifices image quality. This mode cannot work together with ROI encoding. When ROI encoding is enabled, this function is automatically disabled. Cannot be dynamically configured. |
-| u32MaxIQp        | Maximum QP value for I-frame, dynamically configurable. |
-| u32MinIQp        | Minimum QP value for I-frame, dynamically configurable. ||         成员         |               含义                |
-| :------------------: | :-------------------------------: |
-|    u32IntraPeriod    |       I帧间隔，可动态配置。       |
-|     u32FrameRate     | 目标帧率，单位是fps，可动态配置。 |
-|  u32QpMapArrayCount  |        QP值数组的长度。          |
-|    u32QpMapArray     |          QP值数组，可动态配置。   ||       Member       |                                        Meaning                                         |
-| :----------------: | :-----------------------------------------------------------------------------------: |
-|   u32IntraPeriod   |                             I-frame interval, configurable dynamically.                              |
-|    u32FrameRate    |                              Target frame rate in fps, configurable dynamically.                               |
-|   u32QpMapArray    |                             Specify the QP map table. Each macroblock in H264 is 16x16 and requires a QP value. Each QP value takes up one byte and is sorted in a raster scan direction. Configurable dynamically. |
-| u32QpMapArrayCount |                               Specify the size of the QP map table, configurable dynamically.                                |
+| **Member** | **Meaning** |
+| --- | --- |
+| u32IntraPeriod | I-frame interval, dynamically configurable. |
+| u32IntraQp | I-frame QP value, dynamically configurable. |
+| u32BitRate | Target average bit rate, in kbps, dynamically configurable. |
+| u32FrameRate | Target frame rate, in fps, dynamically configurable. |
+| u32InitialRcQp | Initial QP value for rate control, fixed and not configurable (encoder decides if out of range [0,51]). |
+| u32VbvBufferSize | Actual VBV buffer size in bytes, calculated as bit_rate * vbv_buffer_size / 1000 (kb). Affects coding quality and rate control accuracy; smaller buffer size gives higher precision but lower quality, larger buffer size improves quality but may have more bitrate fluctuations. |
+| bMbLevelRcEnable | Enables macroblock-level rate control in H264, higher precision but may reduce image quality. Not configurable when ROI encoding is enabled. |
+| u32MaxIQp | Maximum I-frame QP value, dynamically configurable. |
+| u32MinIQp | Minimum I-frame QP value, dynamically configurable. |
+| u32MaxPQp | Maximum P-frame QP value, dynamically configurable. |
+| u32MinPQp | Minimum P-frame QP value, dynamically configurable. |
+| u32MaxBQp | Maximum B-frame QP value, dynamically configurable. |
+| u32MinBQp | Minimum B-frame QP value, dynamically configurable. |
+| bHvsQpEnable | Enables sub-macroblock level rate control, adjusts sub-block QP to improve subjective image quality. |
+| s32HvsQpScale | Effective when hvs_qp_enable is enabled, represents QP scaling factor, dynamically configurable. |
+| u32MaxDeltaQp | When hvs_qp_enable is enabled, specifies the maximum deviation range for HVS QP values, dynamically configurable. |
+| bQpMapEnable | Enables Qp map, dynamically configurable. |
+
+
+
+### VENC_H264_FIXQP_S
+**Description**
+> Defines the structure for the H.264 encoding channel's FIXQP property.
+
+**Structure Definition**
+```C
+typedef struct HB_VENC_H264_FIXQP_S {
+    uint32_t u32IntraPeriod;
+    uint32_t u32FrameRate;
+    uint32_t u32IQp;
+    uint32_t u32PQp;
+    uint32_t u32BQp;
+} VENC_H264_FIXQP_S;
+```
+**Member Descriptions**
+
+|   Member   |                     Meaning                     |
+| :--------: | :---------------------------------------------: |
+| u32IntraPeriod | Period between I-frames, dynamically configurable. |
+|  u32FrameRate  | Target frame rate in fps, dynamically configurable. |
+|     u32IQp     | Forced QP value for I-frames, dynamically configurable. |
+|     u32PQp     | Forced QP value for P-frames, dynamically configurable. |
+|     u32BQp     | Forced QP value for B-frames, dynamically configurable. |
+
+### VENC_H264_QPMAP_S
+**Description**
+> Defines the structure for the H.264 encoding channel's QPMAP property.
+
+**Structure Definition**
+```C
+typedef struct HB_VENC_H264_QPMAP_S {
+    uint32_t u32IntraPeriod;
+    uint32_t u32FrameRate;
+    unsigned char*  u32QpMapArray;
+    uint32_t u32QpMapArrayCount;
+} VENC_H264_QPMAP_S;
+```
+**Member Descriptions**
+
+|    Member    |                                                  Meaning                                                  |
+| :---------: | :---------------------------------------------------------------------------------------------: |
+|   u32IntraPeriod   | Interval between I-frames, dynamically configurable.                                          |
+|    u32FrameRate    | Target frame rate in fps, dynamically configurable.                                          |
+|   u32QpMapArray    | An array specifying QP values for each 16x16 macroblock, with one byte per QP value, ordered raster-scan. |
+| u32QpMapArrayCount | Size of the QP map array, dynamically configurable.                                            |
+
+
 
 ### VENC_H265_CBR_S
-【Description】
-> Define CBR attribute structure for H.265 encoding channel.
+**Description**
+> Defines the structure for H.265 CBR encoding channel attributes.
 
-【Structure Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VENC_H265_CBR_S {
     uint32_t u32IntraPeriod;
@@ -2779,32 +3263,35 @@ typedef struct HB_VENC_H265_CBR_S {
     HB_BOOL bQpMapEnable;
 } VENC_H265_CBR_S;
 ```
-【Member Description】
+**Member Descriptions**
 
-|       Member       |                                          Meaning                                           |
-| :----------------: | :--------------------------------------------------------------------------------------: |
-|  u32IntraPeriod    |                                 I-frame interval, configurable dynamically.                                  |
-|    u32IntraQp      |                                    QP value for I-frame, configurable dynamically.                                    |
-|    u32BitRate      |                          Target average bit rate in kbps, configurable dynamically.                          |
-|   u32FrameRate     |                                 Target frame rate in fps, configurable dynamically.                                  |
-|  u32InitialRcQp    |                    Initial QP value for rate control. If the value is not in the range [0,51], the encoder will decide the initial value internally. Not configurable dynamically.                    |
-| u32VbvBufferSize   | The actual space size of the VBV buffer is bit_rate * vbv_buffer_size / 1000 (kb), and this buffer size affects the image quality and rate control precision. A smaller buffer size will result in better rate control accuracy but poorer image quality, while a larger buffer size will provide higher image quality but larger rate fluctuations. Configurable dynamically. |
-|bMbLevelRcEnable|The rate control for H264 can work at the macroblock level, which can achieve higher precision rate control but sacrifices image encoding quality. This mode cannot work together with ROI encoding. When ROI encoding is enabled, this function is automatically disabled. Configurable dynamically.|
-|u32MaxIQp|Maximum QP value for I-frame, configurable dynamically.|
-|u32MinIQp|Minimum QP value for I-frame, configurable dynamically.|
-|u32MaxPQp|Maximum QP value for P-frame, configurable dynamically.|
-|u32MinPQp|Minimum QP value for P-frame, configurable dynamically.|
-|u32MaxBQp|Maximum QP value for B-frame, configurable dynamically.|
-|u32MinBQp|Minimum QP value for B-frame, configurable dynamically.||bHvsQpEnable|H.264 bitrate control can work at the sub-macroblock level, adjusting the QP values of the sub-macroblocks to improve subjective image quality. It can be dynamically configured.|
-|s32HvsQpScale|Valid when hvs_qp_enable is enabled. This value represents the QP scaling factor and can be dynamically configured.|
-|u32MaxDeltaQp|Valid when hvs_qp_enable is enabled. Specifies the maximum deviation range of the HVS qp value and can be dynamically configured.|
-|bQpMapEnable|Whether to enable Qp map. It can be dynamically configured.|
+| **Member** | **Meaning** |
+| :---------: | :----------: |
+| u32IntraPeriod | I-frame interval, dynamically configurable. |
+| u32IntraQp | I-frame QP value, dynamically configurable. |
+| u32BitRate | Target average bitrate, in kbps, dynamically configurable. |
+| u32FrameRate | Target frame rate, in fps, dynamically configurable. |
+| u32InitialRcQp | Initial QP value for rate control, when outside [0, 51] range, the encoder will decide the initial value, non-dynamically configurable. |
+| u32VbvBufferSize | Actual VBV buffer size, calculated as bit_rate * vbv_buffer_size / 1000 (kb). This buffer size affects coding image quality and rate control precision. Smaller buffer sizes offer higher precision but lower image quality; larger buffers provide better image quality but with more bitrate fluctuations. Dynamically configurable. |
+| bMbLevelRcEnable | Enables H.264 rate control at macroblock level, offering higher precision but potentially sacrificing image quality. ROI encoding is not compatible with this mode, and it disables automatically when ROI encoding is enabled. Dynamically configurable. |
+| u32MaxIQp | Maximum QP value for I-frames, dynamically configurable. |
+| u32MinIQp | Minimum QP value for I-frames, dynamically configurable. |
+| u32MaxPQp | Maximum QP value for P-frames, dynamically configurable. |
+| u32MinPQp | Minimum QP value for P-frames, dynamically configurable. |
+| u32MaxBQp | Maximum QP value for B-frames, dynamically configurable. |
+| u32MinBQp | Minimum QP value for B-frames, dynamically configurable. |
+| bHvsQpEnable | Enables H.264 rate control at sub-macroblock level for improved subjective image quality. Dynamically configurable. |
+| s32HvsQpScale | Valid when hvs_qp_enable is enabled, represents the QP scaling factor, dynamically configurable. |
+| u32MaxDeltaQp | When hvs_qp_enable is enabled, specifies the maximum deviation range for HVS QP values. Dynamically configurable. |
+| bQpMapEnable | Enables QP mapping, dynamically configurable. |
+
+
 
 ### VENC_H265_VBR_S
-【Description】
-> Defines the VBR attribute structure for H.265 encoding channel.
+**Description**
+> Defines the structure for H.265 encoding channel's Variable Bit Rate (VBR) attributes.
 
-【Structure Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VENC_H265_VBR_S {
     uint32_t u32IntraPeriod;
@@ -2813,20 +3300,20 @@ typedef struct HB_VENC_H265_VBR_S {
     HB_BOOL bQpMapEnable;
 } VENC_H265_VBR_S;
 ```
-【Member Description】
+**Member Descriptions**
 
-|     Member     |           Description           |
-| :------------: | :-------------------------------: |
-| u32IntraPeriod |     Intra frame period, can be dynamically configured.     |
-|   u32IntraQp   |       QP value of intra frame, can be dynamically configured.      |
-|  u32FrameRate  |         Frame rate, can be dynamically configured.          |
-|  bQpMapEnable  |   Whether to enable Qp map, can be dynamically configured.   |
+| Member | Meaning |
+| --- | --- |
+| u32IntraPeriod | I-frame interval, dynamically configurable. |
+| u32IntraQp | I-frame QP value, dynamically configurable. |
+| u32FrameRate | Frame rate, dynamically configurable. |
+| bQpMapEnable | Enables or disables Qp map, dynamically configurable. |
 
 ### VENC_H265_AVBR_S
-【Description】
-> Defines the AVBR attribute structure for H.265 encoding channel.
+**Description**
+> Defines the structure for H.265 encoding channel's Average Bit Rate (ABR) attributes.
 
-【Structure Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VENC_H265_AVBR_S {
     uint32_t u32IntraPeriod;
@@ -2845,30 +3332,62 @@ typedef struct HB_VENC_H265_AVBR_S {
     HB_BOOL bHvsQpEnable;
     int32_t s32HvsQpScale;
     uint32_t u32MaxDeltaQp;
-``````C
-【描述】
-> 定义 H.265 编码通道 Qpmap 属性结构。
-
-【结构定义】
-```C
-typedef struct HB_VENC_H265_QPMAP_S {
-    uint32_t u32MaxQp;
-    uint32_t u32MinQp;
     HB_BOOL bQpMapEnable;
-} VENC_H265_QPMAP_S;
+} VENC_H265_AVBR_S;
 ```
+**Member Descriptions**
 
-【成员说明】
+| Member | Meaning |
+| --- | --- |
+| u32IntraPeriod | I-frame interval, dynamically configurable. |
+| u32IntraQp | I-frame QP value, dynamically configurable. |
+| u32BitRate | Target average bitrate in kbps, dynamically configurable. |
+| u32FrameRate | Target frame rate in fps, dynamically configurable. |
+| u32InitialRcQp | Initial QP value for rate control, if not in [0, 51] range, encoder will decide internally, dynamically configurable. |
+| u32VbvBufferSize | Actual VBV buffer size in bits, proportional to bit_rate * vbv_buffer_size / 1000 (kb). This buffer size affects image quality and rate control precision. Higher buffer sizes improve image quality but can cause larger bitrate fluctuations, dynamically configurable. |
+| bCtuLevelRcEnable | Enables H.264 rate control at CTU level, providing higher precision but potentially lower image quality. This feature cannot be used with ROI encoding; it is automatically disabled when ROI encoding is enabled, dynamically configurable. |
+| u32MaxIQp | Maximum I-frame QP value, dynamically configurable. |
+| u32MinIQp | Minimum I-frame QP value, dynamically configurable. |
+| u32MaxPQp | Maximum P-frame QP value, dynamically configurable. |
+| u32MinPQp | Minimum P-frame QP value, dynamically configurable. |
+| u32MaxBQp | Maximum B-frame QP value, dynamically configurable. |
+| u32MinBQp | Minimum B-frame QP value, dynamically configurable. |
+| bHvsQpEnable | Enables H.264 rate control at sub-CTU level, improving subjective image quality. |
+| s32HvsQpScale | Effective when hvs_qp_enable is enabled, represents the QP scaling factor, dynamically configurable. |
+| u32MaxDeltaQp | Maximum deviation range for HVS QP values when hvs_qp_enable is enabled, dynamically configurable. |
+| bQpMapEnable | Enables or disables Qp map, dynamically configurable. |
 
-|      成员      |              含义               |
-| :------------: | :-----------------------------: |
-|   u32MaxQp     | Qpmap映射的最大QP值，可动态配置。 |
-|   u32MinQp     | Qpmap映射的最小QP值，可动态配置。 |
-| bQpMapEnable   |    是否使能Qp map，可动态配置。   |
-```【Description】
-Define the QPMAP attribute structure for H.265 encoding channel.
 
-【Structure Definition】
+
+### VENC_H265_FIXQP_S
+**Description**
+> Defines the structure for the H.265 encoding channel's Fixqp attribute.
+
+**Structure Definition**
+```C
+typedef struct HB_VENC_H265_FIXQP_S {
+    uint32_t u32IntraPeriod;
+    uint32_t u32FrameRate;
+    uint32_t u32IQp;
+    uint32_t u32PQp;
+    uint32_t u32BQp;
+} VENC_H265_FIXQP_S;
+```
+**Member Descriptions**
+
+|       Member       |                             Meaning                             |
+| :-----------------: | :-------------------------------------------------------------: |
+| u32IntraPeriod    | Interval between I-frames, dynamically configurable.         |
+| u32FrameRate      | Target frame rate in frames per second (fps), dynamically configurable. |
+| u32IQp            | Forced I-frame QP value, dynamically configurable.          |
+| u32PQp            | Forced P-frame QP value, dynamically configurable.          |
+| u32BQp            | Forced B-frame QP value, dynamically configurable.          |
+
+### VENC_H265_QPMAP_S
+**Description**
+> Defines the structure for the H.265 encoding channel's QPMAP attribute.
+
+**Structure Definition**
 ```C
 typedef struct HB_VENC_H265_QPMAP_S {
     uint32_t u32IntraPeriod;
@@ -2877,78 +3396,82 @@ typedef struct HB_VENC_H265_QPMAP_S {
     uint32_t u32QpMapArrayCount;
 } VENC_H265_QPMAP_S;
 ```
-【Member Explanation】
+**Member Descriptions**
 
-|      Member      |                                                    Meaning                                                     |
-| :--------------: | :-----------------------------------------------------------------------------------------------------------: |
-| u32IntraPeriod   |                                          I-frame interval, can be dynamically configured.                                          |
-|  u32FrameRate    |                                    Target frame rate, in fps, can be dynamically configured.                                    |
-| u32QpMapArray    | Specify QP map table. The macroblock size of H.264 is 16x16, and each macroblock needs to be assigned a QP value. Each QP value occupies one byte, and the order is sorted in a raster scan direction. Can be dynamically configured. |
-| u32QpMapArrayCount |                     Specify the size of the QP map table, can be dynamically configured.                      |
+|        Member        |                                                                                           Meaning                                                                                           |
+| :-----------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------: |
+|   u32IntraPeriod   | Interval between I-frames, dynamically configurable.                                                                                                 |
+|    u32FrameRate    | Target frame rate in frames per second (fps), dynamically configurable.                                                                               |
+|   u32QpMapArray    | A specified QP map table, where each 16x16 macroblock is assigned a QP value, with one byte per QP and sorted in raster scan order, dynamically configurable. |
+| u32QpMapArrayCount | The size of the QP map table, dynamically configurable.                                                                                               |
+
+
 
 ### VENC_MJPEG_FIXQP_S
-【Description】
-Define the Fixqp attribute structure for MJPEG encoding channel.
+**Description**
+> Defines the structure for MJPEG encoding channel's Fixqp attribute.
 
-【Structure Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VENC_MJPEG_FIXQP_S {
-    uint32_t u32FrameRate;
-    uint32_t u32QualityFactort;
+    uint32_t u32FrameRate; // Target frame rate, in fps, can be dynamically configured.
+    uint32_t u32QualityFactor; // Quantization factor, when this value is 100, image quality loss is minimal but compression rate is low; when it is 1, image quality loss is significant but compression rate is high, can be dynamically configured.
 } VENC_MJPEG_FIXQP_S;
 ```
-【Member Explanation】
+**Member Descriptions**
 
-|       Member       |                                                   Meaning                                                   |
-| :----------------: | :--------------------------------------------------------------------------------------------------------: |
-|   u32FrameRate     |                                    Target frame rate, in fps, can be dynamically configured.                                    |
-| u32QualityFactort  | Quantification factor. When this value is 100, the image quality loss of the encoded image is minimum but the compression ratio is low. When this value is 1, the image quality loss is greater but the compression ratio is high. Can be dynamically configured. |
+|      Member       |                            Meaning                            |
+| :---------------: | :---------------------------------------------------------: |
+|   u32FrameRate    | Target frame rate, in frames per second (fps), configurable. |
+| u32QualityFactor | Quantization factor; 100 gives minimal quality loss but low compression, 1 offers higher compression with more noticeable quality loss, configurable. |
 
 ### VENC_RC_ATTR_S
-【Description】
-Define the rate control attributes for encoding channel.
+**Description**
+> Defines the attributes of the encoding channel's rate controller.
 
-【Structure Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VENC_RC_ATTR_S {
-    VENC_RC_MODE_E enRcMode;
+    VENC_RC_MODE_E enRcMode; // RC mode, not configurable.
     union {
-        VENC_H264_CBR_S stH264Cbr;
-        VENC_H264_VBR_S stH264Vbr;
-```VENC_H264_AVBR_S stH264AVbr;
-        VENC_H264_FIXQP_S stH264FixQp;
-        VENC_H264_QPMAP_S stH264QpMap;
-        VENC_MJPEG_FIXQP_S stMjpegFixQp;
-        VENC_H265_CBR_S stH265Cbr;
-        VENC_H265_VBR_S stH265Vbr;
-        VENC_H265_AVBR_S stH265AVbr;
-        VENC_H265_FIXQP_S stH265FixQp;
-        VENC_H265_QPMAP_S stH265QpMap;
+        VENC_H264_CBR_S stH264Cbr; // H.264 protocol CBR mode attributes.
+        VENC_H264_VBR_S stH264Vbr; // H.264 protocol VBR mode attributes.
+        VENC_H264_AVBR_S stH264AVbr; // H.264 protocol AVBR mode attributes.
+        VENC_H264_FIXQP_S stH264FixQp; // H.264 protocol Fixqp mode attributes.
+        VENC_H264_QPMAP_S stH264QpMap; // H.264 protocol QpMap mode attributes.
+        VENC_MJPEG_FIXQP_S stMjpegFixQp; // MJPEG protocol Fixqp mode attributes.
+        VENC_H265_CBR_S stH265Cbr; // H.265 protocol CBR mode attributes.
+        VENC_H265_VBR_S stH265Vbr; // H.265 protocol VBR mode attributes.
+        VENC_H265_AVBR_S stH265AVbr; // H.265 protocol AVBR mode attributes.
+        VENC_H265_FIXQP_S stH265FixQp; // H.265 protocol Fixqp mode attributes.
+        VENC_H265_QPMAP_S stH265QpMap; // H.265 protocol QpMap mode attributes.
     };
 } VENC_RC_ATTR_S;
 ```
-【Member Explanation】
+**Member Descriptions**
 
-|     Member     |                Meaning                |
-| :----------: | :---------------------------------: |
-|   enRcMode   |       RC mode, not dynamically configurable.       |
-|  stH264Cbr   |  H.264 protocol coding channel Cbr mode attribute.  |
-|  stH264Vbr   |  H.264 protocol coding channel Vbr mode attribute.  |
-|  stH264AVbr  | H.264 protocol coding channel AVbr mode attribute.  |
-| stH264FixQp  | H.264 protocol coding channel Fixqp mode attribute. |
-| stH264QpMap  | H.264 protocol coding channel QpMap mode attribute. |
-| stMjpegFixQp | Mjpeg protocol coding channel Fixqp mode attribute. |
-|  stH265Cbr   |  .265 protocol coding channel Cbr mode attribute.   |
-|  stH265Vbr   |  H.265 protocol coding channel Vbr mode attribute.  |
-|  stH265AVbr  | H.265 protocol coding channel AVbr mode attribute.  |
-| stH265FixQp  | H.265 protocol coding channel Fixqp mode attribute. |
-| stH265QpMap  | H.265 protocol coding channel QpMap mode attribute. |
+|     Member     |                              Meaning                              |
+| :------------: | :-------------------------------------------------------------: |
+|   enRcMode     | RC mode, which is not configurable.                            |
+|  stH264Cbr     | Attributes for H.264 protocol CBR mode.                        |
+|  stH264Vbr     | Attributes for H.264 protocol VBR mode.                        |
+|  stH264AVbr    | Attributes for H.264 protocol AVBR mode.                       |
+| stH264FixQp    | Attributes for H.264 protocol Fixqp mode.                      |
+| stH264QpMap    | Attributes for H.264 protocol QpMap mode.                     |
+| stMjpegFixQp  | Attributes for MJPEG protocol Fixqp mode.                      |
+|  stH265Cbr     | Attributes for H.265 protocol CBR mode.                        |
+|  stH265Vbr     | Attributes for H.265 protocol VBR mode.                        |
+|  stH265AVbr    | Attributes for H.265 protocol AVBR mode.                       |
+| stH265FixQp    | Attributes for H.265 protocol Fixqp mode.                      |
+| stH265QpMap    | Attributes for H.265 protocol QpMap mode.                     |
+
+
 
 ### VENC_GOP_PICTURE_CUSTOM_S
-【Description】
-> Defines the data structure of the custom GOP structure table.
+**Description**
+> Defines the data structure for a custom GOP (Group of Pictures) structure.
 
-【Structure Definition】
+**Struct Definition**
 ```C
 typedef struct HB_VENC_GOP_PICTURE_CUSTOM_S {
     uint32_t u32PictureType;
@@ -2960,37 +3483,85 @@ typedef struct HB_VENC_GOP_PICTURE_CUSTOM_S {
     uint32_t u32TemporalId;
 } VENC_GOP_PICTURE_CUSTOM_S;
 ```
-【Member Explanation】
+**Member Descriptions**
 
-|        Member        |                                                   Meaning                                                   |
-| :----------------: | :------------------------------------------------------------------------------------------------------: |
-|   u32PictureType   |                                       Frame type of the image, not dynamically configurable.                                       ||          成员          |               含义               |
-| :--------------------: | :------------------------------: |
-|     s32PocOffset       | 图像的POC值，不可动态配置。 |
-|     u32PictureQp       |  图像的QP值，不可动态配置。 |
-| s32NumRefPictureL0 | 当前图像参考的L0的帧数量，只有当pic_type=1时，该值有效，不可动态配置。 |
-|     s32RefPocL0      | 当前图像的L0参考帧的POC值，不可动态配置。|
-|     s32RefPocL1      | 当pic_type=2，表示当前图像的L1参考帧的POC值；当pic_type=1，表示当前图像的L0参考帧的POC值，不可动态配置。 |
-|     u32TemporalId     | 图像的temporal id，不可动态配置。 |
+|        Member        |                                                  Description                                                  |
+| :-----------------: | :---------------------------------------------------------------------------------------------: |
+|   u32PictureType   | The image frame type, which is not dynamically configurable.                                      |
+|    s32PocOffset    | The POC (Picture Order Count) value of the image, which is not dynamically configurable.       |
+|    u32PictureQp    | The QP (Quantization Parameter) value of the image, which is not dynamically configurable.    |
+| s32NumRefPictureL0 | The number of L0 reference frames for the current image; valid only when pic_type=1, not dynamic. |
+|    s32RefPocL0     | The POC value of the L0 reference frame for the current image, not dynamically configurable.    |
+|    s32RefPocL1     | If pic_type=2, this is the POC value of the L1 reference frame for the current image; if pic_type=1, it's the POC value of the L0 reference frame, not dynamic. |
+|   u32TemporalId    | The temporal ID of the image, which is not dynamically configurable.                          |
+
+
+
+### VENC_GOP_CUSTOM_S
+**Description**
+> Defines the parameters set for a custom GOP structure.
+
+**Structure Definition**
+```C
+typedef struct HB_VENC_GOP_CUSTOM_S {
+    uint32_t u32CustomGopSize;
+    VENC_GOP_PICTURE_CUSTOM_S stCustomGopPicture[CUSTOM_MAX_GOP_NUM];
+} VENC_GOP_CUSTOM_S;
+```
+**Member Descriptions**
+
+|       Member       |                        Meaning                        |
+| :-----------------: | :--------------------------------------------------: |
+|  u32CustomGopSize  | Size of the custom GOP (0-8), not dynamically configurable. |
+| stCustomGopPicture | Array of custom GOP picture structures, not dynamic. |
+
+### VENC_GOP_ATTR_S
+**Description**
+> Defines GOP parameters, allowing users to choose between pre-defined GOP structures and custom GOP structures.
+
+**Structure Definition**
+```C
+typedef struct HB_VENC_GOP_ATTR_S {
+    int32_t s32DecodingRefreshType;
+    uint32_t u32GopPresetIdx;
+    VENC_GOP_CUSTOM_S stCustomGopParam;
+} VENC_GOP_ATTR_S;
+```
+**Member Descriptions**
+
+|         Member         |                                 Meaning                                  |
+| :--------------------: | :-------------------------------------------------------------------: |
+| s32DecodingRefreshType | Specifies the specific type of IDR frame, valid only for H265 codec, not configurable. |
+|    u32GopPresetIdx     | Chooses a pre-defined GOP structure; 0 indicates using a custom GOP structure, not configurable. |
+|    stCustomGopParam    | Custom GOP structure, valid only when u32GopPresetIdx=0, not configurable. |
+
+
+
+### VENC_CHN_ATTR_S
+**Description**
+> Defines the structure for encoding channel attributes.
+
+**Structure Definition**
+```C
 typedef struct HB_VENC_CHN_ATTR_S {
     VENC_ATTR_S stVencAttr;
     VENC_RC_ATTR_S stRcAttr;
     VENC_GOP_ATTR_S stGopAttr;
 } VENC_CHN_ATTR_S;
+```
+**Member Descriptions**
 
-【Member Description】
-
-|    Member    |          Meaning          |
-| :--------: | :---------------------: |
-| stVencAttr |      Encoder Attributes       |
-|  stRcAttr  |    Rate Control Attributes     |
-| stGopAttr  | Structure of Gop Mode Type    |
+|    Member    |              Meaning               |
+| :----------: | :---------------------------------: |
+| stVencAttr   | Encoder attribute settings.        |
+|  stRcAttr    | Rate control attribute settings.   |
+| stGopAttr    | Structure containing GOP mode settings. |
 
 ### VENC_JPEG_PARAM_S
-【Description】
-> Defines the advanced parameters structure for JPEG protocol encoding channel.
+**Description**
+> Defines the high-level parameters for JPEG protocol encoding channel.
 
-【Structure Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VENC_JPEG_PARAM_S {
     uint32_t u32Qfactor;
@@ -3002,198 +3573,317 @@ typedef struct HB_VENC_JPEG_PARAM_S {
     VIDEO_CROP_INFO_S stCropCfg;
 } VENC_JPEG_PARAM_S;
 ```
-【Member Description】
+**Member Descriptions**
 
-|         Member          |                               Meaning                               |
-| :-------------------: | :--------------------------------------------------------------: |
-|      u32Qfactor       |   Refer to RFC2435 protocol for specific meaning, default value is 90. Range: [1, 99].   |
-|   u8LumaQuantTable    |              8-bit Y Quantization Table. Range: [0, 255].               |
-|  u8ChromaQuantTable   |             8-bit CbCr Quantization Table. Range: [0, 255].             |
-|  u16LumaQuantEsTable  |              12-bit Y Quantization Table. Range: [0, 255].              |
-| u16ChromaQuantEsTable |            12-bit CbCr Quantization Table. Range: [0, 255].             |
-|  u32RestartInterval   | u32RestartInterval: [0, (picwidth+15)>>4 x(picheight+15)>>4 x 2] |
-|       stCropCfg       |                           Crop Configuration Parameters                           |
+|        Member        |                               Description                               |
+| :------------------: | :--------------------------------------------------------------------: |
+|      u32Qfactor      | Refer to RFC2435 for meaning; system default is 90. Range: [1, 99].     |
+|   u8LumaQuantTable   | 8-bit Y component quantization table<br/>Range: [0, 255].                |
+|  u8ChromaQuantTable  | 8-bit CbCr component quantization table<br/>Range: [0, 255].             |
+|  u16LumaQuantEsTable | 12-bit Y component quantization table<br/>Range: [0, 255].               |
+| u16ChromaQuantEsTable | 12-bit CbCr component quantization table<br/>Range: [0, 255].             |
+|  u32RestartInterval | Restart interval: [0, (picwidth+15)>>4 x(picheight+15)>>4 x 2]         |
+|       stCropCfg      | Parameters for cropping configuration.                                    |
+
+
 
 ### VENC_MJPEG_PARAM_S
-【Description】
-> Defines the advanced parameters structure for MJPEG protocol encoding channel.
+**Description**
+> Defines the structure for advanced parameters of the MJPEG protocol encoding channel.
 
-【Structure Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VENC_MJPEG_PARAM_S {
     uint8_t  u8LumaQuantTable [64];
-```typedef struct HB_VENC_INTRA_REFRESH_S
+    uint8_t  u8ChromaQuantTable [64];
+    uint16_t  u16LumaQuantEsTable [64];
+    uint16_t u16ChromaQuantEsTable[64];
+    uint32_t u32RestartInterval;
+} VENC_MJPEG_PARAM_S;
+```
+**Member Descriptions**
+
+|        Member         |                                Meaning                                |
+| :--------------------: | :--------------------------------------------------------------: |
+|   u8LumaQuantTable    | 8-bit Y-quantization table<br/>Range: [0, 255].               |
+|  u8ChromaQuantTable   | 8-bit CbCr-quantization table<br/>Range: [0, 255].             |
+|  u16LumaQuantEsTable  | 12-bit Y-quantization table<br/>Range: [0, 255].              |
+| u16ChromaQuantEsTable | 12-bit CbCr-quantization table<br/>Range: [0, 255].             |
+|  u32RestartInterval   | u32RestartInterval: [0, (picwidth+15)>>4 x(picheight+15)>>4 x 2] |
+
+### VENC_INTRA_REFRESH_MODE_E
+**Description**
+> Defines the P-frame intra-refresh mode for ISlice.
+
+**Structure Definition**
+```C
+typedef enum HB_VENC_INTRA_REFRESH_MODE_E
+{
+    INTRA_REFRESH_ROW = 0,
+    INTRA_REFRESH_COLUMN,
+    INTRA_REFRESH_STEP_SIZE,
+    INTRA_REFRESH_ADAPTIVE,
+    INTRA_REFRESH_BUTT
+} VENC_INTRA_REFRESH_MODE_E;
+```
+**Member Descriptions**
+
+|        Member         |                Meaning                 |
+| :--------------------: | :----------------------------------: |
+|    INTRA_REFRESH_ROW    | Refresh by rows (row-based).         |
+|  INTRA_REFRESH_COLUMN   | Refresh by columns (column-based).    |
+| INTRA_REFRESH_STEP_SIZE | MB/CTU step size for refresh.        |
+| INTRA_REFRESH_ADAPTIVE  | Adaptive refresh of MB/CTUs in a frame. |
+
+
+
+### VENC_INTRA_REFRESH_S
+**Description**
+>P-frame ISlice control parameters.
+
+**Struct Definition**
+```C
+typedef struct HB_VENC_INTRA_REFRESH_S
 {
     HB_BOOL bRefreshEnable;
     VENC_INTRA_REFRESH_MODE_E enIntraRefreshMode;
-【描述】
-> 定义H265去块滤波参数。
+    uint32_t u32RefreshNum;
+} VENC_INTRA_REFRESH_S;
+```
+**Member Descriptions**
 
-【结构定义】
+|        Member        |                            Meaning                            |
+| :-----------------: | :--------------------------------------------------------: |
+|   bRefreshEnable   | Enables the ISlice refresh function. Default: 0<br/>0: Disable<br/>1: Enable |
+| enIntraRefreshMode | I macroblock refresh mode, either row-by-row or column-by-column. |
+|   u32RefreshNum    | Number of rows or columns to refresh during each I macroblock. |
+
+### VENC_H264_ENTROPY_S
+**Description**
+>Defines H.264 entropy encoding parameters.
+
+**Struct Definition**
+```C
+typedef struct HB_VENC_H264_ENTROPY_S
+{
+    uint32_t u32EntropyEncMode;
+} VENC_H264_ENTROPY_S;
+```
+**Member Descriptions**
+
+|       Member        |           Meaning           |
+| :---------------: | :----------------------: |
+| u32EntropyEncMode | Entropy encoding mode, dynamically configurable. |
+
+### VENC_H264_DBLK_S
+**Description**
+>Defines H.264 deblocking filter parameters.
+
+**Struct Definition**
+```C
+typedef struct HB_VENC_H264_DBLK_S
+{
+    uint32_t disable_deblocking_filter_idc;
+    int32_t slice_alpha_c0_offset_div2;
+    int32_t slice_beta_offset_div2;
+} VENC_H264_DBLK_S;
+```
+**Member Descriptions**
+
+|             Member              |                                Meaning                                 |
+| :---------------------------: | :-----------------------------------------------------------------: |
+| disable_deblocking_filter_idc | Range: [0, 2], default 0; see H.264 specification for details, dynamically configurable. |
+|  slice_alpha_c0_offset_div2   | Range: [-6, 6], default 0; see H.264 specification for details, dynamically configurable. |
+|    slice_beta_offset_div2     | Range: [-6, 6], default 0; see H.264 specification for details, dynamically configurable. |
+
+
+
+### VENC_H265_DBLK_S
+**Description**
+> Defines parameters for H265 deblocking filter.
+
+**Structure Definition**
 ```C
 typedef struct HB_VENC_H265_DBLK_S
 {
-    uint32_t disable_deblocking_filter_idc;
+    uint32_t slice_deblocking_filter_disabled_flag;
     int32_t slice_beta_offset_div2;
     int32_t slice_tc_offset_div2;
+    uint32_t slice_loop_filter_across_slices_enabled_flag;
 } VENC_H265_DBLK_S;
 ```
-【成员说明】
+**Member Descriptions**
 
-|             成员              |                                含义                                 |
-| :---------------------------: | :-----------------------------------------------------------------: |
-| disable_deblocking_filter_idc | 取值范围：[0, 2], 默认值 0，具体含义请参见 H.265 协议，可动态配置。 |
-|    slice_beta_offset_div2     | 取值范围：[-6, 6], 默认值 0，具体含义请参见 H.265 协议，可动态配置。 |
-|     slice_tc_offset_div2      | 取值范围：[-6, 6], 默认值 0，具体含义请参见 H.265 协议，可动态配置。 |{
-    uint32_t aspect_ratio_info_present_flag;
-    uint32_t aspect_ratio_idc;
-    uint32_t sar_width;
-    uint32_t sar_height;
-    uint32_t overscan_info_present_flag;
-    uint32_t overscan_appropriate_flag;
-    uint32_t video_signal_type_present_flag;
-    uint32_t video_format;
-    uint32_t video_full_range_flag;
-    uint32_t colour_description_present_flag;
-    uint32_t colour_primaries;
-    uint32_t transfer_characteristics;
-    uint32_t matrix_coefficients;
-    uint32_t chroma_loc_info_present_flag;
-    uint32_t chroma_sample_loc_type_top_field;
-    uint32_t chroma_sample_loc_type_bottom_field;
-    uint32_t timing_info_present_flag;
-    VENC_VUI_H264_TIME_INFO_S timing_info;
-    uint32_t nal_hrd_parameters_present_flag;
-    uint32_t vcl_hrd_parameters_present_flag;
-    uint32_t low_delay_hrd_flag;
-    uint32_t pic_struct_present_flag;
-    uint32_t bitstream_restriction_flag;
-    uint32_t motion_vectors_over_pic_boundaries_flag;
-    uint32_t max_bytes_per_pic_denom;
-    uint32_t max_bits_per_mb_denom;
-    uint32_t log2_max_mv_length_horizontal;
-    uint32_t log2_max_mv_length_vertical;
-    uint32_t num_reorder_frames;
-    uint32_t max_dec_frame_buffering;
-}VENC_H264_VUI_S;
+|                 Member                 |                           Meaning                           |
+| :----------------------------------: | :-------------------------------------------------------------: |
+| slice_deblocking_filter_disabled_flag | Default is 0.<br/>Range: 0 or 1. Configurable dynamically. |
+|            slice_tc_offset_div2            | Default is 0.<br/>Range: [-6, 6]. Configurable dynamically. |
+|           slice_beta_offset_div2           | Default is 0.<br/>Range: [-6, 6]. Configurable dynamically. |
+| slice_loop_filter_across_slices_enabled_flag | Enables slice boundary filtering. Configurable dynamically. |
+
+### VENC_VUI_H264_TIME_INFO_S
+**Description**
+> Defines H264 Timing parameters.
+
+**Structure Definition**
+```C
+typedef struct HB_VENC_H264_VUI_TIME_INFO_S
+{
+    uint32_t fixed_frame_rate_flag;
+    uint32_t num_units_in_tick;
+    uint32_t time_scale;
+}VENC_VUI_H264_TIME_INFO_S;
 ```
-【成员说明】
+**Member Descriptions**
 
-|              成员               |                             含义                             |
-| :----------------------------: | :----------------------------------------------------------: |
-|  aspect_ratio_info_present_flag  |           Indicate the presence of aspect ratio info.           |
-|            aspect_ratio_idc            | Specify the aspect ratio. |
-|              sar_width               |     Specify the width of the sample aspect ratio.     |
-|             sar_height              |    Specify the height of the sample aspect ratio.    |
-|  overscan_info_present_flag  |         Indicate the presence of overscan info.         |
-|   overscan_appropriate_flag   |    Indicate whether overscan should be deployed.    |
-|  video_signal_type_present_flag  |        Indicate the presence of video signal type info.        |
-|            video_format            |            Specify the format of the video signal.            |
-|    video_full_range_flag    |          Specify the range of the digitized video.          |
-|  colour_description_present_flag  |     Indicate the presence of colour description info.     |
-|       colour_primaries        |      Specify the chromaticity coordinates of the source primaries.      |
-| transfer_characteristics  | Indicate the transfer characteristics of the source picture. |
-|     matrix_coefficients    | Specify the matrix coefficients used in deriving luma and chroma signals. |
-|chroma_loc_info_present_flag| Indicate the presence of chroma sample location info. |
-|chroma_sample_loc_type_top_field| Specify the chromaticity sample location for the top field. |
-|chroma_sample_loc_type_bottom_field| Specify the chromaticity sample location for the bottom field. |
-|timing_info_present_flag| Indicate the presence of HRD timing and buffering parameters. |
-|timing_info| Specify the HRD timing and buffering parameters. |
-|nal_hrd_parameters_present_flag| Indicate the presence of NAL HRD parameters. |
-|vcl_hrd_parameters_present_flag| Indicate the presence of VCL HRD parameters. |
-|low_delay_hrd_flag| Specify whether the HRD buffer delay is low or not. |
-|pic_struct_present_flag| Indicate the presence of pic_struct syntax. |
-|bitstream_restriction_flag| Indicate the presence of bitstream restriction parameters. |
-|motion_vectors_over_pic_boundaries_flag| Indicate whether motion vectors extend beyond picture boundaries. |
-|max_bytes_per_pic_denom| Specify the maximum number of bytes occupied by a picture. |
-|max_bits_per_mb_denom| Specify the maximum number of bits occupied by a macroblock. |
-|log2_max_mv_length_horizontal| Specify the maximum absolute value of a horizontal motion vector component. |
-|log2_max_mv_length_vertical| Specify the maximum absolute value of a vertical motion vector component. |
-|num_reorder_frames| Specify the number of frame reordering delay. |
-|max_dec_frame_buffering| Specify the value of max_dec_frame_buffering. |{
+|         Member         |                             Meaning                             |
+| :--------------------: | :--------------------------------------------------------------: |
+| fixed_frame_rate_flag | Refer to the H.264 standard; system default is 0. Range: 0 or 1. | Not configurable parameter. |
+|   num_units_in_tick   | Follows H264 specifications; not configurable parameter.        |
+|      time_scale       | Follows H264 specifications; not configurable parameter.        |
+
+
+
+### VENC_H264_VUI_S
+**Description**
+> Defines the structure for the H.264 protocol's VUI (Video Usability Information) structure.
+
+**Structure Definition**
+```C
+typedef struct HB_VENC_H264_VUI_S
+{
     VENC_VUI_H264_TIME_INFO_S stVuiTimeInfo;
-}VENC_H264_VUI_S;
+} VENC_H264_VUI_S;
 ```
-【Member Description】
+**Member Descriptions**
 
-|     Member      | Meaning  |
-| :-----------: | :---: |
-| stVuiTimeInfo | H264 Timing parameters |
+|   Member    |    Meaning    |
+| :---------: | :-----------: |
+| stVuiTimeInfo | H264 Timing Parameters |
 
 ### VENC_VUI_H265_TIME_INFO_S
-【Description】
-> Defines H265 Timing parameters.
+**Description**
+> Defines the H265 Timing Parameters.
 
-【Struct Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VENC_VUI_H265_TIME_INFO_S
 {
     uint32_t num_units_in_tick;
     uint32_t time_scale;
     uint32_t num_ticks_poc_diff_one_minus1;
-}VENC_VUI_H265_TIME_INFO_S;
+} VENC_VUI_H265_TIME_INFO_S;
 ```
-【Member Description】
+**Member Descriptions**
 
-|             Member              |               Meaning               |
-| :---------------------------: | :------------------------------: |
-|       num_units_in_tick       | Based on H265 specifications, cannot be dynamically set. |
-|          time_scale           | Based on H265 specifications, cannot be dynamically set. |
-| num_ticks_poc_diff_one_minus1 | Based on H265 specifications, cannot be dynamically set. |
+|        Member        |                Meaning                |
+| :------------------: | :----------------------------------: |
+| num_units_in_tick    | Follows H265 specification, not dynamic. |
+|      time_scale      | Follows H265 specification, not dynamic. |
+| num_ticks_poc_diff_one_minus1 | Follows H265 specification, not dynamic. |
 
 ### VENC_H265_VUI_S
-【Description】
-> Defines Vui structure for H.264 protocol encoding channel.
+**Description**
+> Defines the structure for the H.265 protocol's VUI (Video Usability Information) structure.
 
-【Struct Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VENC_H265_VUI_S
 {
     VENC_VUI_H265_TIME_INFO_S stVuiTimeInfo;
-}VENC_H265_VUI_S;
+} VENC_H265_VUI_S
 ```
-【Member Description】
+**Member Descriptions**
 
-|     Member      |      Meaning       |
-| :-----------: | :-------------: |
-| stVuiTimeInfo | H265 Timing parameters |
+|   Member    |      Meaning      |
+| :---------: | :---------------: |
+| stVuiTimeInfo | H265 Timing Parameters |
+
+
 
 ### VENC_H265_SAO_S
-【Description】
-|                成员                 |                                        含义                                        |
-| :---------------------------------: | :--------------------------------------------------------------------------------: |
-| h265_independent_slice_mode | 独立 slice 分割模式，可动态配置 |
-| h265_independent_slice_arg | 独立 slice 参数，可动态配置，代表一个 slice 宏块个数，从左上开始，64x64的像素，定义一个宏块，图像被划分成一个个宏块，进行编码，宏块最大值(h+63)/64 *（w+63）/64 |
-| h265_dependent_slice_mode | 依赖 slice 分割模式，可动态配置 |
-| h265_dependent_slice_arg | 依赖 slice 参数，可动态配置，代表一个 slice 宏块个数，从左上开始，64x64的像素，定义一个宏块，图像被划分成一个个宏块，进行编码，宏块最大值(h+63)/64 *（w+63）/64 ||              Member               |                                   Meaning                                    |
-| :-------------------------------: | :---------------------------------------------------------------------------: |
-| h265_independent_slice_mode       |                  Independent slice encoding mode<br/>0: Disabled<br/>1: Enabled<br/>Can be dynamically configured.                  |
-| h265_independent_slice_arg        |              Size of independent slice, in coding CTUs, range [0, 2^16-1]<br/>Can be dynamically configured.               |
-| h265_dependent_slice_mode         | Non-independent slice encoding mode<br/>0: Disabled<br/>1: Slice unit is coding CTU<br/>2: Slice unit is byte<br/>Can be dynamically configured. |
-| h265_dependent_slice_arg          |     Size of non-independent slice, range [0, 2^16-1],<br/>Can be dynamically configured.      |
+**Description**
+> Defines the structure for the H.265 protocol encoding channel's Sample Adaptive Offset (SAO) feature.
+
+**Structure Definition**
+```C
+typedef struct HB_VENC_H265_SAO_S
+{
+    uint32_t sample_adaptive_offset_enabled_flag;
+} VENC_H265_SAO_S;
+```
+**Member Descriptions**
+
+|          Member           |              Meaning              |
+| :------------------------: | :------------------------------: |
+| sample_adaptive_offset_enabled_flag | Flag indicating whether SAO is enabled |
+
+### VENC_H264_SLICE_SPLIT_S
+**Description**
+> Defines the structure for the H.264 protocol encoding channel's SLICE Splitting feature.
+
+**Structure Definition**
+```C
+typedef struct HB_VENC_H264_SLICE_SPLIT_S
+{
+    int32_t h264_slice_mode;
+    int32_t h264_slice_arg;
+} VENC_H264_SLICE_SPLIT_S;
+```
+**Member Descriptions**
+
+|        Member         |                            Meaning                            |
+| :--------------------: | :----------------------------------------------------------: |
+| h264_slice_mode       | Slice splitting mode, dynamically configurable |
+| h264_slice_arg        | Slice parameter, dynamically configurable, represents the number of macroblocks, starting from the top-left corner, with 16x16 pixels each. The image is divided into macroblocks for encoding. The maximum value is (h+15)/16 * (w+15)/16, where h and w are height and width, respectively. |
+
+### VENC_H265_SLICE_SPLIT_S
+**Description**
+> Defines the structure for the H.265 protocol encoding channel's SLICE Splitting feature.
+
+**Structure Definition**
+```C
+typedef struct HB_VENC_H265_SLICE_SPLIT_S
+{
+    int32_t h265_independent_slice_mode;
+    int32_t h265_independent_slice_arg;
+    int32_t h265_dependent_slice_mode;
+    int32_t h265_dependent_slice_arg;
+} VENC_H265_SLICE_SPLIT_S
+```
+**Member Descriptions**
+
+|            Member             |                                            Meaning                                            |
+| :-------------------------: | :-------------------------------------------------------------------------------------------: |
+| h265_independent_slice_mode | Encoding mode for independent slices<br/>0: Disable, 1: Enable (dynamically configurable). |
+| h265_independent_slice_arg  | Size of independent slices in coding CTUs, range [0, 2^16-1], dynamically configurable. |
+| h265_dependent_slice_mode  | Mode for dependent slices<br/>0: Disable<br/>1: Slice unit is coding CTU<br/>2: Slice unit is byte, dynamically configurable. |
+| h265_dependent_slice_arg   | Size of dependent slices, range [0, 2^16-1], dynamically configurable.                      |
+
+
 
 ### VENC_H264_INTRA_PRED_S
-【Description】
-> Defines the structure of intra prediction for H.264 protocol encoding channel.
+**Description**
+> Defines the structure for H.264 protocol encoding channel's intra prediction.
 
-【Structure Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VENC_H264_INTRA_PRED_S
 {
     uint32_t constrained_intra_pred_flag;
-} VENC_H264_INTRA_PRED_S;
+} VENC_H264_INTRA_PRED_S
 ```
-【Member Description】
+**Member Descriptions**
 
-|              Member               |                         Meaning                              |
-| :-------------------------------: | :---------------------------------------------------------: |
-| constrained_intra_pred_flag      | Default: 0.<br/>Range: 0 or 1.<br/>Can be dynamically configured. |
+|          Member           |                     Meaning                     |
+| :------------------------: | :---------------------------------------------: |
+| constrained_intra_pred_flag | Default is 0.<br/>Range: 0 or 1. Dynamic configuration supported. |
 
 ### VENC_H265_PU_S
-【Description】
-> Defines the structure of PU parameters for H.265 protocol encoding channel.
+**Description**
+> Defines the structure for H.265 protocol encoding channel's PU parameters.
 
-【Structure Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VENC_H265_PU_S
 {
@@ -3201,20 +3891,24 @@ typedef struct HB_VENC_H265_PU_S
     uint32_t max_num_merge;
     uint32_t constrained_intra_pred_flag;
     uint32_t strong_intra_smoothing_enabled_flag;
-} VENC_H265_PU_S;
+} VENC_H265_PU_S
 ```
-【Member Description】
+**Member Descriptions**
 
-|                                            Member                                             |                       Meaning                       |
-| :-----------------------------------------------------------------------------------------: | :-------------------------------------------------: |
-|                                      intra_nxn_enable                                       |   Enable intra NxN PUs in intra CUs, can be dynamically configured    |
-|                                        max_num_merge                                        |   Specify number of merge candidates in RDO, can be dynamically configured   |
-|                                 constrained_intra_pred_flag                                 | Default: 0<br/>Range: 0 or 1<br/>Can be dynamically configured |
-| strong_intra_smoothing_enabled_flag<br/>Default: 0<br/>Range: 0 or 1<br/>Can be dynamically configured   |
+|                             Member                             |                      Meaning                      |
+| :-----------------------------------------------------------: | :-----------------------------------------------: |
+|                                      intra_nxn_enable                                      | Enables intra NxN PUs in intra CUs, dynamically configurable |
+|                                        max_num_merge                                        | Specifies the number of merge candidates in RDO, dynamically configurable |
+|                                 constrained_intra_pred_flag                                 | Default is 0<br/>Range: 0 or 1.<br/>Dynamically configurable |
+| strong_intra_smoothing_enabled_flag<br/>Default is 0.<br/>Range: 0 or 1.<br/>Dynamically configurable |
+
+
 
 ### VENC_H264_TRANS_S
-【Description】
-> Defines H264 transform parameters.【Structure Definition】
+**Description**
+> Defines the parameters for H264 Transform.
+
+**Struct Definition**
 ```C
 typedef struct HB_VENC_H264_TRANS_S {
     uint32_t transform_8x8_enable;
@@ -3225,22 +3919,22 @@ typedef struct HB_VENC_H264_TRANS_S {
     uint8_t scaling_list_8x8[2][64];
 } VENC_H264_TRANS_S;
 ```
-【Member Description】
+**Member Descriptions**
 
-|         Member        |                  Meaning                   |
-| :-------------------: | :----------------------------------------: |
-| transform_8x8_enable  |  Enable 8x8 transform, dynamically configurable. |
-| chroma_cb_qp_offset   | Specify the QP offset of cb component, dynamically configurable. |
-| chroma_cr_qp_offset   | Specify the QP offset of cr component, dynamically configurable. |
-| user_scaling_list_enable | Enable user-specified scaling list, not dynamically configurable. |
-| scaling_list_4x4 | Specify the coefficients of 4x4 blocks, each element has 16 coefficients, not dynamically configurable. |
-| scaling_list_8x8 | Specify the coefficients of 8x8 blocks, each element has 64 coefficients, not dynamically configurable. |
+|          Member          |                              Meaning                             |
+| :-----------------------: | :-------------------------------------------------------------: |
+|   transform_8x8_enable   | Enables 8x8 transform, dynamically configurable.               |
+|   chroma_cb_qp_offset    | Specifies the QP offset for the cb component, dynamically configurable. |
+|   chroma_cr_qp_offset    | Specifies the QP offset for the cr component, dynamically configurable. |
+| user_scaling_list_enable | Enables user-defined scaling list, not dynamically configurable. |
+|     scaling_list_4x4     | Specifies 4x4 block correlation coefficients, 16 coefficients per element, non-dynamic. |
+|     scaling_list_8x8     | Specifies 8x8 block correlation coefficients, 64 coefficients per element, non-dynamic. |
 
 ### VENC_H265_TRANS_S
-【Description】
-> Define H265 Transform parameters.
+**Description**
+> Defines the H265 Transform parameters.
 
-【Structure Definition】
+**Struct Definition**
 ```C
 typedef struct HB_VENC_H265_TRANSFORM_PARAMS {
     int32_t chroma_cb_qp_offset;
@@ -3254,131 +3948,245 @@ typedef struct HB_VENC_H265_TRANSFORM_PARAMS {
     uint8_t scaling_list_dc_32x32[2];
 } VENC_H265_TRANS_S;
 ```
-【Member Description】
+**Member Descriptions**
 
-|         Member        |                  Meaning                   |
-| :-------------------: | :----------------------------------------: |
-| chroma_cb_qp_offset   | Specify the QP offset of cb component, dynamically configurable. |
-| chroma_cr_qp_offset   | Specify the QP offset of cr component, dynamically configurable. |
-| user_scaling_list_enable | Enable user-specified scaling list, not dynamically configurable. |
-| scaling_list_4x4 | Specify the coefficients of 4x4 blocks, each element has 16 coefficients, not dynamically configurable. |
-| scaling_list_8x8 | Specify the coefficients of 8x8 blocks, each element has 64 coefficients, not dynamically configurable. ||             成员              |                      含义                       |
-| :---------------------------: | :---------------------------------------------: |
-|     mode_decision_enable;     | Enable mode decision, dynamically configurable. |
-|       pu04_delta_rate;        |    4x4 block cost delta, dynamically configurable.    |
-|       pu08_delta_rate;        |    8x8 block cost delta, dynamically configurable.    |
-|       pu16_delta_rate;        |   16x16 block cost delta, dynamically configurable.   |
-|       pu32_delta_rate;        |   32x32 block cost delta, dynamically configurable.   |【Translation】
-| pu04_intra_planar_delta_rate; | Frame intra planar rate delta under intra prediction mode, configurable dynamically. |
-| pu04_intra_dc_delta_rate;   | Frame intra dc rate delta under intra prediction mode, configurable dynamically.   |
-| pu04_intra_angle_delta_rate;  | Frame intra angle rate delta under intra prediction mode, configurable dynamically. |
-| pu08_intra_planar_delta_rate; | Frame intra planar rate delta under intra prediction mode, configurable dynamically. |
-| pu08_intra_dc_delta_rate;   | Frame intra dc rate delta under intra prediction mode, configurable dynamically.   |
-| pu08_intra_angle_delta_rate;  | Frame intra angle rate delta under intra prediction mode, configurable dynamically. |
-| pu16_intra_planar_delta_rate; | Frame intra planar rate delta under intra prediction mode, configurable dynamically. |
-| pu16_intra_dc_delta_rate;   | Frame intra dc rate delta under intra prediction mode, configurable dynamically.   |
-| pu16_intra_angle_delta_rate;  | Frame intra angle rate delta under intra prediction mode, configurable dynamically. |
-| pu32_intra_planar_delta_rate; | Frame intra planar rate delta under intra prediction mode, configurable dynamically. |
-| pu32_intra_dc_delta_rate;   | Frame intra dc rate delta under intra prediction mode, configurable dynamically.   |
-| pu32_intra_angle_delta_rate;  | Frame intra angle rate delta under intra prediction mode, configurable dynamically. |
-| cu08_intra_delta_rate;     | Inter frame CU8x8 intra rate delta, configurable dynamically.  |
-| cu08_inter_delta_rate;     | Inter frame CU8x8 inter rate delta, configurable dynamically.  |
-| cu08_merge_delta_rate;     | Inter frame CU8x8 merge rate delta, configurable dynamically.  |
-| cu16_intra_delta_rate;     | Inter frame CU16x16 intra rate delta, configurable dynamically.  |
-| cu16_inter_delta_rate;     | Inter frame CU16x16 inter rate delta, configurable dynamically.  |
-| cu16_merge_delta_rate;     | Inter frame CU16x16 merge rate delta, configurable dynamically.  |
-| cu32_intra_delta_rate;     | Inter frame CU32x32 intra rate delta, configurable dynamically.  |
-| cu32_inter_delta_rate;     | Inter frame CU32x32 inter rate delta, configurable dynamically.  |
-| cu32_merge_delta_rate;     | Inter frame CU32x32 merge rate delta, configurable dynamically.  |
+|          Member          |                             Meaning                             |
+| :-----------------------: | :--------------------------------------------------------------: |
+|   chroma_cb_qp_offset    | Specifies the QP offset for the cb component, dynamically configurable. |
+|   chroma_cr_qp_offset    | Specifies the QP offset for the cr component, dynamically configurable. |
+| user_scaling_list_enable | Enables user-defined scaling list, not dynamically configurable. |
+|     scaling_list_4x4     | Specifies 4x4 block correlation coefficients, 16 coefficients per element, non-dynamic. |
+|     scaling_list_8x8     | Specifies 8x8 block correlation coefficients, 64 coefficients per element, non-dynamic. |
+|    scaling_list_16x16    | Specifies 16x16 block correlation coefficients, 64 coefficients per element, non-dynamic. |
+|    scaling_list_32x32    | Specifies 32x32 block correlation coefficients, 64 coefficients per element, non-dynamic. |
+|  scaling_list_dc_16x16   | Specifies the DC coefficients for 16x16 blocks, non-dynamic. |
+|  scaling_list_dc_32x32   | Specifies the DC coefficients for 32x32 blocks, non-dynamic. |
+
+
+
+### VENC_CU_PREDICTION_S
+**Description**
+> Defines parameters for internal encoding mode decision in H264/H265.
+
+**Structure Definition**
+```C
+typedef struct HB_VENC_CU_PREDICTION_S
+{
+    int32_t mode_decision_enable;
+    uint32_t pu04_delta_rate;
+    uint32_t pu08_delta_rate;
+    uint32_t pu16_delta_rate;
+    uint32_t pu32_delta_rate;
+    uint32_t pu04_intra_planar_delta_rate;
+    uint32_t pu04_intra_dc_delta_rate;
+    uint32_t pu04_intra_angle_delta_rate;
+    uint32_t pu08_intra_planar_delta_rate;
+    uint32_t pu08_intra_dc_delta_rate;
+    uint32_t pu08_intra_angle_delta_rate;
+    uint32_t pu16_intra_planar_delta_rate;
+    uint32_t pu16_intra_dc_delta_rate;
+    uint32_t pu16_intra_angle_delta_rate;
+    uint32_t pu32_intra_planar_delta_rate;
+    uint32_t pu32_intra_dc_delta_rate;
+    uint32_t pu32_intra_angle_delta_rate;
+    uint32_t cu08_intra_delta_rate;
+    uint32_t cu08_inter_delta_rate;
+    uint32_t cu08_merge_delta_rate;
+    uint32_t cu16_intra_delta_rate;
+    uint32_t cu16_inter_delta_rate;
+    uint32_t cu16_merge_delta_rate;
+    uint32_t cu32_intra_delta_rate;
+    uint32_t cu32_inter_delta_rate;
+    uint32_t cu32_merge_delta_rate;
+} VENC_CU_PREDICTION_S;
+```
+**Member Descriptions**
+
+| Member            | Description                                                                                   |
+| :-----------------: | :-----------------------------------------------------------------------------------------------: |
+| mode_decision_enable | Enables mode selection, dynamically configurable.                                           |
+| pu04_delta_rate    | Dynamic configuration for 4x4 block cost delta.                                                 |
+| pu08_delta_rate    | Dynamic configuration for 8x8 block cost delta.                                                 |
+| pu16_delta_rate    | Dynamic configuration for 16x16 block cost delta.                                              |
+| pu32_delta_rate    | Dynamic configuration for 32x32 block cost delta.                                              |
+| pu04_intra_planar_delta_rate | Dynamic configuration for 4x4 intra-planar rate delta in frame prediction mode.                  |
+| pu04_intra_dc_delta_rate | Dynamic configuration for 4x4 intra DC rate delta in frame prediction mode.                     |
+| pu04_intra_angle_delta_rate | Dynamic configuration for 4x4 intra angle rate delta in frame prediction mode.                |
+| pu08_intra_planar_delta_rate | Dynamic configuration for 8x8 intra-planar rate delta in frame prediction mode.               |
+| pu08_intra_dc_delta_rate | Dynamic configuration for 8x8 intra DC rate delta in frame prediction mode.                    |
+| pu08_intra_angle_delta_rate | Dynamic configuration for 8x8 intra angle rate delta in frame prediction mode.               |
+| pu16_intra_planar_delta_rate | Dynamic configuration for 16x16 intra-planar rate delta in frame prediction mode.           |
+| pu16_intra_dc_delta_rate | Dynamic configuration for 16x16 intra DC rate delta in frame prediction mode.                |
+| pu16_intra_angle_delta_rate | Dynamic configuration for 16x16 intra angle rate delta in frame prediction mode.             |
+| pu32_intra_planar_delta_rate | Dynamic configuration for 32x32 intra-planar rate delta in frame prediction mode.          |
+| pu32_intra_dc_delta_rate | Dynamic configuration for 32x32 intra DC rate delta in frame prediction mode.                |
+| pu32_intra_angle_delta_rate | Dynamic configuration for 32x32 intra angle rate delta in frame prediction mode.             |
+| cu08_intra_delta_rate | Dynamic configuration for 8x8 intra rate delta between frames.                                 |
+| cu08_inter_delta_rate | Dynamic configuration for 8x8 inter rate delta between frames.                               |
+| cu08_merge_delta_rate | Dynamic configuration for 8x8 merge rate delta between frames.                             |
+| cu16_intra_delta_rate | Dynamic configuration for 16x16 intra rate delta between frames.                           |
+| cu16_inter_delta_rate | Dynamic configuration for 16x16 inter rate delta between frames.                          |
+| cu16_merge_delta_rate | Dynamic configuration for 16x16 merge rate delta between frames.                         |
+| cu32_intra_delta_rate | Dynamic configuration for 32x32 intra rate delta between frames.                           |
+| cu32_inter_delta_rate | Dynamic configuration for 32x32 inter rate delta between frames.                          |
+| cu32_merge_delta_rate | Dynamic configuration for 32x32 merge rate delta between frames.                         |
+
+
 
 ### VIDEO_CROP_INFO_S
-【Description】
-> Defines the cropping parameters of the video channel.
+**Description**
+> Defines the cropping parameters.
 
-【Structure Definition】
+**Struct Definition**
 ```C
 typedef struct HB_VIDEO_CROP_INFO_S
 {
-    HB_BOOL bEnable;
-    CODEC_RECT_S stRect;
-}VIDEO_CROP_INFO_S;
+    HB_BOOL bEnable; // Enable cropping.
+    CODEC_RECT_S stRect; // Cropping region.
+} VIDEO_CROP_INFO_S;
 ```
-【Member Description】
+**Member Descriptions**
 
-|  Member   |                             Meaning                             |
-| :-------: | :------------------------------------------------------------: |
-|  bEnable  |              Whether to enable cropping.<br/>Value range: [HB_FALSE, HB_TRUE]              |
-|   stRect  | The cropped area, where s32X and s32Y are aligned to 8 bytes, u32Width and u32Height for H.264/H.265 are aligned to 2 bytes, and u32Width and u32Height for MJPEG/JPEG are aligned to 1 byte. |
+| Member | Description |
+| :----: | :---------- |
+| bEnable | Whether to perform cropping. <br/>Range: [HB_FALSE, HB_TRUE] |
+| stRect  | Cropping area, where s32X and s32Y are 8-byte aligned, while u32Width and u32Height for H.264/H.265 are 2-byte aligned, and for mjpeg/jpeg, u32Width and u32Height are 1-byte aligned |
 
 ### VIDEO_FRAME_PACK_S
-【Description】
-> Defines the structure of a video frame.
+**Description**
+> Defines the image frame structure.
 
-【Structure Definition】
+**Struct Definition**
 ```C
 typedef struct HB_VIDEO_FRAME_PACK_S {
-    hb_char* vir_ptr[3];
-    uint64_t phy_ptr[3];
-```|   stFrameInfo   |  视频帧信息  |
-| stJpegInfo | JPEG图像信息 ||    total_mb_in_frame_display    |      显示帧总MB块数量      |
-|         display_rect         |         显示矩形信息         |
-|       display_width;        |          显示宽度          |
-|         display_height         |         显示高度         |
-|         decoded_rect        |         解码矩形信息         |
-|    aspect_rate_info     |        宽高比信息       |
-|       frame_rate_numerator        |          帧率分子          |
-|        frame_rate_denominator          |         帧率分母         |
-|         display_poc          |         显示POC         |
-|         decoded_poc          |         解码POC         |
-|         error_reason          |         错误原因         |
-|        warn_info         |         警告信息         |
-|        sequence_no          |         序列号         |
-|         temporal_id          |         视频帧时域ID         |
-|         output_flag          |         输出标志         |
-|         ctu_size          |         CTU大小         |
-
-### JPEG_FRAME_INFO_S
-【描述】
-> 定义JPEG图像帧信息结构体。
-
-【结构定义】
-```C
-typedef struct HB_JPEG_FRAME_INFO_S {
-    int32_t width;
-    int32_t height;
-    int32_t image_quality;
-    int32_t aspect_rate_info;
-} HB_JPEG_FRAME_INFO_S;
+    hb_char* vir_ptr[3]; // Image frame virtual address pointers
+    uint64_t phy_ptr[3]; // Image frame physical addresses
+    uint32_t size; // Image frame size
+    uint32_t width; // Image width
+    uint32_t height; // Image height
+    PIXEL_FORMAT_E pix_format; // Image pixel format
+    int32_t stride; // Image horizontal span
+    int32_t vstride; // Image vertical span
+    int32_t fd[3]; // Image ION memory handles
+    uint64_t pts; // Image PTS
+    HB_BOOL frame_end; // Whether the frame is the last one
+    int32_t flags; // Image flags
+    int32_t src_idx; // Internal buffer index
+} VIDEO_FRAME_PACK_S;
 ```
-【成员说明】
+**Member Descriptions**
 
-|       成员       |       含义       |
-| :--------------: | :--------------: |
-|      width       |      宽度       |
-|      height      |      高度       |
-|  image_quality   |      图像质量      |
-| aspect_rate_info |     宽高比信息    || total_mb_in_frame_display |      Total number of MB blocks in the frame display      |
-|       display_rect        |                 Display area                 |
-|       display_width       |                 Display width                |
-|      display_height       |                 Display height               |
-|       decoded_rect        |                 Decoded area                |
-|     aspect_rate_info      |                 Aspect ratio information                |
-|   frame_rate_numerator    |                 Numerator part of frame rate fraction                |
-|  frame_rate_denominator   |                 Denominator part of frame rate fraction                |
-|        display_poc        |                 Image display order                |
-|        decoded_poc        |                 Image decoding order                |
-|       error_reason        |                 Decoding error information                |
-|         warn_info         |                 Decoding warning information                |
-|        sequence_no        |                 Image number, incremented by 1 per frame                |
-|        temporal_id        |                 Temporal ID in custom GOP                |
-|        output_flag        |                 Flag indicating whether to output                |
-|         ctu_size          |                 CTU size                |
+| Member | Description |
+| :----: | :---------- |
+| vir_ptr[3] | Virtual addresses of image frames |
+| phy_ptr[3] | Physical addresses of image frames |
+| size | Size of the image frame |
+| width | Image width |
+| height | Image height |
+| pix_format | Image pixel format |
+| stride | Image horizontal stride |
+| vstride | Image vertical stride |
+| fd[3] | Image ION memory handles |
+| pts | Image presentation timestamp (PTS) |
+| frame_end | Whether the frame marks the end of a sequence |
+| flags | Image flags |
+| src_idx | Internal buffer index |
 
-### VIDEO_FRAME_INFO_JPEG_S
-【Description】
+
+
+### VIDEO_FRAME_S
+**Description**
+> Defines the structure of an original video frame.
+
+**Structure Definition**
+```C
+typedef struct HB_VIDEO_FRAME_S {
+    VIDEO_FRAME_PACK_S stVFrame;
+    union {
+        VIDEO_FRAME_INFO_S stFrameInfo;
+        VIDEO_FRAME_INFO_JPEG_S stJpegInfo;
+    };
+} VIDEO_FRAME_S;
+```
+**Member Descriptions**
+
+|    Member     |    Meaning    |
+| :-----------: | :-----------: |
+|   stVFrame    | Video Frame   |
+| stFrameInfo  | Video Frame Information |
+| stJpegInfo   | JPEG Frame Information |
+
+### VIDEO_FRAME_INFO_S
+**Description**
 > Defines the structure for video frame information.
 
-【Structure Definition】
+**Structure Definition**
+```C
+typedef struct HB_VIDEO_FRAME_INFO_S {
+    int32_t decode_result;
+    int32_t frame_display_index;
+    int32_t frame_decoded_index;
+    uint64_t stream_start_addr;
+    int32_t stream_size;
+    int32_t nalu_type;
+    int32_t err_mb_in_frame_decoded;
+    int32_t total_mb_in_frame_decoded;
+    int32_t err_mb_in_frame_display;
+    int32_t total_mb_in_frame_display;
+    CODEC_RECT_S display_rect;
+    int32_t display_width;
+    int32_t display_height;
+    CODEC_RECT_S decoded_rect;
+    int32_t aspect_rate_info;
+    int32_t frame_rate_numerator;
+    int32_t frame_rate_denominator;
+    int32_t display_poc;
+    int32_t decoded_poc;
+    int32_t error_reason;
+    int32_t warn_info;
+    int32_t sequence_no;
+    int32_t temporal_id;
+    int32_t output_flag;
+    int32_t ctu_size;
+} VIDEO_FRAME_INFO_S;
+```
+**Member Descriptions**
+
+|          Member           |              Meaning              |
+| :------------------------: | :--------------------------------: |
+|       decode_result       |         Decoding result          |
+|    frame_display_index    |           Display index           |
+|    frame_decoded_index    |           Decoded index           |
+|    stream_start_addr;     |         Stream start address        |
+|       stream_size;        |             Stream size            |
+|         nalu_type         |           NALU type               |
+|  err_mb_in_frame_decoded  | Error MB blocks in decoded frame |
+| total_mb_in_frame_decoded | Total MB blocks in decoded frame |
+|  err_mb_in_frame_display  | Error MB blocks in displayed frame |
+| total_mb_in_frame_display | Total MB blocks in displayed frame |
+|       display_rect        |              Display area          |
+|       display_width       |              Display width           |
+|      display_height       |              Display height          |
+|       decoded_rect        |              Decoded area          |
+|     aspect_rate_info      |            Aspect ratio info       |
+|   frame_rate_numerator    |      Numerator of frame rate       |
+|  frame_rate_denominator   |     Denominator of frame rate      |
+|        display_poc        |            Displayed POC           |
+|        decoded_poc        |            Decoded POC             |
+|       error_reason        |             Error reason            |
+|         warn_info         |              Warning info           |
+|        sequence_no        |         Frame sequence number       |
+|        temporal_id        | Temporal ID in custom GOP         |
+|        output_flag        |            Output flag             |
+|         ctu_size          |                 CTU size           |
+
+
+
+### VIDEO_FRAME_INFO_JPEG_S
+**Description**
+> Defines the structure for video image frame information.
+
+**Struct Definition**
 ```C
 typedef struct HB_VIDEO_FRAME_INFO_JPEG_S {
     int32_t decode_result;
@@ -3392,191 +4200,202 @@ typedef struct HB_VIDEO_FRAME_INFO_JPEG_S {
     int32_t display_height;
 } VIDEO_FRAME_INFO_JPEG_S;
 ```
-【Member Description】
+**Member Descriptions**
 
-|         Member         |                           Meaning                           |
-| :------------------: | :------------------------------------------------------: |
-|    decode_result;    |                         Decoding result                         |
-| frame_display_index; |                        Frame display index                        |
-|  stream_start_addr;  |                       Stream start address                       |
-|     stream_size;     |                         Stream size                         |
-|     err_rst_idx;     | JPEG error restart index, available after decode_result returns success  |
-|      err_pos_x;      | JPEG error MCU position X, available after decode_result returns success |
-|      err_pos_y;      | JPEG error MCU position Y, available after decode_result returns success |
-|    display_width;    |                         Display width                         |
-|   display_height;    |                         Display height                         |
+|          Member          |                             Meaning                             |
+| :-----------------------: | :-------------------------------------------------------------: |
+|        decode_result;       | The result of the decoding process.                            |
+| frame_display_index; | The index used for displaying the frame.                       |
+|  stream_start_addr;       | The starting address of the stream.                            |
+|        stream_size;        | The size of the stream in bytes.                               |
+|      err_rst_idx;         | JPEG error restart index, available after successful decoding. |
+|       err_pos_x;          | JPEG error MCU position X, available after successful decoding. |
+|       err_pos_y;          | JPEG error MCU position Y, available after successful decoding. |
+|     display_width;        | The width of the displayed image.                              |
+|    display_height;        | The height of the displayed image.                             |
 
-### VIDEO_STREAM_PACK_S【Description】
-> Defines the stream buffer information for video streams.
 
-【Structure Definition】
+
+### VIDEO_STREAM_PACK_S
+**Description**
+> Defines information about a video stream's buffer.
+
+**Structure Definition**
 ```C
 typedef struct HB_VIDEO_PACK_S {
-    hb_char* vir_ptr;
-    uint64_t phy_ptr;
-    uint32_t size;
-    uint64_t pts;
-    uint32_t fd;
-    uint32_t src_idx;
-    HB_BOOL stream_end;
+    hb_char* vir_ptr;           // Pointer to the virtual address of the framebuffer
+    uint64_t phy_ptr;            // Physical address of the framebuffer
+    uint32_t size;               // Total size of the framebuffer
+    uint64_t pts;                // Presentation timestamp of the frame
+    uint32_t fd;                 // File descriptor of the buffer
+    uint32_t src_idx;            // Index of the source buffer
+    HB_BOOL stream_end;          // Indicates if this is the end of the data stream
 } VIDEO_STREAM_PACK_S;
 ```
-【Member Description】
+**Member Descriptions**
 
-|   Member    |           Meaning           |
-| :---------: | :-------------------------: |
-|  vir_ptr    | Frame buffer virtual address pointer |
-|  phy_ptr    |    Frame buffer physical address    |
-|    size     |    Total size of the frame buffer    |
-|    pts      |           Frame timestamp           |
-|     fd      |         Buffer file handle          |
-|  src_idx    |             Index number            |
-| stream_end  |     Last segment of the data stream   |
+|    Member    |                  Meaning                  |
+| :----------: | :--------------------------------------: |
+|  vir_ptr     | Pointer to the virtual address of the frame buffer |
+|  phy_ptr     | Physical address of the frame buffer       |
+|    size      | Total size of the frame buffer             |
+|    pts       | Frame timestamp                          |
+|     fd       | File descriptor of the buffer              |
+|  src_idx     | Index of the source buffer                 |
+| stream_end   | Whether this is the last segment in the stream |
 
 ### VIDEO_STREAM_INFO_S
-【Description】
+**Description**
 > Defines additional information for H264/H265 output streams.
 
-【Structure Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VIDEO_STREAM_INFO_S {
-    HB_BOOL frame_index;
-    uint64_t frame_start_addr;
-    int32_t frame_size;
-    int32_t nalu_type;
-    uint32_t slice_idx;
-    uint32_t slice_num;
-    uint32_t dependent_slice_num;
-    uint32_t independent_slice_num;
-    uint32_t pic_skipped;
-    uint32_t intra_block_num;
-    uint32_t skip_block_num;
-    uint32_t avg_mb_qp;
-    uint32_t enc_pic_byte;
-    int32_t enc_gop_pic_idx;
-    int32_t enc_pic_poc;
-    uint32_t enc_src_idx;
-```uint32_t enc_pic_cnt; // Encoded picture count
-int32_t enc_error_reason; // Encoding error reason
-int32_t enc_warn_info; // Encoding warning information
-uint32_t frame_cycle; // Frame cycle for encoding
-uint32_t temporal_id; // Temporal ID for output stream
-uint32_t longterm_ref_type; // Long-term reference frame type for output stream
+    HB_BOOL frame_index;           // Whether the frame is indexed
+    uint64_t frame_start_addr;      // Start address of the stream
+    int32_t frame_size;            // Size of the stream frame
+    int32_t nalu_type;             // NAL unit type
+    uint32_t slice_idx;            // Slice index
+    uint32_t slice_num;            // Number of slices (valid for H264)
+    uint32_t dependent_slice_num;   // Number of dependent slices (valid for H265)
+    uint32_t independent_slice_num; // Number of independent slices (valid for H265)
+    uint32_t pic_skipped;          // Indicates if the frame was skipped
+    uint32_t intra_block_num;      // Number of intra-blocks in the frame
+    uint32_t skip_block_num;       // Number of blocks skipped
+    uint32_t avg_mb_qp;            // Average macroblock QP
+    uint32_t enc_pic_byte;         // Size of encoded image, in bytes
+    int32_t enc_gop_pic_idx;       // Index of the GOP picture in encoding
+    int32_t enc_pic_poc;           // Encoding picture order count
+    uint32_t enc_src_idx;          // Index of the source buffer for encoding
+    uint32_t enc_pic_cnt;          // Count of encoded pictures
+    int32_t enc_error_reason;      // Encoding error reason
+    int32_t enc_warn_info;         // Encoding warning information
+    uint32_t frame_cycle;          // Period for encoding one frame
+    uint32_t temporal_id;          // Output stream's temporal layer identifier
+    uint32_t longterm_ref_type;    // Stream frame type, bits 1 and 0 valid<br/>
+                                  // Bit 1 set indicates long-term reference frame<br/>
+                                  // Bit 0 set indicates reference to a long-term reference frame.
+} VIDEO_STREAM_INFO_S;
+```
+**Member Descriptions**
 
-【Member Description】
+|         Member          |                                                 Meaning                                                 |
+| :-------------------: | :----------------------------------------------------------------------------------------------: |
+|   frame_start_addr    | Address at which the stream begins                                          |
+|      frame_size       | Size of the stream frame                                                                       |
+|      frame_index      | Index assigned to the reconstructed frame                                                   |
+|       nalu_type       | Type of the NAL unit                                                                           |
+|       slice_idx       | Index of the slice                                                                              |
+|       slice_num       | Number of slices, valid for H264                                                                   |
+|  dependent_slice_num  | Number of non-independent slices, valid for H265                                               |
+| independent_slice_num | Number of independent slices, valid for H265                                                      |
+|      pic_skipped      | Flag indicating if the frame was skipped during encoding                                          |
+|    intra_block_num    | Number of intra-blocks within the frame                                                           |
+|    skip_block_num     | Number of blocks that were skipped during encoding                                              |
+|       avg_mb_qp       | Average macroblock quantization parameter                                                       |
+|     enc_pic_byte      | Size of the encoded image, in bytes                                                               |
+|    enc_gop_pic_idx    | Index of the GOP picture in the encoding process                                              |
+|      enc_pic_poc      | Picture order count of the encoded image                                                         |
+|      enc_src_idx      | Index of the source buffer used for encoding                                                      |
+|      enc_pic_cnt      | Count of encoded pictures                                                                        |
+|   enc_error_reason    | Encoding error reason                                                                            |
+|     enc_warn_info     | Encoding warning information                                                                     |
+|      frame_cycle      | Period for encoding one frame                                                                      |
+|      temporal_id      | Identifier for the output stream's temporal domain                                                |
+|   longterm_ref_type   | Stream frame type, where bit 1 and 0 are valid. Bit 1 = long-term reference frame, bit 0 = ref to long-term. |
 
-|       Member       |                                   Meaning                                    |
-| :----------------: | :--------------------------------------------------------------------------: |
-|  frame_start_addr  |                           Start address of the frame stream                            |
-|     frame_size     |                                  Size of the frame stream                                   |
-|    frame_index     |                               Index of the reconstructed frame                              |
-|     nalu_type      |                                   NALU type in H.264                                    |
-|     slice_idx      |                                 Slice index in H.264                                  |
-|     slice_num      |                             Number of slices (H.264)                             |
-| dependent_slice_num|                       Number of non-independent slices (H.265)                       |
-|independent_slice_num|                        Number of independent slices (H.265)                       |
-|    pic_skipped     |                          Flag indicating whether the frame is skipped                           |
-|  intra_block_num   |                               Number of intra blocks in the frame                                |
-|   skip_block_num   |                               Number of skipped blocks in the frame                               |
-|      avg_mb_qp     |                          Average macroblock quantization parameter                           |
-|    enc_pic_byte    |                      Size of the encoded image in bytes                     |
-|  enc_gop_pic_idx   |                          GOP index of the encoded image                           |
-|    enc_pic_poc     |                           POC (Picture Order Count) value of the encoded image                           |
-|    enc_src_idx     |                      Buffer index of the encoded image                      |
-|    enc_pic_cnt     |                          Number of encoded images                           |
-| enc_error_reason   |                             Encoding error information                             |
-|  enc_warn_info    |                            Encoding warning information                             |
-|    frame_cycle     |                           Cycle for encoding one frame                            |
-|    temporal_id     |                                    Temporal layer ID for output stream                                   |
-| longterm_ref_type  |            Frame type for output stream, where bit1 and bit0 are valid            |
-|                     |  bit1 = 1 indicates long-term reference frame, bit0 = 1 indicates reference long-term reference frame  |
+
 
 ### VIDEO_STREAM_INFO_JPEG_S
-【Description】
-> Defines additional information for MJPEG/JPEG output stream.
+**Description**
+> Defines additional information for an MJPEG/JPEG output stream.
 
-【Structure Definition】
+**Structure Definition**
 ```C
 typedef struct VIDEO_STREAM_INFO_JPEG_S {
-    uint64_t frame_start_addr;
-    int32_t frame_size;
-    uint32_t slice_idx;
-    uint32_t slice_num;
-    uint32_t frame_cycle;
-} VIDEO_STREAM_INFO_JPEG_S;
+    uint64_t frame_start_addr; // Start address of the stream
+    int32_t frame_size;        // Size of the stream in bytes
+    uint32_t slice_idx;         // Index of the slice within the frame
+    uint32_t slice_num;         // Total number of slices in the frame
+    uint32_t frame_cycle;       // Period to encode one frame
+}VIDEO_STREAM_INFO_JPEG_S;
 ```
-【Member Description】|     Member      |                   Meaning                   |
-| :-------------: | :-----------------------------------------: |
-| frame_start_addr |          Start address of the bitstream          |
-|   frame_size    |            Size of the bitstream            |
-|    slice_idx    |           Index of the slice           |
-|    slice_num    |           Number of slices           |
-|   frame_cycle   |          Cycle of encoding one frame          |
+**Member Descriptions**
+
+| Member         | Meaning                                                                                   |
+| :-------------: | :----------------------------------------------------------------------------------------- |
+| frame_start_addr | Address of the beginning of the stream in memory                                            |
+| frame_size      | Size of the stream in bytes, including all slices                                              |
+| slice_idx      | Index of the current slice being processed within the frame                                      |
+| slice_num      | Total number of slices that make up the frame                                                   |
+| frame_cycle    | Time interval between encoding consecutive frames                                             |
 
 ### VIDEO_STREAM_S
-【Description】
-> Defines the structure of video frame stream.
+**Description**
+> Defines a frame stream structure.
 
-【Structure Definition】
+**Structure Definition**
 ```C
-typedef struct HB_VIDEO_STREAM_S
-{
-    VIDEO_STREAM_PACK_S pstPack;
-    union
-    {
-        VIDEO_STREAM_INFO_S stStreamInfo;
-        VIDEO_STREAM_INFO_JPEG_S stJpegInfo;
+typedef struct HB_VIDEO_STREAM_S {
+    VIDEO_STREAM_PACK_S pstPack; // Frame stream packet structure
+    union {
+        VIDEO_STREAM_INFO_S stStreamInfo; // Stream information
+        VIDEO_STREAM_INFO_JPEG_S stJpegInfo; // JPEG stream information
     };
 }VIDEO_STREAM_S;
 ```
-【Member Description】
+**Member Descriptions**
 
-|    Member    |         Meaning          |
-| :----------: | :----------------------: |
-|   pstPack    | Structure of the frame stream package |
-| stStreamInfo | Characteristics information of the bitstream |
-|  stJpegInfo  | Characteristics information of the bitstream |
+| Member        | Meaning                                                                                   |
+| :------------: | :----------------------------------------------------------------------------------------- |
+| pstPack       | Structure containing details about the frame stream packet                                          |
+| stStreamInfo  | Information about the general stream characteristics                                              |
+| stJpegInfo    | Information specific to an MJPEG/JPEG stream (e.g., JPEG stream start address and slice details) |
 
 ### VENC_RECV_PIC_PARAM_S
-【Description】
-> Defines the structure of number of frames continuously received and encoded by the encoding channel.
+**Description**
+> Defines a structure for the number of consecutive frames received and encoded by the encoding channel.
 
-【Structure Definition】
+**Structure Definition**
 ```C
-typedef struct HB_VENC_RECV_PIC_PARAM_S
-{
-    int32_t s32RecvPicNum;
+typedef struct HB_VENC_RECV_PIC_PARAM_S {
+    int32_t s32RecvPicNum; // Number of consecutive frames to receive and encode, range: [-1, 0) ∪ (0, ∞]
 }VENC_RECV_PIC_PARAM_S;
 ```
-【Member Description】
+**Member Description**
 
-|    Member     |                   Meaning                   |
-| :-----------: | :-----------------------------------------: |
-| s32RecvPicNum | Number of frames continuously received and encoded by the encoding channel. Range: [-1,0)∪(0,∞] |### VENC_REF_PARAM_S
-【Description】
-> Defines the structure of the reference parameters for the encoder.
+| Member      | Meaning                                                                                     |
+| :----------: | :------------------------------------------------------------------------------------------- |
+| s32RecvPicNum | The number of frames to be continuously received and encoded by the encoding channel. Negative values indicate a variable number or end of stream. |
 
-【Structure Definition】
+
+
+### VENC_REF_PARAM_S
+**Description**
+> Defines the structure for the encoder reference parameter.
+
+**Structure Definition**
 ```C
-typedef struct HB_VENC_REF_PARAM_S{
+typedef struct HB_VENC_REF_PARAM_S
+{
     uint32_t use_longterm;
     uint32_t longterm_pic_period;
     uint32_t longterm_pic_using_period;
 } VENC_REF_PARAM_S;
 ```
-【Member Description】
+**Member Descriptions**
 
-| Member                   | Meaning                                 |
-| -----------------------  | --------------------------------------- |
-| use_longterm             | Enables long-term reference mode, not dynamically configurable. |
-| longterm_pic_period      | Long-term reference picture period, dynamically configurable. |
-| longterm_pic_using_period| Long-term reference picture usage period, dynamically configurable. |
+|          Member          |                  Meaning                  |
+| :------------------------: | :--------------------------------------: |
+|       use_longterm        | Enables long-term frame reference mode, not dynamically configurable. |
+|    longterm_pic_period    | Long-term picture period, dynamically configurable. |
+| longterm_pic_using_period | Period of usage for long-term picture references, dynamically configurable. |
 
 ### VENC_USER_RC_ATTR_S
-【Description】
-> Defines the structure of the user frame information.
+**Description**
+> Defines user image frame information.
 
-【Structure Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VENC_USER_RC_ATTR_S {
     HB_BOOL qp_map_valid;
@@ -3584,88 +4403,91 @@ typedef struct HB_VENC_USER_RC_ATTR_S {
     uint32_t qp_map_array_count;
 } VENC_USER_RC_ATTR_S;
 ```
-【Member Description】
+**Member Descriptions**
 
-| Member               | Meaning                  |
-| -------------------- | ------------------------ |
-| qp_map_valid         | Whether to enable QP map. |
-| qp_map_array	       | Pointer to the QP map table. |
-| qp_map_array_count   | Length of the QP map table. |
+|         Member         |             Meaning             |
+| :--------------------: | :------------------------------: |
+|    qp_map_valid       | Enables the qp map feature. |
+|  qp_map_array      | Pointer to the qp map array.    |
+| qp_map_array_count | Length of the qp map array.  |
 
 ### USER_FRAME_INFO_S
-【Description】
-> Defines the structure of the user frame information.
+**Description**
+> Defines user image frame information.
 
-【Structure Definition】
+**Structure Definition**
 ```C
-typedef struct HB_USER_FRAME_INFO_S{
+typedef struct HB_USER_FRAME_INFO_S {
     VIDEO_FRAME_S stUserFrame;
-    VENC_USER_RC_ATTR_S stUserRcInfo;} USER_FRAME_INFO_S;
+    VENC_USER_RC_ATTR_S stUserRcInfo;
+} USER_FRAME_INFO_S;
 ```
-【Member Explanation】
+**Member Descriptions**
 
-|     Member     |     Meaning     |
-| :----------: | :----------: |
-| stUserFrame  |    Image frame    |
-| stUserRcInfo | User RC information. |
+|    Member    |            Meaning            |
+| :----------: | :------------------------------: |
+| stUserFrame | The image frame.                 |
+| stUserRcInfo | User RC information.             |
+
+
 
 ### VENC_PARAM_MOD_S
-【Description】
-> Define frame rate control parameters for encoding channels.
+**Description**
+> Defines encoding channel frame rate control parameters.
 
-【Struct Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VENC_PARAM_MOD_S {
     uint32_t u32OneStreamBuffer;
 } VENC_PARAM_MOD_S;
 ```
-【Member Explanation】
+**Member Descriptions**
 
 |        Member        |                       Meaning                        |
-| :----------------: | :-----------------------------------------------: |
-| u32OneStreamBuffer | Whether VPS, SPS, PPS, IDR are output in one frame<br/>Default: one frame output. |
+| :-----------------: | :-----------------------------------------------: |
+| u32OneStreamBuffer | Whether VPS, SPS, PPS, and IDR frames are output per frame. Default is one frame output per frame. |
 
 ### VENC_FRAME_RATE_S
-【Description】
-> Define frame rate control parameters for encoding channels.
+**Description**
+> Defines encoding channel frame rate control parameters.
 
-【Struct Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VENC_FRAME_RATE_S {
     int32_t s32InputFrameRate;
     int32_t s32OutputFrameRate;
 } VENC_FRAME_RATE_S;
 ```
-【Member Explanation】
+**Member Descriptions**
 
 |        Member        |                 Meaning                  |
 | :----------------: | :-----------------------------------: |
-| s32InputFrameRate  |               Input frame rate                |
-| s32OutputFrameRate | Output frame rate, range: [1- s32InputFrameRate） |
+| s32InputFrameRate  |              Input frame rate             |
+| s32OutputFrameRate | Output frame rate, within the range [1- s32InputFrameRate] |
 
 ### VENC_CHN_PARAM_S
-【Description】
-> Define encoding channel parameters.
+**Description**
+> Defines parameters for an encoding channel.
 
-【Struct Definition】
-```C
-typedef struct HB_VENC_CHN_PARAM_S {
+**Structure Definition**
 ```C
 typedef struct HB_VENC_CHN_PARAM_S {
     VENC_FRAME_RATE_S stFrameRate;
 } VENC_CHN_PARAM_S;
 ```
-【Member Description】
+**Member Descriptions**
 
-|   Member    |      Meaning     |
-|:-----------:|:-----------------:|
-| stFrameRate | Frame rate control parameters, can be dynamically set |
+|    Member     |           Meaning           |
+| :---------: | :----------------------: |
+| stFrameRate | Frame rate control parameter, which can be dynamically set |
+
+
 
 ### VENC_ROI_ATTR_S
-【Description】
-> Defines the information of regions of interest for encoding.
+**Description**
+> Defines the structure for encoding ROI (Region of Interest) information.
 
-【Structure Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VENC_ROI_ATTR_S {
     uint32_t roi_enable;
@@ -3673,19 +4495,19 @@ typedef struct HB_VENC_ROI_ATTR_S {
     uint32_t roi_map_array_count;
 } VENC_ROI_ATTR_S;
 ```
-【Member Description】
+**Member Descriptions**
 
-|       Member       |              Meaning               |
-|:------------------:|:----------------------------------:|
-|    roi_enable      | Enable ROI region, cannot be dynamically configured |
-|   roi_map_array    | ROI region Qp array, can be dynamically configured |
-| roi_map_array_count| Number of ROI region Qp arrays, cannot be dynamically configured |
+|        Member         |                   Description                   |
+| :--------------------: | :---------------------------------------------: |
+|     roi_enable        | Enables the ROI area; not dynamically configurable. |
+|    roi_map_array      | ROI area QP array, dynamically configurable.    |
+| roi_map_array_count  | Number of ROI QP array elements, not dynamically configurable. |
 
 ### VENC_CHN_STATUS_S
-【Description】
+**Description**
 > Defines the structure for encoding channel status.
 
-【Structure Definition】
+**Structure Definition**
 ```C
 typedef struct HB_VENC_CHN_STATUS_S {
     uint32_t cur_input_buf_cnt;
@@ -3700,35 +4522,89 @@ typedef struct HB_VENC_CHN_STATUS_S {
     int32_t channel_port_id;
 } VENC_CHN_STATUS_S;
 ```
-【Member Description】
+**Member Descriptions**
 
-|       Member       |          Meaning          |
-|nr_noise_sigmaCb|Cb分量噪声标准偏差|
-|nr_noise_sigmaCr|Cr分量噪声标准偏差|## Error Codes
-The error codes for VENC are as follows:
+|         Member         |                        Meaning                        |
+| :---------------------: | :--------------------------------------------------: |
+|  cur_input_buf_cnt     | Current number of input frames yet to be encoded   |
+|  cur_input_buf_size    | Current size of input frame buffers                 |
+|  cur_output_buf_cnt    | Current number of encoded frames                    |
+| cur_output_buf_size    | Current size of encoded buffer                      |
+|   left_recv_frame      | Remaining frames to be received                       |
+|    left_enc_frame      | Remaining frames to be encoded                       |
+| total_input_buf_cnt    | Total number of input frames received               |
+| total_output_buf_cnt  | Total number of encoded frames                       |
+|       pipeline        | The current stage of the encoding pipeline           |
+|   channel_port_id      | Identifier for the encoding channel                  |
 
-| Error Code   |                Macro Definition | Description        |
-| :----------: | -----------------------------: | ------------------: |
-| -268958720   |               HB_ERR_VENC_UNKNOWN | Unknown error      |
-| -268958721   |             HB_ERR_VENC_NOT_FOUND | VENC channel not found |
-| -268958722   |             HB_ERR_VENC_OPEN_FAIL | Failed to open VENC channel |
-| -268958723   |      HB_ERR_VENC_RESPONSE_TIMEOUT | No response from VENC channel |
-| -268958724   |             HB_ERR_VENC_INIT_FAIL | Failed to initialize VENC module |
-| -268958725   |HB_ERR_VENC_OPERATION_NOT_ALLOWED | Operation not allowed |
-| -268958726   |                 HB_ERR_VENC_NOMEM | Insufficient VENC memory |
-| -268958727   |       HB_ERR_VENC_NO_FREE_CHANNEL | No available VENC channel |
-| -268958728   |         HB_ERR_VENC_ILLEGAL_PARAM | Invalid parameter |
-| -268958729   |         HB_ERR_VENC_INVALID_CHNID | Invalid channel ID |
-| -268958730   |           HB_ERR_VENC_INVALID_BUF | Invalid buffer block |
-| -268958731   |           HB_ERR_VENC_INVALID_CMD | Invalid command |
-| -268958732   |          HB_ERR_VENC_WAIT_TIMEOUT | Wait timeout |
-| -268958733   |   HB_ERR_VENC_FILE_OPERATION_FAIL | Operation failed |
-| -268958734   |       HB_ERR_VENC_PARAMS_SET_FAIL | Failed to set parameters |
-| -268958735   |       HB_ERR_VENC_PARAMS_GET_FAIL | Failed to retrieve parameters |
-| -268958736   |                 HB_ERR_VENC_EXIST | VENC channel already exists |
-| -268958737   |               HB_ERR_VENC_UNEXIST | VENC channel does not exist |
-| -268958738   |              HB_ERR_VENC_NULL_PTR | Null pointer |
-| -268958739   |             HB_ERR_VENC_UNSUPPORT | Not supported |
 
-## Reference Code
-You can refer to the sample code for VENC in [sample_video_codec](./multimedia_samples#sample_video_codec).
+
+### VENC_3DNR_PARAMS
+**Description**
+> Defines the structure for encoding channel state.
+
+**Structure Definition**
+```C
+typedef struct HB_VENC_3DNR_PARAMS {
+    uint32_t nr_y_enable;
+    uint32_t nr_cb_enable;
+    uint32_t nr_cr_enable;
+    uint32_t nr_est_enable;
+    uint32_t nr_intra_weightY;
+    uint32_t nr_intra_weightCb;
+    uint32_t nr_intra_weightCr;
+    uint32_t nr_inter_weightY;
+    uint32_t nr_inter_weightCb;
+    uint32_t nr_inter_weightCr;
+    uint32_t nr_noise_sigmaY;
+    uint32_t nr_noise_sigmaCb;
+    uint32_t nr_noise_sigmaCr;
+} VENC_3DNR_PARAMS;
+```
+**Member Descriptions**
+
+| Member | Meaning |
+| :-----: | :------ |
+| `nr_y_enable` | Y component noise reduction enabled |
+| `nr_cb_enable` | Cb component noise reduction enabled |
+| `nr_cr_enable` | Cr component noise reduction enabled |
+| `nr_est_enable` | Noise estimation enabled |
+| `nr_intra_weightY` | Intra-frame image Y-weighting coefficient |
+| `nr_intra_weightCb` | Intra-frame image Cb-weighting coefficient |
+| `nr_intra_weightCr` | Intra-frame image Cr-weighting coefficient |
+| `nr_inter_weightY` | Inter-frame image Y-weighting coefficient |
+| `nr_inter_weightCb` | Inter-frame image Cb-weighting coefficient |
+| `nr_inter_weightCr` | Inter-frame image Cr-weighting coefficient |
+| `nr_noise_sigmaY` | Y component noise standard deviation |
+| `nr_noise_sigmaCb` | Cb component noise standard deviation |
+| `nr_noise_sigmaCr` | Cr component noise standard deviation |
+
+## Error Codes
+The VENC error codes are as follows:
+
+| Error Code | Macro Definition | Description |
+| :---------: | :--------------: | -----------: |
+| `-268958720` | `HB_ERR_VENC_UNKNOWN` | Unknown error |
+| `-268958721` | `HB_ERR_VENC_NOT_FOUND` | VENC channel not found |
+| `-268958722` | `HB_ERR_VENC_OPEN_FAIL` | Failed to open VENC channel |
+| `-268958723` | `HB_ERR_VENC_RESPONSE_TIMEOUT` | No response from VENC channel |
+| `-268958724` | `HB_ERR_VENC_INIT_FAIL` | Failed to initialize VENC module |
+| `-268958725` | `HB_ERR_VENC_OPERATION_NOT_ALLOWDED` | Operation not allowed |
+| `-268958726` | `HB_ERR_VENC_NOMEM` | Insufficient VENC memory |
+| `-268958727` | `HB_ERR_VENC_NO_FREE_CHANNEL` | No available VENC channel |
+| `-268958728` | `HB_ERR_VENC_ILLEGAL_PARAM` | Invalid parameter |
+| `-268958729` | `HB_ERR_VENC_INVALID_CHNID` | Invalid channel ID |
+| `-268958730` | `HB_ERR_VENC_INVALID_BUF` | Invalid buffer block |
+| `-268958731` | `HB_ERR_VENC_INVALID_CMD` | Invalid command |
+| `-268958732` | `HB_ERR_VENC_WAIT_TIMEOUT` | Timeout waiting |
+| `-268958733` | `HB_ERR_VENC_FILE_OPERATION_FAIL` | Operation failure |
+| `-268958734` | `HB_ERR_VENC_PARAMS_SET_FAIL` | Failed to set parameters |
+| `-268958735` | `HB_ERR_VENC_PARAMS_GET_FAIL` | Failed to get parameters |
+| `-268958736` | `HB_ERR_VENC_EXIST` | VENC channel already exists |
+| `-268958737` | `HB_ERR_VENC_UNEXIST` | VENC channel does not exist |
+| `-268958738` | `HB_ERR_VENC_NULL_PTR` | Null pointer |
+| `-268958739` | `HB_ERR_VENC_UNSUPPORT` | Not supported |
+
+## Referencing Code
+For a sample of VENC code, you can refer to the [sample_video_codec](./multimedia_samples#sample_video_codec) section.
+

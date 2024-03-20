@@ -47,7 +47,9 @@ qat_8bit_qconfig = QConfig(
 )
 ```
 
-## Introduction to FX Quantization TheoryBefore reading this document, it is recommended to read [torch.fx — PyTorch documentation](https://pytorch.org/docs/stable/fx.html) to have a preliminary understanding of the FX mechanism in PyTorch.
+## Introduction to FX Quantization 
+
+TheoryBefore reading this document, it is recommended to read [torch.fx — PyTorch documentation](https://pytorch.org/docs/stable/fx.html) to have a preliminary understanding of the FX mechanism in PyTorch.
 
 FX adopts a symbolic execution approach to build graphs at the level of `nn.Module` or functions, enabling automated fusion and other graph-based optimizations.
 
@@ -144,57 +146,103 @@ class RetinaNet(nn.Module):
         # only preserving it as it is (the modules called within the method can still be set with qconfig, and can be replaced
         # by prepare_qat_fx and convert_fx)
         return self._post_process( data, feat, cls_scores, bbox_preds)
-```@ fx_warp() # fx_wrap supports directly decorate class method
+        
+        @ fx_warp() # fx_wrap supports directly decorate class method
+        def _post_process(self, data, feat, cls_scores, bbox_preds)
+            anchors = self.anchors(feat)
 
-def _post_process(self, data, feat, cls_scores, bbox_preds)
-    anchors = self.anchors(feat)
+            # The judgment of self.training must be encapsulated, otherwise, after the symbolic trace, this judgment
+            # The logic will be lost
+            if self.training:
+                cls_scores = self.rearrange_head_out(
+                    cls_scores, self.head.num_classes
+                )
+                bbox_preds = self.rearrange_head_out(bbox_preds, 4)
+                gt_labels = [
+                    torch.cat(
+                        [data["gt_bboxes"][i], data["gt_classes"][i][:, None] + 1],
+                        dim=-1,
+                    )
+                    for i in range(len(data["gt_classes"]))
+                ]
+                gt_labels = [gt_label.float() for gt_label in gt_labels]
+                _, labels = self.targets(anchors, gt_labels)
+                avg_factor = labels["reg_label_mask"].sum()
+                if avg_factor == 0:
+                    avg_factor += 1
+                cls_loss = self.loss_cls(
+                    pred=cls_scores.sigmoid(),
+                    target=labels["cls_label"],
+                    weight=labels["cls_label_mask"],
+                    avg_factor=avg_factor,
+                )
+                reg_loss = self.loss_reg(
+                    pred=bbox_preds,
+                    target=labels["reg_label"],
+                    weight=labels["reg_label_mask"],
+                    avg_factor=avg_factor,
+                )
+                return {
+                    "cls_loss": cls_loss,
+                    "reg_loss": reg_loss,
+                }
+            else:
+                preds = self.post_process(
+                    anchors,
+                    cls_scores,
+                    bbox_preds,
+                    [torch.tensor(shape) for shape in data["resized_shape"]],
+                )
+                assert (
+                    "pred_bboxes" not in data.keys()
+                ), "pred_bboxes has been in data.keys()"data["pred_bboxes"] = preds
+        return data
+```
 
-    # The judgment of self.training must be encapsulated, otherwise, after the symbolic trace, this judgment
-    # The logic will be lost
-    if self.training:
-        cls_scores = self.rearrange_head_out(
-            cls_scores, self.head.num_classes
-        )
-        bbox_preds = self.rearrange_head_out(bbox_preds, 4)
-        gt_labels = [
-            torch.cat(
-                [data["gt_bboxes"][i], data["gt_classes"][i][:, None] + 1],
-                dim=-1,
-            )
-            for i in range(len(data["gt_classes"]))
-        ]
-        gt_labels = [gt_label.float() for gt_label in gt_labels]
-        _, labels = self.targets(anchors, gt_labels)
-        avg_factor = labels["reg_label_mask"].sum()
-        if avg_factor == 0:
-            avg_factor += 1
-        cls_loss = self.loss_cls(
-            pred=cls_scores.sigmoid(),
-            target=labels["cls_label"],
-            weight=labels["cls_label_mask"],
-            avg_factor=avg_factor,
-        )
-        reg_loss = self.loss_reg(
-            pred=bbox_preds,
-            target=labels["reg_label"],
-            weight=labels["reg_label_mask"],
-            avg_factor=avg_factor,
-        )
-        return {
-            "cls_loss": cls_loss,
-            "reg_loss": reg_loss,
-        }
-    else:
-        preds = self.post_process(
-            anchors,
-            cls_scores,
-            bbox_preds,
-            [torch.tensor(shape) for shape in data["resized_shape"]],
-        )
-        assert (
-            "pred_bboxes" not in data.keys()
-        ), "pred_bboxes has been in data.keys()"data["pred_bboxes"] = preds
-return data```python
+
+
+## RGB888 Data Deployment
+
+### Scenario
+
+In the BPU, the output images from the image pyramid are in a centered YUV444 format with a data range of [-128, 127]. However, your training dataset might be in RGB format, which requires preprocessing to align with the BPU's input requirements. During training, it's recommended to convert RGB images to YUV to ensure compatibility with the model's inference pipeline.
+
+Since the compiler currently doesn't support color space conversions, users can manually insert color space conversion nodes to bypass these limitations.
+
+### Brief on YUV Format
+
+YUV is commonly used to describe color spaces in analog television systems. In BT.601, YUV has two standards: YUV studio swing (Y: 16-235, UV: 16-240) and YUV full swing (YUV: 0-255). The BPU supports full swing YUV.
+
+### Preprocessing RGB Input during Training
+
+When training, you can use `horizon.functional.rgb2centered_yuv` or `horizon.functional.bgr2centered_yuv` to convert RGB images to the BPU-supported YUV format. For example, the `rgb2centered_yuv` function definition is as follows:
+
+```python
+def rgb2centered_yuv(input: Tensor, swing: str = "studio") -> Tensor:
+    """Convert color space.
+
+    Convert images from RGB format to centered YUV444 BT.601
+
+    Args:
+        input: input image in RGB format, ranging 0~255
+        swing: "studio" for YUV studio swing (Y: -112~107,
+                U, V: -112~112)
+                "full" for YUV full swing (Y, U, V: -128~127).
+                default is "studio"
+
+    Returns:
+        output: centered YUV image
+    """
+```
+The input is an RGB image, and the output is a centered YUV image. To match the BPU data flow format, **set `swing` to "full"`**.
+
+### Real-time Conversion of YUV Input during Inference
+
+We recommend converting RGB images to YUV during training to avoid extra overhead and accuracy loss during inference. However, if you've trained with RGB images, you can use `horizon.functional.centered_yuv2rgb` or `horizon.functional.centered_yuv2bgr` for on-the-fly conversion at inference time. These functions should be inserted after the QuantStub in your model.
+
+For instance, the `centered_yuv2rgb` operator definition looks like this:
+
+```python
 def centered_yuv2rgb(
     input: QTensor,
     swing: str = "studio",
@@ -203,38 +251,31 @@ def centered_yuv2rgb(
     q_scale: Union[float, Tensor] = 1.0 / 128.0,
 ) -> QTensor:
 ```
+To align with BPU's YUV format, **set `swing` to "full"`**.
 
-`swing` is the format of YUV, with options "full" and "studio". To align with the YUV data format of BPU, **please set `swing` to "full"**.
-`mean` and `std` are the normalization mean and standard deviation used for training RGB images, which support both list and torch.Tensor input types, and support normalization parameters for single channel or three channels. For example, if your normalization mean is \[128, 0, -128\], you can pass in a list \[128., 0., -128.\] or torch.tensor(\[128., 0., -128.\]).
-`q_scale` is the scale value used by QuantStub during quantization training. It supports both float and torch.Tensor data types.
-
-The operator performs the following operations:
-
-1. Convert the input image to RGB format according to the conversion formula corresponding to the given `swing`.
-2. Normalize the RGB image using the given `mean` and `std`.
-3. Quantize the RGB image using the given `q_scale`.
-
-Since this operator includes the quantization operation on the RGB image, after inserting this operator, you need to manually change the scale parameter of the QuantStub in your model to 1.
-
-The deployment model after inserting this operator is shown in the following figure:
+The operator adjusts the input according to the following steps:
+1. Converts the image to RGB using the formula corresponding to the given `swing`.
+2. Normalizes the RGB image using provided `mean` and `std`.
+3. Quantizes the RGB image using the given `q_scale`.
 
 ![yuv1](./image/expert/yuv1.svg)
 
-:::caution CAUTION
-
-This operator is for deployment only and should not be used during training.
+:::caution Caution
+**Note**: This operator is designed specifically for deployment and should not be used during training.
 :::
 
-#### Usage
+#### Insertion of the Operator
 
-After quantization training using RGB images, you need to:
+To integrate this operator into your model, follow these steps after QAT model conversion:
 
-1. Get the scale value used by the QuantStub during quantization training and the normalization parameters used for RGB images.
-2. Use the `convert_fx` interface to convert the qat model to a quantized model.
-3. Insert the `centered_yuv2rgb` operator after the QuantStub in the model. The operator needs to be passed the parameters obtained in step 1.
-4. Modify the `scale` parameter of the QuantStub to 1.
+1. Retrieve the scale value from the QuantStub and the normalization parameters used during training.
+2. Convert the QAT model to a quantized model using `convert_fx`.
+3. Insert the `centered_yuv2rgb` operator after the QuantStub, providing the gathered parameters.
+4. Manually set the QuantStub's `scale` parameter to 1.
 
-Example:
+Here's an example:
+
+
 
 ```python
 import torch
@@ -242,7 +283,8 @@ from horizon_plugin_pytorch.quantization import (
     QuantStub,
     prepare_qat_fx,
     convert_fx,
-```from horizon_plugin_pytorch.functional import centered_yuv2rgb
+)
+from horizon_plugin_pytorch.functional import centered_yuv2rgb
 from horizon_plugin_pytorch.quantization.qconfig import (
     default_qat_8bit_fake_quant_qconfig,
 )
@@ -270,7 +312,7 @@ class Net(torch.nn.Module):
 data = torch.rand(1, 3, 28, 28)
 net = Net()
 
-# Set march **RDK X3** to bernoulli2, **RDK Ultra** to bayes.
+# Set march to BERNOULLI2 for RDK X3, and to BAYES for RDK Ultra.
 set_march("bayes")
 
 net.set_qconfig()
@@ -290,15 +332,15 @@ for n in traced.graph.nodes:
             n.replace_all_uses_with(new_node)
             new_node.args = (n,)
 
-traced.quant.scale.fill_(1.0)traced.recompile()
+traced.quant.scale.fill_(1.0)
+traced.recompile()
 print("\nAfter centered_yuv2rgb")
 traced.graph.print_tabular()
 ```
-
-After `centered_yuv2rgb`, we can see that a color space conversion node is inserted into the modified graph:
+The graph comparison will show the insertion of the color space conversion node:
 
 ```sh
-Before `centered_yuv2rgb`
+Before centered_yuv2rgb
 opcode       name     target    args        kwargs
 -----------  -------  --------  ----------  --------
 placeholder  input_1  input     ()          {}
@@ -306,7 +348,7 @@ call_module  quant    quant     (input_1,)  {}
 call_module  conv     conv      (quant,)    {}
 output       output   output    (conv,)     {}
 
-After `centered_yuv2rgb`
+After centered_yuv2rgb
 opcode         name              target                                         args                 kwargs
 -------------  ----------------  ---------------------------------------------  -------------------  -----------------
 placeholder    input_1           input                                          ()                   {}
@@ -315,6 +357,7 @@ call_function  centered_yuv2rgb  <function centered_yuv2rgb at 0x7fa1c2b48040>  
 call_module    conv              conv                                           (centered_yuv2rgb,)  {}
 output         output            output                                         (conv,)              {}
 ```
+
 
 ## Model Segmented Deployment
 
@@ -363,11 +406,39 @@ Operator fusion not only preserves high-precision state for intermediate results
 
 *(Since operator fusion can improve both model precision and speed, it is generally recommended to fuse all possible parts.)*
 
+
+
+### Operator Fusion {#op_fusion}
+
+The training tools support two main categories of operator fusion: 1. Absorbing Batch Normalization (BN); 2. Fusing Add and ReLU(6).
+
+### Absorbing Batch Normalization (BN)
+
+The purpose of absorbing BN is to reduce model computation. Since BN is a linear transformation, when it follows a Conv layer, the BN parameters can be absorbed into the Conv parameters, eliminating BN computations during deployment.
+
+The absorption process looks like this:
+
+![fuse_bn](./image/expert/fuse_bn.jpg)
+
+By absorbing BN, a `Conv2d + BN2d` sequence can be simplified to just `Conv2d`.
+
+![absorb_bn](./image/expert/absorb_bn.svg)
+
+### Fusing Add, ReLU(6)
+
+Unlike CUDA Kernel Fusion that aims to improve computational speed, the fusion supported by training tools leans more towards quantization. The BPU hardware optimizes common model structures, allowing for high-precision data transfer between `Conv`, `Add`, and `ReLU` operators, enhancing overall numerical precision. During quantization, these operators can be treated as a single unit.
+
+Since training tools quantize models at the `torch.nn.Module` level, to treat `Conv -> Add -> ReLU` as a whole during quantization, they need to be merged into a single `Module`.
+
+Operator fusion not only retains high precision intermediate results but also eliminates the need for converting them to low-precision representation, resulting in faster execution compared to non-fused scenarios.
+
+*Note: Operator fusion is generally beneficial due to its improvements in both model accuracy and speed, so it should be applied to all eligible parts.*
+
 ### Implementation Principle
 
-Thanks to the advantage of FX being able to obtain the computation graph, the training toolkit can automatically analyze the computation graph of the model, match the fusion patterns against the parts that can be fused, and replace them with submodules to achieve fusion. The following example illustrates this process.
+Thanks to the graph analysis capability provided by FX, the training tools can automatically analyze the model's computation graph and apply fusion patterns to eligible sections. Submodules are replaced to implement the fusion operation. Here's an example:
 
-*(Absorbing BN and fusing Add and ReLU(6) can be achieved through the same mechanism, so there is no need to differentiate between them during fusion.)*
+*Absorbing BN and fusing Add, ReLU(6) can be done using the same mechanism, so there's no need to differentiate during fusion.*
 
 ```python
 import torch
@@ -377,10 +448,8 @@ from horizon_plugin_pytorch.quantization import QuantStub
 from horizon_plugin_pytorch.quantization import fuse_fx
 
 
-class ModelForFusion(torch.nn.Module):
-    def __init__(
-        self,
-    ):
+class ModelForFusion(nn.Module):
+    def __init__(self):
         super(ModelForFusion, self).__init__()
         self.quantx = QuantStub()
         self.quanty = QuantStub()
@@ -388,40 +457,57 @@ class ModelForFusion(torch.nn.Module):
         self.bn = nn.BatchNorm2d(3)
         self.relu = nn.ReLU()
         self.dequant = DeQuantStub()
-``````
-torch.fx.passes.fuser.can_fuse_node(graph_node: torch.fx.Node) -> bool
+
+    def forward(self, x, y):
+        x = self.quantx(x)
+        y = self.quanty(y)
+        x = self.conv(x)
+        x = self.bn(x)
+        x = x + y
+        x = self.relu(x)
+        x = self.dequant(x)
+
+        return x
+
+
+float_model = ModelForFusion()
+fused_model = fuse_fx(float_model)
+
+print(fused_model)
+"""
+ModelForFusion(
+  (quantx): QuantStub()
+  (quanty): QuantStub()
+  (conv): Identity()
+  (bn): Identity()
+  (relu): Identity()
+  (dequant): DeQuantStub()
+  (_generated_add_0): ConvAddReLU2d(
+    (conv): Conv2d(3, 3, kernel_size=(3, 3), stride=(1, 1))
+    (relu): ReLU()
+  )
+)
+...
+
+def forward(self, x, y):
+    quantx = self.quantx(x);  x = None
+    quanty = self.quanty(y);  y = None
+    _generated_add_0 = self._generated_add_0
+    add_1 = _generated_add_0(quantx, quanty);  quantx = quanty = None
+    dequant = self.dequant(add_1);  add_1 = None
+    return dequant
+"""
 ```
 
-其中，`graph_node` 表示图中的一个节点。这个函数用于判断某个节点是否可以被融合，如果可以融合则返回 `True`，否则返回 `False`。
+After applying operator fusion, the BN is absorbed into the Conv, and Conv, Add, and ReLU are fused into a single `Module` (`_generated_add_0`). Original submodules are replaced with `Identity`, and the calls to them are removed from the `forward` function.
 
-判断一个节点是否可以融合主要根据以下几个条件：
+*FX automatically replaces the `+` operator in the model with a `Module` named `_generated_add_0` to support fusion and quantization operations.*
 
-1. 节点是一个 `CallFunction` 节点，表示调用一个函数。
-2. 调用的函数是一个 `Module`。
-3. 调用的函数是被融合的函数，具体判断方法是：调用的函数是否在 `DEFAULT_FUSER_METHODS` 列表中，且调用函数的定义签名中有 `torch.Tensor` 类型的参数。
-4. 调用的函数是一个模块的方法，并且模块实例的 `forward` 方法的定义绑定到这个函数。
+### Supported Operator Combinations
 
-如果一个节点满足以上所有条件，则可以被融合。
+The current supported combinations for fused operators are defined in the following function:
 
-### 算子的融合
-
-可以被融合的算子会被替换为一个新的 `ConvAddReLU2d` 模块，这个模块封装了原来的 `Conv2d` 和 `ReLU`，并且用一个 `Conv2d` 执行了原来的加法操作。
-
-具体实现方法是通过以下函数实现的：
-
-```
-torch.fx.passes.fuser.fuse_conv_add_relu(graph: torch.fx.Graph, input_module: torch.nn.Module)
-```
-
-其中，`graph` 表示要进行算子融合的图，`input_module` 表示带有 `forward` 方法的函数。这个函数遍历图中的节点，找到可以融合的算子节点，并进行替换。具体的替换过程是：
-
-1. 找到可以融合的节点时，创建一个新的 `ConvAddReLU2d` 模块。
-2. 把原来的节点的调用函数改为新的 `ConvAddReLU2d` 模块。
-3. 在图中插入新的 `ConvAddReLU2d` 模块。
-4. 对新的 `ConvAddReLU2d` 模块进行量化操作。
-5. 删除所有的符号表中对原来节点的引用，以确保下次不会再遍历到这个已经被融合的节点。
-
-经过算子融合后，新的 `ConvAddReLU2d` 模块将替代原来的多个模块，达到了减少节点数量和提高运行效率的目的。
+```python
 import operator
 import torch
 from torch import nn
@@ -440,7 +526,7 @@ def register_fusion_patterns():
         nn.quantized.FloatFunctional.add,
         horizon_nn.quantized.FloatFunctional.add,
         torch.add,
-        operator.add,  # The plus operator used in the code
+        operator.add,  # The '+' operator used in code
     )
     relus = (nn.ReLU, nn.ReLU6, nn.functional.relu, nn.functional.relu6)
 
@@ -448,37 +534,49 @@ def register_fusion_patterns():
         for bn in bns:
             for add in adds:
                 for relu in relus:
-                    # conv bn
+                    # Conv BN
                     register_fusion_pattern((bn, conv))(ConvBNAddReLUFusion)
 
-                    # conv relu
+                    # Conv ReLU
                     register_fusion_pattern((relu, conv))(ConvBNAddReLUFusion)
 
-                    # conv add
+                    # Conv Add
                     register_fusion_pattern((add, conv, MatchAllNode))(
                         ConvBNAddReLUFusion
-                    )  # conv's output acts as the first input for add
+                    )  # Conv output as first input to add
                     register_fusion_pattern((add, MatchAllNode, conv))(
                         ConvBNAddedReLUFusion
-                    )  # conv's output acts as the second input for add
+                    )  # Conv output as second input to add
 
-                    # conv bn relu
+                    # Conv BN ReLU
                     register_fusion_pattern((relu, (bn, conv)))(
                         ConvBNAddReLUFusion
                     )
 
-                    # conv bn add
+                    # Conv BN Add
                     register_fusion_pattern((add, (bn, conv), MatchAllNode))(
-                        ConvBNAddReLUFusionregister_fusion_pattern((add, MatchAllNode, (bn, conv)))(ConvBNAddedReLUFusion)
+                        ConvBNAddReLUFusion
+                    )
+                    register_fusion_pattern((add, MatchAllNode, (bn, conv)))(
+                        ConvBNAddedReLUFusion
+                    )
 
-# conv add relu
-register_fusion_pattern((relu, (add, conv, MatchAllNode)))(ConvBNAddReLUFusion)
-register_fusion_pattern((relu, (add, MatchAllNode, conv)))(ConvBNAddedReLUFusion)
+                    # Conv Add ReLU
+                    register_fusion_pattern((relu, (add, conv, MatchAllNode)))(
+                        ConvBNAddReLUFusion
+                    )
+                    register_fusion_pattern((relu, (add, MatchAllNode, conv)))(
+                        ConvBNAddedReLUFusion
+                    )
 
-# conv bn add relu
-register_fusion_pattern(
-    (relu, (add, (bn, conv), MatchAllNode))
-)(ConvBNAddReLUFusion)
-register_fusion_pattern(
-    (relu, (add, MatchAllNode, (bn, conv)))
-)(ConvBNAddedReLUFusion)
+                    # Conv BN Add ReLU
+                    register_fusion_pattern(
+                        (relu, (add, (bn, conv), MatchAllNode))
+                    )(ConvBNAddReLUFusion)
+                    register_fusion_pattern(
+                        (relu, (add, MatchAllNode, (bn, conv)))
+                    )(ConvBNAddedReLUFusion)
+```
+
+These patterns define which combinations of Conv, BN, Add, and ReLU operators can be fused.
+

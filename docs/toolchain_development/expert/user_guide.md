@@ -145,7 +145,7 @@ The output distribution of layernorm will show several highly concentrated areas
 
 6. It is recommended to try the min max method first, as it is the fastest. Use it to go through the calibration process, adjust and determine the batch size and average_constant parameters, and then try the percentile, kl, mse, and mix methods separately, selecting the method with the best performance.
 
-### Observer Parameters Documentation```python
+### Observer Parameters Documentation
 
 ```python
 
@@ -199,40 +199,40 @@ Should be overridden by all subclasses.
 
 MSE observer.
 
-Observer模块用于基于原始张量和量化张量之间的均方误差（MSE）计算量化参数。
+Observer module for computing the quantization parameters based on the Mean Square Error (MSE) between the original tensor and the quantized one.
 
-该观察器线性搜索使MSE最小化的量化尺度。
+This observer linear searches the quantization scales that minimize MSE.
 
 **Parameters**
 
-  - **stride** – 搜索步长。较大的值会给出较小的搜索空间，这意味着计算时间较短，但可能会影响准确性。默认为1。建议不大于20。
+  - **stride** – Searching stride. Larger value gives smaller search space, which means less computing time but possibly poorer accuracy. Default is 1. Suggests no greater than 20.
 
-  - **averaging_constant** – 用于最小值和最大值的平均常数。
+  - **averaging_constant** – Averaging constant for min/max.
 
-  - **ch_axis** – 通道轴。
+  - **ch_axis** – Channel axis.
 
-  - **dtype** – 量化数据类型。
+  - **dtype** – Quantized data type.
 
-  - **qscheme** – 要使用的量化方案。
+  - **qscheme** – Quantization scheme to be used.
 
-  - **quant_min** – 最小量化值。如果未指定，则将遵循dtype。
+  - **quant_min** – Min quantization value. Will follow dtype if unspecified.
 
-  - **quant_max** – 最大量化值。如果未指定，则将遵循dtype。
+  - **quant_max** – Max quantization value. Will follow dtype if unspecified.
 
-  - **is_sync_quantize** – 如果在多个设备上进行训练时同步统计信息。
+  - **is_sync_quantize** – If sync statistics when training with multiple devices.
 
-  - **factory_kwargs** – 传递给min_val和max_val工厂函数的kwargs参数。
+  - **factory_kwargs** – kwargs which are passed to factory functions for min_val and max_val.
 
 ```python
     forward(x_orig)
 ```
-定义每次调用时执行的计算。
 
-应该由所有子类重写。
+Defines the computation performed at every call.
 
-:::info 小技巧
+Should be overridden by all subclasses.
 
-虽然前向传递的过程需要在此函数中定义，但是应该在调用模块实例之后调用它而不是调用此函数，因为前者会处理运行注册的钩子，而后者则会忽略它们。
+:::info Tips
+  Although the recipe for forward pass needs to be defined within this function, one should call the Module instance afterwards instead of this since the former takes care of running the registered hooks while the latter silently ignores them.
 :::
 
 ```python
@@ -531,7 +531,11 @@ From the above example code, it can be seen that quantization-aware training has
 1. prepare_qat_fx
 2. Load calibration model parameters
 
-#### prepare_qat_fx#### Loading Calibration Model Parameters
+#### prepare_qat_fx
+
+The objective of this step is to transform the floating-point network by inserting quantization nodes.
+
+#### Loading Calibration Model Parameters
 
 By loading the pseudo quantization parameters obtained from Calibration, a better initialization can be achieved.
 
@@ -627,7 +631,7 @@ def prepare_qat_fx(
         `model`: torch.nn.Module or GraphModule (model after fuse_fx)
         `qconfig_dict`: Define Qconfig. If eager mode within module is used in addition to qconfig_dict, the qconfig defined within the module takes priority. The configuration format of qconfig_dict is as follows:
             qconfig_dict = {
-```                # Optional, global configuration
+                # Optional, global configuration
                 "": qconfig,
                 # Optional, configure by module type
                 "module_type": [(torch.nn.Conv2d, qconfig), ...],
@@ -682,7 +686,7 @@ def export_to_onnx(
     input_names=None,
     output_names=None,
     operator_export_type=OperatorExportTypes.ONNX_FALLTHROUGH,
-```opset_version=11,
+    opset_version=11,
     do_constant_folding=True,
     example_outputs=None,
     strip_doc_string=True,
@@ -1001,6 +1005,9 @@ def forward(self, input):
 
 The exported ONNX model shown in the image contains CPU operators highlighted in red circles.
 
+![hybrid_qat_onnx](./image/expert/hybrid_qat_onnx.jpg)
+
+
 ## Guide to Analysis Tools
 
 When encountering precision issues with QAT or quantized models, you can use various tools provided to analyze the models and identify precision drop points.
@@ -1222,7 +1229,7 @@ def check_unfused_operations(
 """Check if there are unfused ops in the model.
     This interface can only check if there are unfused ops. It cannot check the correctness of the fusion. If you want to check if the fusion of ops is correct,
     please use the `featuremap_similarity` interface to compare the similarity between the pre-fusion and post-fusion models.
-```Parameters:
+    Parameters:
       model: input model
       example_inputs: model input parameters
       print_tabulate: whether to print the result. The default is True.
@@ -1695,30 +1702,31 @@ Output:
     | sub[sub]        | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | input dtype ['qint8', 'qint8'] is not same with out dtype qint16 |
     | sub[sub]        | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | Fixed scale 3.0517578125e-05                                     |
     +-----------------+----------------------------------------------------------------------------+------------------------------------------------------------------+
-```
+    ```
 
 The output txt file contains three tables in the following order:
 
-    - Quantization information for each layer, from left to right columns represent:
+- Quantization information for each layer, from left to right columns represent:
 
-        - Module Name: the name of each module defined in the model
-        - Module Type: the actual type of each module
-        - Input dtype: the input type of each module
-        - out dtype: the output type of each module
-        - ch_axis: the dimension on which the quantization is performed. -1 indicates per-tensor quantization; if qconfig=None is displayed, it means that the module does not have a qconfig and will not be quantized
+    - Module Name: the name of each module defined in the model
+    - Module Type: the actual type of each module
+    - Input dtype: the input type of each module
+    - out dtype: the output type of each module
+    - ch_axis: the dimension on which the quantization is performed. -1 indicates per-tensor quantization; if qconfig=None is displayed, it means that the module does not have a qconfig and will not be quantized
 
-    - Quantization information for the weights in each layer, from left to right columns represent:
+- Quantization information for the weights in each layer, from left to right columns represent:
 
-        - Module Name: the name of each module defined in the model
-        - Module Type: the actual type of each module
-        - weight dtype: the quantization precision used for the weights, currently only support qint8 quantization
-        - ch_axis: the dimension on which the quantization is performed. -1 indicates per-tensor quantization; by default, weights are quantized on the 0th dimension. If qconfig=None is displayed, it means that the weights of the module do not have a qconfig and will not be quantized
+    - Module Name: the name of each module defined in the model
+    - Module Type: the actual type of each module
+    - weight dtype: the quantization precision used for the weights, currently only support qint8 quantization
+    - ch_axis: the dimension on which the quantization is performed. -1 indicates per-tensor quantization; by default, weights are quantized on the 0th dimension. If qconfig=None is displayed, it means that the weights of the module do not have a qconfig and will not be quantized
 
-    - Modules in the model with special quantization configurations (does not indicate configuration errors, need to be checked one by one). This table will also be displayed on the screen.
+- Modules in the model with special quantization configurations (does not indicate configuration errors, need to be checked one by one). This table will also be displayed on the screen.
 
-        - Module Name: the name of each module defined in the model
-        - Module Type: the actual type of each module
-        - Msg: special quantization configuration
+    - Module Name: the name of each module defined in the model
+    - Module Type: the actual type of each module
+    - Msg: special quantization configuration
+
 
 - Screen output
 
@@ -1735,7 +1743,7 @@ The output txt file contains three tables in the following order:
     | sub           | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | input dtype ['qint8', 'qint8'] is not same with out dtype qint16 |
     | sub           | <class 'horizon_plugin_pytorch.nn.qat.functional_modules.FloatFunctional'> | Fixed scale 3.0517578125e-05                                     |
     +---------------+----------------------------------------------------------------------------+------------------------------------------------------------------+
-    ```
+
 
 ### Visualization: ONNX Model Visualization{#onnx-a-name-onnx-a}
 
@@ -2320,11 +2328,15 @@ After running, the following files will be generated in the current directory or
 Currently, only the **RDK Ultra** with BPU architecture set to "BAYES" supports setting "int16" quantization.
 :::
 
-    - Mean: The mean value of the data.- Var: Variance of the data. If the variance is NaN, and min=max=mean, it means there is only one value. If the variance is large, it indicates that the data distribution in the array is uneven and may not be suitable for quantization.
+```
+- Mean: The mean value of the data.
+    
+- Var: Variance of the data. If the variance is NaN, and min=max=mean, it means there is only one value. If the variance is large, it indicates that the data distribution in the array is uneven and may not be suitable for quantization.
 
 - Scale: The quantization scale of the data. If it is empty, it means that the data is quantized per-channel or not quantized.
 
 - Dtype: The quantization dtype of the current layer, such as qint8/qint16. If the current layer is not quantized, it will directly print the floating-point data type.
+```
 
 :::caution Note
 
@@ -2333,7 +2345,7 @@ Currently, only **RDK Ultra** with BPU architecture set to "BAYES" supports "int
 
 Under normal circumstances, the statistic.txt file will contain two tables in the above format, one is the statistics of each layer printed in the order of the model forward; the other is the statistics of each layer printed in descending order of the quantization data range, which is convenient for you to quickly locate the layers with large value ranges. If there are NaN or inf in some layers of the model, the statistic.txt file will also include an additional table indicating which layers have NaN or inf, and this table will be printed on the screen to remind you to check these abnormal layers.
 
-    ```text
+```text
     +----------------+----------------------------+-------------------------------------------------------------------------------+---------------------+------------+-----------+------------+-----------+-----------+---------------+
     | Module Index   | Module Name                | Module Type                                                                   | Input/Output/Attr   | Min        | Max       | Mean       | Var       | Scale     | Dtype         |
     |----------------+----------------------------+-------------------------------------------------------------------------------+---------------------+------------+-----------+------------+-----------+-----------+---------------|
@@ -2430,7 +2442,7 @@ Under normal circumstances, the statistic.txt file will contain two tables in th
     | 18             | dequant_stub               | <class 'horizon_plugin_pytorch.nn.quantized.quantize.DeQuantize'>             | input               | 0.0773549  | 0.1048589 | 0.0903853  | 0.0000251 | 0.0008595 | qint8         |
     | 18             | dequant_stub               | <class 'horizon_plugin_pytorch.nn.quantized.quantize.DeQuantize'>             | output              | 0.0773549  | 0.1048589 | 0.0903853  | 0.0000251 |           | torch.float32 |
     +----------------+----------------------------+-------------------------------------------------------------------------------+---------------------+------------+-----------+------------+-----------+-----------+---------------+
-    ```
+```
 
 - statistic.html
 
@@ -2468,18 +2480,17 @@ def compare_weights(
         float_model: Float model
         qat_quantized_model: QAT/fixed-point model
         similarity_func: Similarity calculation function. Supports Cosine/MSE/L1/KL/SQNR and any custom functions.
-```Similarity calculation function for weights. If it is a custom function, it should return a scalar or a tensor with only one number, otherwise the result may not be as expected. Default is Cosine.
-with_tensorboard: Whether to use tensorboard, default is False.
-tensorboard_dir: Tensorboard log file path. Default is None.
-out_dir: Path to save the txt result. Default is None, saved to the current path.
+        Similarity calculation function for weights. If it is a custom function, it should return a scalar or a tensor with only one number, otherwise the result may not be as expected. Default is Cosine.
+        with_tensorboard: Whether to use tensorboard, default is False.
+        tensorboard_dir: Tensorboard log file path. Default is None.
+        out_dir: Path to save the txt result. Default is None, saved to the current path.
 
-Output:
-A dictionary that records the weights of the two models, in the following format:
-* KEY (str): Module name (such as layer1.0.conv.weight)
-* VALUE (dict): The weights of the corresponding layers in the two models:
-  "float": The weights in the floating-point model
-  "quantized": The weights in the qat/fixed-point model
-"""
+        Output:
+        A dictionary that records the weights of the two models, in the following format:
+        * KEY (str): Module name (such as layer1.0.conv.weight)
+        * VALUE (dict): The weights of the corresponding layers in the two models:
+        "float": The weights in the floating-point model
+        "quantized": The weights in the qat/fixed-point model
 ```
 
 Example:
@@ -2567,6 +2578,7 @@ When encountering difficulties in training QAT models that lead to poor performa
 :::info Note
 
 If you use fx for quantization, you can directly refer to the API documentation [**prepare_qat_fx**](../api_reference/apis/qat.html#horizon_plugin_pytorch.quantization.prepare_qat_fx) and use the `hybrid` and `hybrid_dict` parameters to enable step-wise quantization.# from horizon_plugin_pytorch.quantization import prepare_qat
+:::
 
 ```python
 # from horizon_plugin_pytorch.quantization import prepare_qat
@@ -2663,7 +2675,7 @@ qat_model(data)
 
 ### Single Operator Conversion Precision Debugging
 
-When the precision of the fixed-point model is reduced during QAT conversion, you may need to verify which operator specifically causes the loss of precision by replacing some key operators in the fixed-point model with QAT.# from horizon_plugin_pytorch.utils.quant_profiler import set_preserve_qat_mode
+When the precision of the fixed-point model is reduced during QAT conversion, you may need to verify which operator specifically causes the loss of precision by replacing some key operators in the fixed-point model with QAT.
 
 ```python
 # from horizon_plugin_pytorch.utils.quant_profiler import set_preserve_qat_mode
@@ -3515,54 +3527,54 @@ We recommend the following steps to identify layers that may have insufficient q
 
         - Operators
 
-            If the quantized error is significantly larger than the unquantized error after quantization of a certain layer, it indicates that there may be some limitations in the quantized implementation of this operator. Generally, the following types of operators have larger quantization errors:
+        If the quantized error is significantly larger than the unquantized error after quantization of a certain layer, it indicates that there may be some limitations in the quantized implementation of this operator. Generally, the following types of operators have larger quantization errors:
 
-            1. Multi-input operators, such as "cat". If there is a large difference in input value range, it may result in large numbers overpowering small numbers, leading to abnormal accuracy. Try the following improvements:
+        1. Multi-input operators, such as "cat". If there is a large difference in input value range, it may result in large numbers overpowering small numbers, leading to abnormal accuracy. Try the following improvements:
 
-            1. Restrict the input range through various means to make the values of multiple inputs similar.
+            a. Restrict the input range through various means to make the values of multiple inputs similar.
 
-            2. Use int16 quantization.
+            b. Use int16 quantization.
 
                 :::caution Caution
 
                     Currently, only the **RDK Ultra** with "BAYES" as the BPU architecture supports setting "int16" quantization.
                 :::
 
-            2. Non-linear activation operators, such as "reciprocal". If the operator itself has large fluctuations in certain interval values, it is generally implemented through table lookup. Due to the limited number of table entries, insufficient resolution may occur when the output is in a steep range. Try the following improvements:
+        2. Non-linear activation operators, such as "reciprocal". If the operator itself has large fluctuations in certain interval values, it is generally implemented through table lookup. Due to the limited number of table entries, insufficient resolution may occur when the output is in a steep range. Try the following improvements:
 
-                1. Evaluate whether this operator can be omitted or replaced with other operators.
+            1. Evaluate whether this operator can be omitted or replaced with other operators.
 
-                2. Limit the input range to a more gentle interval.
+            2. Limit the input range to a more gentle interval.
 
-                3. Use int16 quantization.
+            3. Use int16 quantization.
 
-                    :::caution Caution
+                :::caution Caution
 
-                        Currently, only the **RDK Ultra** with "BAYES" as the BPU architecture supports setting "int16" quantization.
-                    :::
+                    Currently, only the **RDK Ultra** with "BAYES" as the BPU architecture supports setting "int16" quantization.
+                :::
 
-                4. If the QAT precision is normal but the quantized precision is insufficient, try manually adjusting the table lookup parameters.
+            4. If the QAT precision is normal but the quantized precision is insufficient, try manually adjusting the table lookup parameters.
 
-            3. Complex operators, such as "layernorm" and "softmax". They are generally composed of multiple small operators, which may also cause accuracy problems due to the aforementioned non-linear activation operators. Try the following improvements:
+        3. Complex operators, such as "layernorm" and "softmax". They are generally composed of multiple small operators, which may also cause accuracy problems due to the aforementioned non-linear activation operators. Try the following improvements:
 
-                1. Evaluate whether this operator can be omitted or replaced with other operators.
+            1. Evaluate whether this operator can be omitted or replaced with other operators.
 
-                2. If the QAT precision is normal but the quantized precision is insufficient, try manually adjusting the table lookup parameters. Both "layernorm" and "softmax" support manual parameter adjustment.
+            2. If the QAT precision is normal but the quantized precision is insufficient, try manually adjusting the table lookup parameters. Both "layernorm" and "softmax" support manual parameter adjustment.
 
-        :::caution Caution
+    :::caution Caution
 
-            Currently, only the **RDK Ultra** with "BAYES" as the BPU architecture supports setting "int16" quantization.
+        Currently, only the **RDK Ultra** with "BAYES" as the BPU architecture supports setting "int16" quantization.
 
-            Debug cost: If it is necessary to adjust the input range or operator in the above three cases, retraining float is required. If int16 quantization is to be used, retraining QAT is required. If only manually adjusting the table lookup parameters, it is only necessary to convert the QAT model to the quantized model again.
-        :::
+        Debug cost: If it is necessary to adjust the input range or operator in the above three cases, retraining float is required. If int16 quantization is to be used, retraining QAT is required. If only manually adjusting the table lookup parameters, it is only necessary to convert the QAT model to the quantized model again.
+    :::
 
-        - Network structure
-            When implementing the network structure, if there is shared operator in multiple branches, it may cause the quantization parameter to quantize multiple branch outputs at the same time, which may result in insufficient resolution of the quantized output. It is recommended to split the shared operator into multiple operators.
+    - Network structure
+        When implementing the network structure, if there is shared operator in multiple branches, it may cause the quantization parameter to quantize multiple branch outputs at the same time, which may result in insufficient resolution of the quantized output. It is recommended to split the shared operator into multiple operators.
 
-        :::caution Caution
+    :::caution Caution
 
-        Debug cost: Re-training QAT is needed.
-        :::
+    Debug cost: Re-training QAT is needed.
+    :::
 
 3. Find the quantization abnormal layer by quantizing in a modular way.
 
@@ -3799,7 +3811,9 @@ Modules that do not need quantization are set with a non-None qconfig, such as p
 
 Correct approach: Only set qconfig for modules that need to be quantized.
 
-------------------------------------------------------------------------:::warning Error
+------------------------------------------------------------------------
+
+:::warning Error
 The `march` is not set correctly, which may cause the model compilation failure or inconsistent deployment accuracy.
 :::
 

@@ -46,7 +46,9 @@ At this time, it is in the Uboot stage, most of the tasks of Uboot have been com
 
 At this time, the kernel has been loaded and running, and the loading and initialization of the kernel and drivers are in progress, but the development board restarts abnormally.
 
-![image-20230914174123619](image/system/image-20230914174123619.png)### Other Phenomena:
+![image-20230914174123619](image/system/image-20230914174123619.png)
+
+### Other Phenomena:
 
 The phenomenon of insufficient power supply can only be analyzed through serial port logs. If no **errors** or **warnings** are observed during the startup process in the log, and the development board directly prints `NOTICE: fast_boot: 0` and restarts, it can be basically determined that the issue is due to insufficient power supply.
 
@@ -94,7 +96,9 @@ Currently, the phenomena caused by insufficient power supply are easily confused
 
 - The `adbd` service is enabled by default in Ubuntu system. Users only need to install the adb tool on the computer to use it. The method can refer to [bootloader image update](https://developer.horizon.ai/forumDetail/88859074455714818).
 
-## apt update Update Fail<font color='Blue'>[Question]</font> 
+## apt update Update Fail
+
+<font color='Blue'>[Question]</font> 
 
 - When running the `apt update` command in Ubuntu system, the following error is prompted:
     ```bash

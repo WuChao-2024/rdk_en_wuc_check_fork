@@ -94,7 +94,6 @@ echo 1 > /sys/bus/platform/drivers/ddr_monitor/read_qos_ctrl/bpu0
 echo 1 > /sys/bus/platform/drivers/ddr_monitor/read_qos_ctrl/bpu1
 # Set vio0 read QoS to 2:
 echo 2 > /sys/bus/platform/drivers/ddr_monitor/read_qos_ctrl/vio0
-```
 # Set VPU read QoS to 0:
 echo 0 > /sys/bus/platform/drivers/ddr_monitor/read_qos_ctrl/vpu
 # Set VIO1 read QoS to 3:
@@ -115,6 +114,7 @@ echo 0 > /sys/bus/platform/drivers/ddr_monitor/write_qos_ctrl/vpu
 echo 3 > /sys/bus/platform/drivers/ddr_monitor/write_qos_ctrl/vio1
 # Set PERI write QoS to 0:
 echo 0 > /sys/bus/platform/drivers/ddr_monitor/write_qos_ctrl/peri
+```
 
 ## VIO Submodule Configuration
 
@@ -192,7 +192,8 @@ Query HBlank: cat /sys/devices/platform/soc/a4001000.sif/hblank
 
 ## IPU Configuration
 
-### IPU Line_delay wr_ddr_fifo_threadIPU has a line_delay setting, with a unit of 1 line. The larger the value, the larger the bus delay that the IPU can tolerate, which is helpful for reducing frame drop in offline mode.
+### IPU Line_delay  wr_ddr_fifo_thred
+IPU has a line_delay setting, with a unit of 1 line. The larger the value, the larger the bus delay that the IPU can tolerate, which is helpful for reducing frame drop in offline mode.
 
 At the same time, a smaller value of wr_ddr_fifo_thred can reduce frame drop.
 
@@ -241,12 +242,12 @@ The typical scenario is as follows: 4k DOL2 input, SIF - offline - ISP - GDC - I
 
 SIF hblank and QoS are recommended to be configured as follows:
 
-```### Translate：
-
+```
 echo 120 > /sys/devices/platform/soc/a4001000.sif/hblank
 echo 0x10100000 > /sys/bus/platform/drivers/ddr_monitor/axibus_ctrl/all
 echo 0x03120000 > /sys/bus/platform/drivers/ddr_monitor/read_qos_ctrl/all
 echo 0x03120000 > /sys/bus/platform/drivers/ddr_monitor/write_qos_ctrl/all
+```
 
 ### Dual 1080P input
 
@@ -286,6 +287,10 @@ Multi-process sharing currently supports a maximum of 8 processes sharing camera
 
 3. After step 2, the dumped information vio_frame_state_pipe[pipeline]_[time].log will be generated in the /userdata/log/usr/ directory.
 
-4. Use Notepad++, search for Frmid xxxxx, where xxxxx is the frame number. The processing time of each module can be obtained by subtracting the xxx time before PYM out free from the xxx time before ISP out dq.### Method 2
+4. Use Notepad++, search for Frmid xxxxx, where xxxxx is the frame number. The processing time of each module can be obtained by subtracting the xxx time before PYM out free from the xxx time before ISP out dq.
+
+![image-20220929113655983](./image/performance_debug/image-20220929113655983.png)
+
+### Method 2
 
 By using the HB_VPS_GetChnFrame(int VpsGrp, int VpsChn, void *videoFrame, int ms) interface, the pyramid videoFrame can be obtained. The structure pointer is forcibly converted to a pym_buffer_t pointer, and then the pym_img_info can be found through pym_buffer_t. The pym_img_info contains a struct timeval tv, which is the system time filled in by sif's frame start. By using the gettimeofday interface to get the current system time minus the tv time, the delay in obtaining data from sif's frame start to pym can be obtained.

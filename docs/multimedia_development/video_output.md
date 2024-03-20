@@ -826,8 +826,6 @@ int HB_VOT_SetChnAttrEx(uint8_t layer, uint8_t chn, const VOT_CHN_ATTR_EX_S *pst
 **Reference Code**
 > See HB_VOT_EnableVideoLayer
 
----
-
 ### HB_VOT_GetChnAttrEx
 **Function Declaration**
 ```C
@@ -2013,7 +2011,7 @@ typedef enum HB_PIXEL_FORMAT_YUV_E {
     PIXEL_FORMAT_YUV422SP_UV = 4,
     PIXEL_FORMAT_YUV422SP_VU = 5,
     PIXEL_FORMAT_YUV420SP_UV = 6,
-    PIXEL_FORMAT_YUV420SP_VU = 7,
+    PIXEL_FORMAT_YUV420SP_VU =
     PIXEL_FORMAT_YUV422P_UV = 8,
     PIXEL_FORMAT_YUV422P_VU = 9,
     PIXEL_FORMAT_YUV420P_UV = 10,
