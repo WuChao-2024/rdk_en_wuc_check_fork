@@ -75,10 +75,10 @@ Camera.open_vps([src_width, src_height], [dst_width, dst_height], crop_rect, rot
 | ----------- | ------------------------ | --------  |
 | src_width  | Width of the input image                 | Determine by the camera output width |
 | src_height | Height of the input image                 | Determine by the camera output height |
-| dst_width  | Width of the output image | 1/8 to 1.5 times the input width |
-| dst_height | Height of the output image | 1/8 to 1.5 times the input height |
+| dst_width  | Width of the output image | `1/8 to 1.5` times the input width |
+| dst_height | Height of the output image | `1/8 to 1.5` times the input height |
 | crop_rect  | Width and height of the cropped area, input format[x, y] | Not exceed the input image size |
-| rotate     | Rotation angle, supports rotation in two channels | Range is 0 to 3, representing "no rotation", "90 degrees", "180 degrees", "270 degrees" respectively |
+| rotate     | Rotation angle, supports rotation in two channels | Range is 0 to 3, representing `no rotation`, `90 degrees`, `180 degrees`, `270 degrees` respectively |
 
 
 <font color='Blue'>【Usage】</font> 
@@ -98,7 +98,9 @@ ret = camera.open_vps([1920, 1080],[ 512, 512])
 | 0      | Success  |
 | -1    | Failure |
 
-<font color='Blue'>【Important Note】</font>- The image cropping function crops the image according to the configured size with the upper-left corner of the image as the origin.
+<font color='Blue'>【Important Note】</font>
+
+- The image cropping function crops the image according to the configured size with the upper-left corner of the image as the origin.
 - The image cropping is performed before scaling and rotation operations, and the multi-channel configuration is passed through the input parameter `list`.
 
 <font color='Blue'>【Reference Code】</font>
@@ -271,7 +273,7 @@ def test_camera_vps():
     vps.close()
     print("test_camera_vps done!!!")
 
-    test_camera_vps():
+test_camera_vps()
 ```
 ## close
 

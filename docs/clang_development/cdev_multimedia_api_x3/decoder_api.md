@@ -3,7 +3,7 @@ sidebar_position: 3
 ---
 # DECODER API
 
-The DECODER API provides the following interfaces:
+The `DECODER` API provides the following interfaces:
 
 | Function | Description |
 | ---- | ----- |
@@ -47,6 +47,8 @@ Destroy the decoder module object.
 - `obj`: The object pointer obtained when calling the initialization interface.
 
 **【Return Type】**
+
+None
 
 ## sp_start_decode  
 
@@ -93,7 +95,9 @@ Returns 0 if successful, -1 if failure.
 
 **【Function Prototype】**  
 
-`int32_t sp_decoder_get_image(void *obj, char *image_buffer)`**[Function Description]**
+`int32_t sp_decoder_get_image(void *obj, char *image_buffer)`
+
+**[Function Description]**
 
 Obtain the decoded image frame data from the decoding channel, and the returned image data format is a `YUV` image in `NV12` format.
 

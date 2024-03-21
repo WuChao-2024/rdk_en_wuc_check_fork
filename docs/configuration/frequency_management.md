@@ -91,7 +91,7 @@ sudo bash -c "echo 1000000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_set
 ### CPU Overclocking
 
 :::info Note
-The following content is applicable to RDK X3 and RDK X3 Module development boards and not applicable to the RDK Ultra development board.
+The following content is applicable to `RDK X3` and `RDK X3 Module` development boards and not applicable to the `RDK Ultra` development board.
 :::
 
 <iframe src="//player.bilibili.com/player.html?aid=700903305&bvid=BV1rm4y1E73q&cid=1196557803&page=14" scrolling="no" border="0" frameborder="no" framespacing="0" width="100%" height="500" allowfullscreen="true"> </iframe>

@@ -47,7 +47,8 @@ ps [options]
 - `-j`: Job format.
 - `j`: BSD job control format.
 - `-l`: Long format.
-- `l`: BSD long format.- `-M, Z`: Add security data (for SELinux).
+- `l`: BSD long format.
+- `-M, Z`: Add security data (for SELinux).
 - `-O <format>`: Use default column preloading.
 - `-O <format>`: Preload columns in BSD style.
 - `-o, -o, --format <format>`: User-defined format.

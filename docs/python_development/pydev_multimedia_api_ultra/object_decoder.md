@@ -52,7 +52,7 @@ None
 
 <font color='Blue'>【Sample Code】</font>  
 
-Not provided.
+None
 
 ## get_img
 
@@ -93,28 +93,30 @@ This interface should be used after creating a decoding channel by calling `Deco
 
 ```python
 import sys, os, time
+
 import numpy as np
 import cv2
 from hobot_vio import libsrcampy
 
 def test_decode():
-    # Create a decode object
+    #create decode object
     dec = libsrcampy.Decoder()
 
-    # Enable the decoding function
-    # Decode input: encode.h265, resolution: 1080p, format: h265
-    ret = dec.decode(2, [1920, 1080], "encode.h265")
-    print("Decoder return:%d frame count: %d" %(ret[0], ret[1]))
+    #enable decode function
+    #decode input: encode.h265, solution: 1080p, format: h265
+    ret = dec.decode(2,[ 1920, 1080],"encode.h265")
+    print ("Decoder return:%d frame count: %d" %(ret[0], ret[1]))
     
-    # Get decoder output
+    #get decoder output
     img = dec.get_img()
     if img is not None:
-        # Save file
-        with open("output.img", "wb") as fo:
-            fo.write(img)
-        print("Decode and save image file success")
+        #save file
+        fo = open("output.img", "wb")
+        fo.write(img)
+        fo.close()
+        print("decode save img file success")
     else:
-        print("Decode and save image file failed")
+        print("decode save img file failed")
 
     dec.close()
     print("test_decode done!!!")
@@ -144,7 +146,7 @@ Decoder.set_img(img, chn=0, eos=0)
 
 <font color='Blue'>【Usage Example】</font> 
 
-None provided.
+None
 
 <font color='Blue'>【Return Value】</font>  
 
@@ -223,7 +225,7 @@ No parameters.
 
 <font color='Blue'>【Usage Example】</font> 
 
-None provided.
+None
 
 <font color='Blue'>【Return Value】</font>
 

@@ -46,7 +46,9 @@ Returns 0 on success, and other values on failure.
 
 `int32_t sp_module_unbind(void *src, int32_t src_type, void *dst, int32_t dst_type)`
 
-**[Description]**This interface completes the unbinding of two modules that have already been bound. The unbinding needs to be completed before the module exits.
+**[Description]**
+
+This interface completes the unbinding of two modules that have already been bound. The unbinding needs to be completed before the module exits.
 
 **【Parameters】**
 

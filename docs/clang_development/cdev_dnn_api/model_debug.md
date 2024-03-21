@@ -42,7 +42,7 @@ sidebar_position: 8
    If the log level that occurs is greater than or equal to the set level, the log can be printed; otherwise, it is blocked. The smaller the set log level, the more print information there is (except for level 0, which does not output logs). For example, if the log level is set to 3, which is the ``WARNING`` level, logs of level 3, 4, and 5 can be printed. The default log level of the prediction library is ``HB_DNN_LOG_WARNING``, so log information of the following levels can be printed: ``WARNING``, ``ERROR``, ``FATAL``.
 
 3. Log level setting method:
-   The log level can be set using the environment variable ``HB_DNN_LOG_LEVEL``.
+   The log level can be set using the environment variable ``HB_DNN_LOG_LEVEL``. For example :`export HB_DNN_LOG_LEVEL=3`, output logs at or above the level of `Warning`
 
 4. Common Environment Variables
    ```
@@ -58,12 +58,12 @@ sidebar_position: 8
    
 ## Considerations for Development Machine Simulator
 
-1. When using the development machine simulator, you can specify the simulated processor architecture by setting the environment variable HB_DNN_SIM_PLATFORM. You can execute the following commands:
+1. When using the development machine simulator, you can specify the simulated processor architecture by setting the environment variable `HB_DNN_SIM_PLATFORM`. You can execute the following commands:
 
-   - "export HB_DNN_SIM_PLATFORM=BERNOULLI" for the "BERNOULLI" architecture, simulating the Horizon "xj2" platform;
-   - "export HB_DNN_SIM_PLATFORM=BERNOULLI2" for the "BERNOULLI2" architecture, simulating the Horizon "x3" platform, **RDK X3** can be used;
-   - "export HB_DNN_SIM_PLATFORM=BAYES" for the "BAYES" architecture, simulating the Horizon "xj5" platform, **RDK Ultra** can be used.
+   - `export HB_DNN_SIM_PLATFORM=BERNOULLI` for the `BERNOULLI` architecture, simulating the Horizon `xj2` platform;
+   - `export HB_DNN_SIM_PLATFORM=BERNOULLI2` for the `BERNOULLI2` architecture, simulating the Horizon `x3` platform, **RDK X3** can be used;
+   - `export HB_DNN_SIM_PLATFORM=BAYES` for the `BAYES` architecture, simulating the Horizon `xj5` platform, **RDK Ultra** can be used.
 
-2. If the HB_DNN_SIM_PLATFORM environment variable is not set, the simulator platform will be set based on the architecture of the first loaded model. For example, if the first loaded model is of "BERNOULLI2" architecture, the program will default to the "x3" platform.
+2. If the `HB_DNN_SIM_PLATFORM` environment variable is not set, the simulator platform will be set based on the architecture of the first loaded model. For example, if the first loaded model is of `BERNOULLI2` architecture, the program will default to the `x3` platform.
 
-3. Before executing any operations related to "resize" in the development machine simulator, you need to specify the platform by using the HB_DNN_SIM_PLATFORM environment variable.
+3. Before executing any operations related to `resize` in the development machine simulator, you need to specify the platform by using the `HB_DNN_SIM_PLATFORM` environment variable.

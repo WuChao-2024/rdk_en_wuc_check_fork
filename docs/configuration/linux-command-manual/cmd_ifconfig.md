@@ -46,7 +46,8 @@ ifconfig [-a] [-v] [-s] <interface> [[<AF>] <address>]
 - `ifconfig -s`: displays network interface information in a concise format.
 - `ifconfig -v`: displays detailed information.
 
-## Common CommandsCommon commands
+## Common Commands
+Common commands
 
 ```
 ifconfig   # Network interface in active state

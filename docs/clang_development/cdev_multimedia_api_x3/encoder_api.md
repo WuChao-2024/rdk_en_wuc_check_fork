@@ -46,7 +46,11 @@ Destroy the encoder module object.
 
 - `obj`: Pointer to the object obtained when initializing the interface.
 
-**[Return Type]**## sp_start_encode  
+**[Return Type]**
+
+None
+
+## sp_start_encode  
 
 **[Function Prototype]**  
 
@@ -91,7 +95,9 @@ Returns 0 on success, -1 on failure
 
 **[Function Prototype]**  
 
-`int32_t sp_encoder_set_frame(void *obj, char *frame_buffer, int32_t size)`**[Function Description]**
+`int32_t sp_encoder_set_frame(void *obj, char *frame_buffer, int32_t size)`
+
+**[Function Description]**
 
 Pass the image frame data that needs to be encoded to the encoding channel, and the format must be `NV12`.
 

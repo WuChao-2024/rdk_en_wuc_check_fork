@@ -145,7 +145,9 @@ The data preprocessing, model inference, and post-processing code in this exampl
     Note that if you encounter the following error when running `start_nginx.sh`, it means that there is already an httpd service running on the device and TCP port 80 is occupied:
     ![image-20220719003947031](./image/pydev_dnn_demo/image-20220719003947031.png)
 
-    In this case, you need to find and terminate the process that occupies port `80`. You can execute the command `lsof -i:80` to get the PID of the process occupying the port, and then use `kill -9 PID` to terminate the process.- Protobuf Serialization
+    In this case, you need to find and terminate the process that occupies port `80`. You can execute the command `lsof -i:80` to get the PID of the process occupying the port, and then use `kill -9 PID` to terminate the process.
+    
+- Protobuf Serialization
 
 The web client receives data that has been serialized using Protobuf. As the server, the development board needs to serialize the model's output according to a specific data format. In this example, the serialization operation is performed using the `serialize` function.
 

@@ -10,9 +10,9 @@ This document is the user manual for the Horizon RDK Suite, providing developers
 :::info Note
 
 - All **RDK X3** mentioned in this document use the Ubuntu 2.0 version operating system. For users who still need to use **Sunrise X3 version 1.0 system**, you can obtain information from the following links:<br/>
-     [Sunrise X3 User Manual](https://developer.horizon.ai/api/v1/fileData/documents_pi/index.html)<br/>
+     [Sunrise X3 User Manual](https://developer.horizon.cc/api/v1/fileData/documents_pi/index.html)<br/>
      [Sunrise X3 Ubuntu Image](http://sunrise.horizon.cc/downloads/os_images/), select the image in the 1.x.x version directory<br/>
-     [Sunrise X3 Data Package](https://developer.horizon.ai/api/v1/static/fileData/X3%E6%B4%BE%E8%B5%84%E6%96%99%E5%8C%85_20220711175326.zip)<br/>
+     [Sunrise X3 Data Package](https://developer.horizon.cc/api/v1/static/fileData/X3%E6%B4%BE%E8%B5%84%E6%96%99%E5%8C%85_20220711175326.zip)<br/>
 
 - The **RDK X3 Module** comes with a pre-burned test version system image, to ensure the use of the latest version of the system, it is recommended to refer to this document to complete [the burning of the latest version of the system image](/installation/install_os).
 
@@ -62,7 +62,7 @@ Introduces relevant content of operating system software development, including 
 Introduces the usage of video, image, and multimedia low-level interfaces, covering technologies and examples in image processing, audio processing, video processing, video codec/decoding, etc. The interface functions are rich and can implement complex and flexible functional requirements.
 
 **[Hardware Development Guide](/category/hardware_development)**  
-Introduces the hardware specifications, interfaces, design files, and design guidelines for RDK X3 (X3 Family), RDK X3 Module (X3 Module Family), and RDK Ultra. It provides design materials such as specifications, schematics, dimension drawings, etc.
+Introduces the hardware specifications, interfaces, design files, and design guidelines for RDK X3 (Sunrise X3), RDK X3 Module (Sunrise X3 Module), and RDK Ultra. It provides design materials such as specifications, schematics, dimension drawings, etc.
 
 **[Algorithm Toolchain Development Guide](/category/toolchain_development)**  
 Introduces the usage of Horizon's algorithm quantization toolchain, covering commonly used algorithm models, usage of development tools, optimization techniques, and more.
@@ -93,14 +93,15 @@ Enhancements:
 - VNC service is not automatically started by default to reduce system resource consumption. Users can enable it through the srpi-config tool.
 - RDK X3 v2.1 and RDK Module development board's CPU can run at a maximum frequency of 1.5GHz in normal mode and 1.8GHz after overclocking.
 
-Bug Fixes: [No specific translation provided]- Remove redundant kernel logs for Wi-Fi drivers.
+Bug Fixes: 
+- Remove redundant kernel logs for Wi-Fi drivers.
 - Modify apt source domain to sunrise.horizon.cc.
 
 Other updates:
 
 - Support for the Chromium browser, users can install and use it with `sudo apt install chromium`.
 
-### Version Number: 2.0.0
+### Version: 2.0.0
 
 This release brings many anticipated features and improvements, aiming to provide a better development experience and broader application support. Here are the main highlights of this version release:
 

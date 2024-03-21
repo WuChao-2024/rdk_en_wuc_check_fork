@@ -84,7 +84,7 @@ Releases and recycles memory for the input `tensor`.
 **【Parameters】**
 
 - `tensor`: Pointer to the `tensor` to be released
-- `len`: Length or size of the `tensor` (apparent inconsistency with parameter name)
+- `len`: Length or size of the `tensor`
 
 **【Return Type】**
 

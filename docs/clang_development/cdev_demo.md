@@ -90,13 +90,13 @@ The `vio_capture` example in this document realizes the function of capturing im
     Setting VPS channel-2: src_w:1920, src_h:1080; dst_w:1920, dst_h:1080;
     Setting VPS channel-1: src_w:1920, src_h:1080; dst_w:1920, dst_h:1080;
     jiale:start streaming...
-    capture time: 0
-    capture time: 1
-    capture time: 2
-    capture time: 3
-    capture time: 4
-    capture time: 5
-    capture time: 6
+    capture time :0
+    capture time :1
+    capture time :2
+    capture time :3
+    capture time :4
+    capture time :5
+    capture time :6
     capture time :7
     capture time :8
     capture time :9
@@ -146,13 +146,14 @@ This `vio_capture` example demonstrates the image capture of a `MIPI` camera and
   cmd=i2ctransfer -y -f 6 w2@0x10 0x0 0x0 r1 2>&1, result=0x02
   capture time :0
   capture time :1
-  capture time :2capture time :3 
-capture time :4 
-capture time :5 
-capture time :6 
-capture time :7 
-capture time :8 
-capture time :9 
+  capture time :2
+  capture time :3 
+  capture time :4 
+  capture time :5 
+  capture time :6 
+  capture time :7 
+  capture time :8 
+  capture time :9 
 sensor_name imx219, setting_size = 1
 
 ## Camera Image Capture and Encoding
@@ -353,7 +354,8 @@ This example uses the `FCOS` model to implement the object detection algorithm f
   - -i: Path of the input video
   - -m: Model type, default is 1
 
-- **Expected Output:**
+
+**Expected Output:**
   After the program runs successfully, the video and the rendered image after algorithm detection will be output through the `HDMI` interface for user preview on a display. The running log is as follows:
 
   ```bash

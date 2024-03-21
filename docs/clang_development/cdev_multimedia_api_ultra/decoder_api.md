@@ -54,7 +54,7 @@ Destroy the decoder module object.
 
 **【Return Type】** 
 
-Void
+None
 
 ## sp_start_decode  
 

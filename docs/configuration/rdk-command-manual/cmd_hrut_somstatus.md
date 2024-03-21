@@ -46,4 +46,5 @@ bpu status information ---->
 - `min`: The minimum frequency at which the BPU can operate.
 - `cur`: The current operating frequency of the BPU.
 - `max`: The maximum frequency at which the BPU can operate.
-- `ratio`: The load ratio of the BPU during operation.- These pieces of information indicate the frequency range of the BPU, including the minimum, current, and maximum frequency and load.
+- `ratio`: The load ratio of the BPU during operation.
+- These pieces of information indicate the frequency range of the BPU, including the minimum, current, and maximum frequency and load.

@@ -45,7 +45,9 @@ The System Options menu allows you to configure changes to various parts such as
 
 - **Boot / Auto login**
 
-  Choose whether to boot to console or desktop, and whether automatic login is required. If automatic login is chosen, it will be logged in with the default account `sunrise`.- **Power LED**
+  Choose whether to boot to console or desktop, and whether automatic login is required. If automatic login is chosen, it will be logged in with the default account `sunrise`.
+  
+- **Power LED**
  
   If the model of RDK allows, you can change the behavior of the power LED in this option. The default is off or flashing.
 
@@ -86,6 +88,7 @@ The System Options menu allows you to configure changes to various parts such as
  ![image-20231123103758686](image/srpi-config/image-20231123103758686.png)
  
 - **Configure Wi-Fi antenna**
+  
   Switch Wi-Fi antenna mode, supports setting to use onboard or external antenna.
 
 > Currently supported in RDK X3 V2.1 version.
@@ -94,7 +97,8 @@ The System Options menu allows you to configure changes to various parts such as
  
  Performance options, including overclocking, CPU operating mode and frequency settings, adjusting ION memory size, etc.
  
- ![image-20231123104234000](image/srpi-config/image-20231123104234000.png)- **CPU frequency**
+ ![image-20231123104234000](image/srpi-config/image-20231123104234000.png)
+ - **CPU frequency**
 
   Use this tool to overclock the CPU of the RDK. It is generally not recommended to enable this option, but you can try modifying it if sufficient cooling measures are in place.
 

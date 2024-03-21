@@ -47,7 +47,11 @@ The dpkg-deb command not only has options to set, but also requires a command to
 dpkg-deb -x hobot-configs_2.2.0-20231030133209_arm64.deb
 ```
 
-- Extract control filesdpkg-deb -e hobot-configs_2.2.0-20231030133209_arm64.deb hobot-configs/DEBIAN
+- Extract control files
+
+```shell
+dpkg-deb -e hobot-configs_2.2.0-20231030133209_arm64.deb hobot-configs/DEBIAN
+```
 
 - Query the content of the deb package
 

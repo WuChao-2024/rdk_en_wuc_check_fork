@@ -102,12 +102,6 @@ Get the properties of the specific input tensor for the model pointed by `dnnHan
 - [in] `dnnHandle`: DNN handle pointing to a model.
 - [in] `inputIndex`: The index of the input tensor.
 
-**[Parameters]**
-
-- [out] ``properties``   Information of the input tensor.
-- [in]  ``dnnHandle``    DNN handle pointing to a model.
-- [in]  ``inputIndex``   Index of the input tensor in the model.
-
 **[Return Type]**  
 
 - Return ``0`` indicates successful execution of the API, otherwise it fails.

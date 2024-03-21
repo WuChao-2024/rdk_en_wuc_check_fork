@@ -25,7 +25,7 @@ The `VIO` API provides the following interfaces:
 
 **【Description】**  
 
-Initialize the VIO object and create an operating handle. This must be executed before calling other interfaces.
+Initialize the `VIO` object and create an operating handle. This must be executed before calling other interfaces.
 
 **【Parameters】**
 
@@ -95,7 +95,8 @@ Open an image processing module, supporting zoom, enlargement, rotation, and cro
 - `dst_width`: Address of the array for configuring the target output width
 - `dst_height`: Address of the array for configuring the target output height
 - `crop_x`: Collection of the top-left x coordinates of the cropping area. Pass `NULL` if the cropping function is not used.
-- `crop_y`: Collection of the top-left y coordinates of the cropping area. Pass `NULL` if the cropping function is not used.- `crop_width`: The width of the cropping area. Pass `NULL` if cropping is not used.
+- `crop_y`: Collection of the top-left y coordinates of the cropping area. Pass `NULL` if the cropping function is not used.
+- `crop_width`: The width of the cropping area. Pass `NULL` if cropping is not used.
 - `crop_height`: The height of the cropping area. Pass `NULL` if cropping is not used.
 - `rotate`: The rotation angle. Currently supports `ROTATION_90` (90°), `ROTATION_180` (180°), and `ROTATION_270` (270°). Pass `NULL` if rotation is not used.
 
@@ -115,7 +116,7 @@ Closes the camera or VPS module based on the input `obj`.
 
 **【Parameters】**
 
-- `obj`: Initialized 'VIO' object pointer.
+- `obj`: Initialized `VIO` object pointer.
 
 **【Return Type】**
 
@@ -133,10 +134,10 @@ Gets the image frame data of the specified resolution (resolution needs to be pa
 
 **【Parameters】**
 
-- `obj`: Initialized 'VIO' object pointer.
+- `obj`: Initialized `VIO` object pointer.
 - `frame_buffer`: Pointer to the pre-allocated buffer used to save the retrieved image. Currently, the retrieved image is in `NV12` format, so the pre-allocated buffer size can be calculated using the formula `height * width * 3 / 2`, or using the provided macro definition `FRAME_BUFFER_SIZE(w, h)`.
-- `width`: Width of the image buffer to save the image, must be the same as the configured output width in `sp_open_camera` or `sp_open_vps`.
-- `height`: Height of the image buffer to save the image, must be the same as the configured output height in `sp_open_camera` or `sp_open_vps`.
+- `width`: Width of the `image_buffer` to save the image, must be the same as the configured output width in `sp_open_camera` or `sp_open_vps`.
+- `height`: Height of the `image_buffer` to save the image, must be the same as the configured output height in `sp_open_camera` or `sp_open_vps`.
 - `timeout`: Timeout for retrieving the image, in milliseconds. Generally set to `2000`.
 
 **【Return Type】**

@@ -31,7 +31,7 @@ Use the Wi-Fi management tool in the top-right corner of the menu bar to connect
 
 <TabItem value="server" label="Server">
 
-Use the `sudo srpi-config` command to connect to Wi-Fi using the `srpi-config` tool.
+Use the srpi-config tool to connect to Wi-Fi.
 
 Execute the command `sudo srpi-config`, select System Options -> Wireless LAN, and enter the Wi-Fi name (`SSID`) and password (`passwd`) as prompted.
 
@@ -94,7 +94,8 @@ For the desktop graphical system, there are four login modes available:
 
 1. Start the graphical interface and automatically log in.
 2. Start the graphical interface and require manual login by the user.
-3. Character terminal, automatically log in.4. Character Terminal, User Manual Login
+3. Character terminal, automatically log in.
+4. Character Terminal, User Manual Login
 
 Open `RDK Configuration` through the menu bar. Select System Options -> Boot / Auto Login to enter the following configuration options. Select the corresponding options according to your needs.
 
@@ -106,7 +107,7 @@ It will take effect after restarting.
 
 <TabItem value="server" label="Server">
 
-Desktop graphical system, supporting four login modes:
+Server system, supporting four login modes:
 
 1. Character Terminal, Automatic Login
 2. Character Terminal, User Manual Login
@@ -142,7 +143,9 @@ It is recommended to choose `Don't ask me again` `Keep Old Name`, so that the di
 
 </TabItem>
 
-<TabItem value="server" label="Server">To enter the configuration menu, execute the command `sudo srpi-config`. Select the option "Localisation Options -> Locale" to enter the following configuration.
+<TabItem value="server" label="Server">
+
+To enter the configuration menu, execute the command `sudo srpi-config`. Select the option "Localisation Options -> Locale" to enter the following configuration.
 
 Step 1: Select the desired language environment(s) (multiple selection). Usually, selecting both `en_US.UTF-8 UTF-8` and `zh_CN.UTF-8 UTF-8` is sufficient. Press Enter to confirm and proceed to the next step.
 

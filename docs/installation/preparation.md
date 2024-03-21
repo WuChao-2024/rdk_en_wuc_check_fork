@@ -17,7 +17,7 @@ Before using the RDK X3 development board, the following preparations need to be
 <Tabs groupId="rdk-type">
 <TabItem value="x3" label="RDK X3">
 
-The RDK X3 development board is powered by a USB Type C interface. It requires a power adapter that supports **5V/3A** to power the board. It is recommended to use the recommended power adapter model in the [Basic Accessories](/hardware_development/rdk_x3/accessory#basic_accessories) section.
+The RDK X3 development board is powered by a USB Type C interface. It requires a power adapter that supports **5V/3A** to power the board. It is recommended to use the recommended power adapter model in the [Basic Accessories List](/hardware_development/rdk_x3/accessory#basic_accessories) section.
 
 </TabItem>
 
@@ -52,7 +52,7 @@ For more troubleshooting, please refer to the [Common Questions](../category/com
 
 <TabItem value="x3md" label="RDK X3 Module">
 
-The RDK X3 Module is equipped with onboard eMMC (optional) and supports booting the system from both eMMC and SD cards.
+The RDK X3 Module has onboard eMMC (optional) and supports booting the system from both eMMC and SD cards.
 
 </TabItem>
 
@@ -129,6 +129,6 @@ Here are some common issues when using the development board for the first time:
 
 :::tip
 
-For more problem-solving, please refer to the [Frequently Asked Questions](../category/common_questions) section, and you can also visit the [Horizon Developer Forum](https://developer.horizon.ai/forum) for assistance.
+For more problem-solving, please refer to the [Frequently Asked Questions](../category/common_questions) section, and you can also visit the [Horizon Developer Forum](https://developer.horizon.cc/forum) for assistance.
 
 :::

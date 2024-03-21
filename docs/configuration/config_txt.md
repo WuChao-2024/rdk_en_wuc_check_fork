@@ -96,9 +96,10 @@ frequency=1000000
 
 ### gpio
 
-Supports setting the IO multiplexing, output, input mode, output high/low level, and pull-up/pull-down mode.gpio:
+Supports setting the IO multiplexing, output, input mode, output high/low level, and pull-up/pull-down mode.
 
 ```bash
+gpio:
 ip - Input                             Set to input mode
 op - Output                            Set to output mode
 f0-f3 - Func0-Func3                    Set function multiplexing, f3 functions are all set to IO mode, For other functions, please refer to the register manual.
@@ -170,7 +171,7 @@ The supported filtering items are differentiated by hardware model, and the foll
 
 ### voltage_domain
 
-Configures the voltage domain of the 40-pin pin, supporting configuration as 3.3V or 1.8V. If not configured, the default is 3.3V.
+Configures the voltage domain of the 40-pin, supporting configuration as 3.3V or 1.8V. If not configured, the default is 3.3V.
 
 This configuration item needs to be used in conjunction with the jumper cap for voltage domain switching on the hardware.
 

@@ -47,9 +47,11 @@ Destroy the `DISPLAY` object.
 
 **【Parameters】**
 
-- `obj`: Pointer to the initialized `DISPLAY` object.**【Return Type】** 
+- `obj`: Pointer to the initialized `DISPLAY` object.
 
-void
+**【Return Type】** 
+
+None
 
 ## sp_start_display 
 
@@ -94,7 +96,9 @@ Successful: 0, Failure: -1
 
 **【Function Prototype】** 
 
-`int32_t sp_display_set_image(void *obj, char *addr, int32_t size, int32_t chn)`**[Function Description]**
+`int32_t sp_display_set_image(void *obj, char *addr, int32_t size, int32_t chn)`
+
+**[Function Description]**
 
 Display image data in `addr` on display channel `chn`. The image format only supports `NV12` YUV images.
 

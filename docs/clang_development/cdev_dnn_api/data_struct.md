@@ -185,13 +185,13 @@ the ``dimensionSize`` array would sequentially store the image's ``Number=1``, `
 Shift/De-Shift Data for Quantization/Dequantization.
 
 **For Input:**
-If a floating-point data point ``data[i]`` is collected, with its corresponding shift data being ``shift[i]``, the inference data fed into the model would be: :math:`data[i] * (1 << shift[i])` rounded to the nearest integer;
+If a floating-point data point ``data[i]`` is collected, with its corresponding shift data being ``shift[i]``, the inference data fed into the model would be: `data[i] * (1 << shift[i])` rounded to the nearest integer;
 
 **For Output:**
-If the inference result is ``data[i]`` and its corresponding shift data is ``shift[i]``, then the final inference result would be: :math:`data[i] / (1 << shift[i])`.
+If the inference result is ``data[i]`` and its corresponding shift data is ``shift[i]``, then the final inference result would be: `data[i] / (1 << shift[i])`.
 
 :::caution Note
-Here, ``shiftLen`` is determined by the data ``data`` based on either the "per-axis" or "per-tensor" quantization/dequantization method.
+Here, ``shiftLen`` is determined by the data ``data`` based on either the `per-axis` or `per-tensor` quantization/dequantization method.
 When the data ``data`` is quantized/dequantized using the "per-tensor" method, ``shiftLen`` equals ``1``, and in this case, the value of ``quantizeAxis`` need not be considered; otherwise, it equals the size of the ``quantizeAxis`` dimension in the data ``data``.
 :::
 
@@ -214,13 +214,13 @@ When the data ``data`` is quantized/dequantized using the "per-tensor" method, `
 Scaling/De-scaling Data for Quantization/Dequantization.
 
 **For Input:**
-If a floating-point data point ``data[i]`` is collected, with its corresponding scaling data as ``scale[i]`` and zero-point offset data as ``zeroPoint[i]``, the inference data fed into the model would be: :math:`g((data[i] / scale[i]) + zeroPoint[i])`, where :math:`g(x) = clip(nearbyint(x))` using fesetround(FE_TONEAREST) rounding method, truncated to: U8: :math:`g(x) ∈ [0, 255]`, S8: :math:`g(x) ∈ [-128, 127]`;
+If a floating-point data point ``data[i]`` is collected, with its corresponding scaling data as ``scale[i]`` and zero-point offset data as ``zeroPoint[i]``, the inference data fed into the model would be: `g((data[i] / scale[i]) + zeroPoint[i])`, where `g(x) = clip(nearbyint(x))` using fesetround(FE_TONEAREST) rounding method, truncated to: U8: `g(x) ∈ [0, 255]`, S8: `g(x) ∈ [-128, 127]`;
 
 **For Output:**
-If the inference result is ``data[i]`` with its corresponding scaling data as ``scale[i]`` and zero-point offset data as ``zeroPoint[i]``, the final inference result would be: :math:`(data[i] - zeroPoint[i]) * scale[i]`.
+If the inference result is ``data[i]`` with its corresponding scaling data as ``scale[i]`` and zero-point offset data as ``zeroPoint[i]``, the final inference result would be: `(data[i] - zeroPoint[i]) * scale[i]`.
 
 :::caution Note
-Here, ``scaleLen`` is determined by the data ``data`` based on either the "per-axis" or "per-tensor" quantization/dequantization method.
+Here, ``scaleLen`` is determined by the data ``data`` based on either the `per-axis` or `per-tensor` quantization/dequantization method.
 When the data ``data`` is quantized/dequantized using the "per-tensor" method, ``scaleLen`` equals ``1``, and in this case, the value of ``quantizeAxis`` need not be considered; otherwise, it equals the size of the ``quantizeAxis`` dimension in the data ``data``. The length of ``zeroPointLen`` remains consistent with that of ``scaleLen``.
 :::
 
@@ -340,7 +340,7 @@ typedef struct {
 } hbDNNRoi;
 ```
 
-This structure represents a rectangular region of interest (ROI). The ROI spans from :math:`W∈[left, right]` to :math:`H∈[top, bottom]` in terms of pixel coordinates.
+This structure represents a rectangular region of interest (ROI). The ROI spans from `W∈[left, right]` to `H∈[top, bottom]` in terms of pixel coordinates.
 
 + Members
 

@@ -46,13 +46,15 @@ If successful, it returns a pointer to an ENCODER object. Otherwise, it returns 
 
 **【Description】**
 
-Destroy the encoding module object.**【Parameters】**
+Destroy the encoding module object.
+
+**【Parameters】**
 
 - `obj`: Pointer to the object obtained when calling the initialization interface.
 
 **【Return Type】**
 
-Void
+None
 
 ## sp_start_encode  
 
@@ -62,7 +64,7 @@ Void
 
 **【Function Description】**
 
-Create an image encoding channel, supporting up to 32 encodings. Supported encoding types include `H264`, `H265`, and `MJPEG`.
+Create an image encoding channel, supporting up to `32` encodings. Supported encoding types include `H264`, `H265`, and `MJPEG`.
 
 **【Parameters】**
 

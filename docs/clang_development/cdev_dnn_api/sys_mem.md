@@ -41,7 +41,9 @@ Allocate cached BPU memory.
 
 - Returns ``0`` if the API is executed successfully, otherwise the execution fails.
 
-## hbSysFlushMem()**[Function Prototype]**
+## hbSysFlushMem()
+
+**[Function Prototype]**
 
 ``int32_t hbSysFlushMem(hbSysMem *mem, int32_t flag)``
 
@@ -90,8 +92,9 @@ Writes to BPU memory.
 
 **[Parameters]**
 
-- [out] ``dest``                Memory pointer.- [in] "src"                Pointer to data.
-- [in] "size"               Size of data.
+- [out] `dest`  Memory pointer.
+- [in] `src`    Pointer to data.
+- [in] `size`   Size of data.
 
 **[Return Type]**
 
@@ -110,9 +113,9 @@ Reads BPU memory.
 
 **[Parameters]**
 
-- [out] "dest"               Pointer to data.
-- [in] "src"                Pointer to memory.
-- [in] "size"               Size of data.
+- [out] `dest`Pointer to data.
+- [in] `src`Pointer to memory.
+- [in] `size`Size of data.
 
 **[Return Type]**
 
@@ -131,7 +134,7 @@ Registers a memory range with a known physical address as a memory identifier th
 
 **[Parameters]**
 
-- [in/out] "mem"               Pointer to memory.
+- [in/out] `mem`Pointer to memory.
 
 **[Return Type]**
 

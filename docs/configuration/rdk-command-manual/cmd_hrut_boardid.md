@@ -46,7 +46,8 @@ Options:
 | **ecc**             |                                     | 4bit<br/>[15:12] | 0x0: default ECC config<br/>0x1: inline ECC all<br/>0x2: inline ECC option1<br/>0x3: inline ECC option2 |
 | **som_type**        | SOM type                            | 4bit<br/>[11:8]  | 0x0: auto detection<br/>0x3: sdb v3<br/>0x4: sdb v4<br/>0x5: RDK X3 v1<br/>0x6: RDK X3 v1.2<br/>0x8: RDK X3 v2<br/>0xb: RDK Module<br/>0xF: X3E |
 | **DFS EN**          | Dynamic Frequency Scaling (DFS) enable bit | 1bit<br/>[7]    | 1: enable DFS feature<br/>0: disable DFS feature                                               |
-| **alternative**     | Alternative parameter                | 3bit<br/>[6:4]  | 0x0: default configuration<br/>0x1: configuration 1                                           || **base_board_type**  | Board Type           | 4bit<br/>[3:0]   | 0x0: auto detection<br/>0x1: X3 DVB<br/>0x4: X3 SDB<br/>0x5: customer board |
+| **alternative**     | Alternative parameter                | 3bit<br/>[6:4]  | 0x0: default configuration<br/>0x1: configuration 1                                           |
+| **base_board_type**  | Board Type           | 4bit<br/>[3:0]   | 0x0: auto detection<br/>0x1: X3 DVB<br/>0x4: X3 SDB<br/>0x5: customer board |
 
 **The definitions of each field are as follows:**
 

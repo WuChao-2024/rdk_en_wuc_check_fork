@@ -96,7 +96,8 @@ List of currently supported camera resolutions:
 | Camera | Resolution |
 | ------ | ---------- |
 |IMX219|1920x1080@30fps(default), 640x480@30fps, 1632x1232@30fps, 3264x2464@15fps(max)|
-|IMX477|1920x1080@50fps(default), 1280x960@120fps, 2016x1520@40fps, 4000x3000@10fps(max)||OV5647|1920x1080@30fps(default), 640x480@60fps, 1280x960@30fps, 2592x1944@15fps(max)|
+|IMX477|1920x1080@50fps(default), 1280x960@120fps, 2016x1520@40fps, 4000x3000@10fps(max)|
+|OV5647|1920x1080@30fps(default), 640x480@60fps, 1280x960@30fps, 2592x1944@15fps(max)|
 |F37|1920x1080@30fps(default)|
 |GC4663|2560x1440@30fps(default)|
 
@@ -142,7 +143,9 @@ Returns 0 if successful, -1 if failed
 
 **【Function Description】**  
 
-Opens an image processing module, supports resizing, zooming, rotating, and cropping tasks for the input image.【Parameters】
+Opens an image processing module, supports resizing, zooming, rotating, and cropping tasks for the input image.
+
+**【Parameters】** 
 
 - `obj`: Initialized `VIO` object pointer
 - `pipe_id`: Differentiates multiple openings through `pipe_id`.
@@ -186,7 +189,9 @@ Return 0 if successful, -1 if failed
 
 ## sp_vio_get_frame  
 
-【Function Prototype】`int32_t sp_vio_get_frame(void *obj, char *frame_buffer, int32_t width, int32_t height, const int32_t timeout)`
+【Function Prototype】
+
+`int32_t sp_vio_get_frame(void *obj, char *frame_buffer, int32_t width, int32_t height, const int32_t timeout)`
 
 **【Description】**  
 
@@ -234,7 +239,9 @@ Returns 0 on success, -1 on failure.
 
 **【Description】**  
 
-Get the YUV data from the ISP module of the camera.**【Parameters】**
+Get the YUV data from the ISP module of the camera.
+
+**【Parameters】**
 
 - `obj`: Initialized pointer to the `VIO` object
 - `frame_buffer`: Pointer to the pre-allocated buffer used to save the captured image. Currently, the captured images are in `NV12` format, so the buffer size can be calculated using the formula `height * width * 3 / 2`, or by utilizing the provided macro definition `FRAME_BUFFER_SIZE(w, h)`.

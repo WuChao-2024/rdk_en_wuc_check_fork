@@ -35,8 +35,7 @@ mount [-fnrsvw] [-t fstype] [-o options] device dir
 -o atime, -o noatime: When atime is enabled, the system updates the "last accessed time" of a file each time it is read. This option can be turned off to reduce the number of writes when using flash file systems.
 -o auto, -o noauto: Enables/disables auto-mounting mode.
 -o defaults: Uses default options rw, suid, dev, exec, auto, nouser, and async.
--o dev, -o nodev
--o exec, -o noexec: Allows/executes execution of files.
+-o dev, -o nodev -o exec, -o noexec: Allows/executes execution of files.
 -o suid, -o nosuid: Allows execution of files with root privileges.
 -o user, -o nouser: Allows users to perform mount/umount actions.
 -o remount: Remounts a file system that is already mounted with different options. For example, if the system is originally mounted as read-only, it can be remounted in read-write mode.

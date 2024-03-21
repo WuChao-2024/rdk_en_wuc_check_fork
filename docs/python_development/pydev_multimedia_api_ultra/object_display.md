@@ -98,17 +98,17 @@ def test_display():
     ret = disp.display([1920, 1080])
     print ("Display display 0 return:%d" % ret)
     fo = open("output.img", "rb")
-img = fo.read()
-fo.close()
+    img = fo.read()
+    fo.close()
 
-#send image data to display
-ret = disp.send_frame(img)
-print ("Display send_frame return:%d" % ret)
+    #send image data to display
+    ret = disp.send_frame(img)
+    print ("Display send_frame return:%d" % ret)
 
-time.sleep(3)
+    time.sleep(3)
 
-disp.close()
-print("test_display done!!!")
+    disp.close()
+    print("test_display done!!!")
 
 test_display()
 ```
@@ -247,6 +247,8 @@ This interface needs to be used after enabling the display function with the `di
 
 <font color='Blue'>[Reference Code]</font>
 
+None
+
 ## bind interface
 
 <font color='Blue'>[Function Description]</font>
@@ -302,6 +304,7 @@ None
 Unbind two bound modules.
 
 <font color='Blue'>【Function Declaration】</font>
+
 ```python
 srcampy.unbind(src, dst)
 ```

@@ -47,7 +47,8 @@ ssh [-46AaCfGgKkMNnqsTtVvXxYy] [-B bind_interface]
 
 ```shell
 # ssh username@remote_server_address
-ssh sunrise@192.168.1.10# Specify port
+ssh sunrise@192.168.1.10
+# Specify port
 ssh -p 2211 sunrise@192.168.1.10
 
 # SSH family

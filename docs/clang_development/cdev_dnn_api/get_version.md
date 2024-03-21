@@ -11,7 +11,7 @@ sidebar_position: 1
 
 **【Function Description】**  
 
-This function is used to retrieve the version information of the "DNN" prediction library.
+This function is used to retrieve the version information of the `DNN` prediction library.
 
 **【Parameters】**
 

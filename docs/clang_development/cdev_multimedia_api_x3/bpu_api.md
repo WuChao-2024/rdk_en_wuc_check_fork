@@ -72,37 +72,38 @@ None.
 
 ## sp_deinit_bpu_tensor 
 
-**【函数原型】**  
+**【Function Prototype】**
+
 `int32_t sp_deinit_bpu_tensor(hbDNNTensor *tensor, int32_t len)`
 
-**【功能描述】**  
+**【Function Description】**
+
 Release and reclaim memory for the input `tensor`.
 
-**【参数】**
+**【Parameters】**
+
 - `tensor`: Pointer to the `tensor`
 - `len`: Length of the `tensor`
 
-**【返回类型】**  
+**【Return Type】**
+
 None.
 
 ## sp_release_bpu_module  
 
-**【函数原型】**  
+**【Function Prototype】**
+
 `int32_t sp_release_bpu_module(bpu_module *bpu_handle)`
 
-**【功能描述】**  
+**【Function Description】**
+
 Release the BPU module.
-
-**【参数】**  
-- `bpu_handle`: BPU module object
-
-**【返回类型】**  
-None.Turn off algorithm inference task.
 
 **【Parameters】**
 
-- `bpu_handle`: Algorithm inference task object.
+- `bpu_handle`: BPU module object
 
 **【Return Type】**
 
 Return 0 if successful, -1 if failed.
+

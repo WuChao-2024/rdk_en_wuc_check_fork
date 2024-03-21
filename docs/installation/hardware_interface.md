@@ -633,7 +633,7 @@ The development board has silk screen marking for the 40-pin interface, making i
 
 ![image-X3-PI-40Pin_Index](./image/hardware_interface/image-X3-PI-40Pin_Index.png)
 
-For the usage of each function of the 40-pin interface, please refer to the [40PIN Function Usage](../python_development/40pin_user_guide/40pin_define.md) section.
+For the usage of each function of the 40-pin interface, please refer to the [40PIN Function Usage](../python_development/40pin_user_guide/40pin_define) section.
 
 </TabItem>
 
@@ -735,7 +735,7 @@ It is important to note that **this interface cannot be left unconnected, otherw
 By default, the firmware of the core module of RDK X3 Module and the level configuration of the carrier board are set to 3.3V. If you need to switch the IO level, please follow the steps below:
 
 1. Download the boot firmware that supports the 1.8V level configuration from the [firmware download address](http://sunrise.horizon.cc/downloads/miniboot).
-2. Use the official programming tool `hbupdate` to update the boot firmware of the core board. For detailed instructions, please refer to [Image Flash](./system.md).
+2. Use the official programming tool `hbupdate` to update the boot firmware of the core board. For detailed instructions, please refer to [Image Flash](./install_os).
 3. Power off the device, short connect the `vref` and `1.8V` signals using a jumper cap, and then power on again.
 :::
 

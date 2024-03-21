@@ -46,7 +46,9 @@ Execute an inference task based on the input parameters. The caller can use the 
 
 **【Description】** 
 
-Execute an ROI inference task based on the input parameters. The caller can use the returned ``taskHandle`` across functions and threads.**[Parameters]**
+Execute an ROI inference task based on the input parameters. The caller can use the returned ``taskHandle`` across functions and threads.
+
+**[Parameters]**
 
 - [out]     ``taskHandle``       Pointer to the task handle.
 - [in/out]  ``output``           Output of the inference task.
@@ -64,8 +66,8 @@ Execute an ROI inference task based on the input parameters. The caller can use 
 
   If using **RDK X3**, follow these rules:
   | This interface supports batch processing, assuming the number of data batches to be inferred is ``batch``, and the number of model inputs is ``input_count``, where the number of input sources for the resizer is ``resizer_count``.
-  | Prepare input parameter ``input``: The range of the array index of ``input`` for the i-th ``batch`` is :math:`[i * input\_count`, :math:`(i + 1) * input\_count)，i=[0,batch)`.
-  | Prepare input parameter ``rois``: Each input source for the resizer should match a roi. The range of the array index of ``rois`` for the i-th ``batch`` is :math:`[i * resizer\_count`, :math:`(i + 1) * resizer\_count)，i=[0,batch)`. The order of rois in each batch should be consistent with the order of the inputs.
+  | Prepare input parameter ``input``: The range of the array index of ``input`` for the i-th ``batch`` is `[i * input\_count`, `(i + 1) * input\_count)，i=[0,batch)`.
+  | Prepare input parameter ``rois``: Each input source for the resizer should match a roi. The range of the array index of ``rois`` for the i-th ``batch`` is `[i * resizer\_count`, `(i + 1) * resizer\_count)，i=[0,batch)`. The order of rois in each batch should be consistent with the order of the inputs.
   | Limit on the number of ``batch``: The range should be [1, 255].
 
   Model Limitations: The compilation parameter ``input_source`` of the model needs to be set to ``resizer`` during compilation, and the h*w of the model should be less than 18432.
@@ -74,9 +76,9 @@ Execute an ROI inference task based on the input parameters. The caller can use 
 
   The ``left`` and ``top`` values of the ``roi`` must be even, while the ``right`` and ``bottom`` values must be odd.
 
-  The size of the ``roi`` must satisfy the following requirements: :math:`16 <= width < 256`, :math:`16 <= height < 256`.
+  The size of the ``roi`` must satisfy the following requirements: `16 <= width < 256`, `16 <= height < 256`.
 
-  The scaling range is :math:`0.5 < roi / src <= 8`.
+  The scaling range is `0.5 < roi / src <= 8`.
 
   Currently, up to 32 model tasks can exist simultaneously.
 
@@ -93,9 +95,10 @@ Execute an ROI inference task based on the input parameters. The caller can use 
 
   If using **RDK Ultra**, follow these rules:
 
-  - ``input_count``: Number of model input branches
-  - ``output_count``: Number of model output branches
-  - ``resizer_count``: Number of resizer input-source branches in the model (≤input_count). When the model processes a batch of data, one resizer input-source branch handles one roi.- ``roiCount``: Total number of rois, its value is ``batch * resizer_count``
+- ``input_count``: Number of model input branches
+- ``output_count``: Number of model output branches
+- ``resizer_count``: Number of resizer input-source branches in the model (≤input_count). When the model processes a batch of data, one resizer input-source branch handles one roi.
+- ``roiCount``: Total number of rois, its value is ``batch * resizer_count``
 - ``data_batch``: The number of data batches that the model needs to infer, its value is ``roiCount / resizer_count``
 - ``model_batch``: The batch size used internally by the model, i.e., the batch_size input to the model during inference. Horizon Toolchain supports compiling the model as a batch model.
 
@@ -110,7 +113,7 @@ Taking a more complex multi-input model as an example, let's assume the model ha
 - ``data_batch`` = 3
 - ``model_batch`` = 2
 
-Therefore, to infer these 3 batches of data, you need to prepare independent addresses for ``input_tensor``, which is equal to ``input_count * data_batch = 9``.
+So for model inference, these three batches of data need to prepare ``input_count * data_batch = 9`` input-tensors with independent addresses.
 
 Assuming the static information of the model input/output is as follows:
 
@@ -140,10 +143,10 @@ Interface Limitations Explanation:
 
 - Regarding the ``batch`` number limitation: its range should be [1, 255].
 - When using this interface to submit a task, ``taskHandle`` should be set to ``nullptr`` in advance, unless it is appending a task to a specific ``taskHandle`` (i.e., using the ``inferCtrlParam::more`` functionality).
-- The roi size requirement is: :math:`2 <= width <= 4096`, :math:`2 <= height <= 4096`.
-- The original image size requirement is: :math:`1 <= W <= 4096`, :math:`16 <= stride <= 131072`, and ``stride`` must be a multiple of 16.
-- The output size requirement is: :math:`2 <= Wout`, :math:`2 <= Hout`.
-- The roi scaling factor limit is: :math:`0 <= step <= 262143`, where the step is calculated using the formula: :math:`step = ((src_len - 1)*65536 + (dst_len - 1)/2)/(dst_len - 1)`, where src_len is the W or H of the roi and dst_len is the required W or H of the model.
+- The roi size requirement is: `2 <= width <= 4096`, `2 <= height <= 4096`.
+- The original image size requirement is: `1 <= W <= 4096`, `16 <= stride <= 131072`, and ``stride`` must be a multiple of 16.
+- The output size requirement is: `2 <= Wout`, `2 <= Hout`.
+- The roi scaling factor limit is: `0 <= step <= 262143`, where the step is calculated using the formula: `step = ((src_len - 1)*65536 + (dst_len - 1)/2)/(dst_len - 1)`, where src_len is the W or H of the roi and dst_len is the required W or H of the model.
 - Up to 32 model tasks can exist simultaneously.
 :::
 

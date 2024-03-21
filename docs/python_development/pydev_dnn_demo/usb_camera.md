@@ -47,7 +47,9 @@ Please refer to [USB Camera AI Inference](/first_application/usb_camera) for ins
         print_properties(output.properties)
     ```
 
-- Data preprocessingUse OpenCV to open the USB camera device node `/dev/video8`, get real-time images, and resize the images to fit the input tensor size of the model.
+- Data preprocessing
+
+Use OpenCV to open the USB camera device node `/dev/video8`, get real-time images, and resize the images to fit the input tensor size of the model.
 
 ```python
 # open usb camera: /dev/video8

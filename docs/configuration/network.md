@@ -80,7 +80,7 @@ After modifying, `reboot` to make the configuration take effect.
 The development board integrates a 2.4GHz wireless WiFi module, which supports Soft AP and Station modes, and runs in Station mode by default. The following introduces how to use the two modes.
 
 ### Station Mode
-In Station mode, the development board acts as a client and accesses the router's wireless hotspot for internet connection.
+In Station mode, the development board as a client and accesses the router's wireless hotspot for internet connection.
 
 - For users of Ubuntu Desktop version, you can click on the Wi-Fi icon in the upper right corner of the desktop, select the corresponding hotspot, and enter the password to complete the network configuration, as shown in the figure below:
 
@@ -133,7 +133,7 @@ By default, the development board's wireless network runs in Station mode. To us
     wpa_pairwise=CCMP # Encryption protocol, usually CCMP
     ```
 
-      - For an open hotspot configuration, add the following content to the `hostapd.conf` file:
+    - For an open hotspot configuration, add the following content to the `hostapd.conf` file:
 
     ```shell
     interface=wlan0
@@ -146,10 +146,11 @@ By default, the development board's wireless network runs in Station mode. To us
     ignore_broadcast_ssid=0
     ```
 
-      - For a hotspot with a password, add the following content to the `hostapd.conf` file:
+    - For a hotspot with a password, add the following content to the `hostapd.conf` file:
 
     ```shell
-    interface=wlan0driver=nl80211
+    interface=wlan0
+    driver=nl80211
     ctrl_interface=/var/run/hostapd
     ssid=Sunrise
     channel=6
@@ -163,67 +164,69 @@ By default, the development board's wireless network runs in Station mode. To us
     ```
 3. Configure the `isc-dhcp-server` file as follows:
 
-- Execute `sudo vim /etc/default/isc-dhcp-server` to modify the `isc-dhcp-server` file and add the following definition for the network interface:
+    - Execute `sudo vim /etc/default/isc-dhcp-server` to modify the `isc-dhcp-server` file and add the following definition for the network interface:
 
-```shell
-INTERFACESv4="wlan0"
-```
+    ```shell
+    INTERFACESv4="wlan0"
+    ```
 
-- Execute `sudo vim /etc/dhcp/dhcpd.conf` to modify the `dhcpd.conf` file and uncomment the following fields:
+    - Execute `sudo vim /etc/dhcp/dhcpd.conf` to modify the `dhcpd.conf` file and uncomment the following fields:
 
-```shell
-authoritative;
-```
+    ```shell
+    authoritative;
+    ```
 
-- Then, add the following configuration to the end of the `/etc/dhcp/dhcpd.conf` file:
+    - Then, add the following configuration to the end of the `/etc/dhcp/dhcpd.conf` file:
 
-```shell
-subnet 10.5.5.0 netmask 255.255.255.0 { #network and subnet mask
-range 10.5.5.100 10.5.5.254;#IP range available
-option subnet-mask 255.255.255.0; #subnet mask
-option routers 10.5.5.1;#default gateway
-option broadcast-address 10.5.5.31;#broadcast address
-default-lease-time 600;#default lease time in seconds
-max-lease-time 7200;#maximum lease time in seconds
-```
+    ```shell
+    subnet 10.5.5.0 netmask 255.255.255.0 { #network and subnet mask
+    range 10.5.5.100 10.5.5.254;#IP range available
+    option subnet-mask 255.255.255.0; #subnet mask
+    option routers 10.5.5.1;#default gateway
+    option broadcast-address 10.5.5.31;#broadcast address
+    default-lease-time 600;#default lease time in seconds
+    max-lease-time 7200;#maximum lease time in seconds
+    }
+    ```
 
 4. Stop the `wpa_supplicant` service and restart `wlan0`
 
-```bash
-systemctl stop wpa_supplicant
+    ```bash
+    systemctl stop wpa_supplicant
 
-ip addr flush dev wlan0
-sleep 0.5
-ifconfig wlan0 down
-sleep 1
-ifconfig wlan0 up
-```
+    ip addr flush dev wlan0
+    sleep 0.5
+    ifconfig wlan0 down
+    sleep 1
+    ifconfig wlan0 up
+    ```
 
 5. Start the `hostapd` service as follows:
-- Execute the command `sudo hostapd -B /etc/hostapd.conf`
-```bash
-root@ubuntu:~# sudo hostapd -B /etc/hostapd.conf
-Configuration file: /etc/hostapd.conf
-Using interface wlan0 with hwaddr 08:e9:f6:af:18:26 and ssid "sunrise"
-wlan0: interface state UNINITIALIZED->ENABLED
-wlan0: AP-ENABLED
-```
-- Configure the IP and subnet of wireless interface `wlan0` using the `ifconfig` command, make sure it matches the configuration in the third step
+    - Execute the command `sudo hostapd -B /etc/hostapd.conf`
+    ```bash
+    root@ubuntu:~# sudo hostapd -B /etc/hostapd.conf
+    Configuration file: /etc/hostapd.conf
+    Using interface wlan0 with hwaddr 08:e9:f6:af:18:26 and ssid "sunrise"
+    wlan0: interface state UNINITIALIZED->ENABLED
+    wlan0: AP-ENABLED
+    ```
+    - Configure the IP and subnet of wireless interface `wlan0` using the `ifconfig` command, make sure it matches the configuration in the third step
 
-```bash
-sudo ifconfig wlan0 10.5.5.1 netmask 255.255.255.0
-```
+    ```bash
+    sudo ifconfig wlan0 10.5.5.1 netmask 255.255.255.0
+    ```
 
-- Finally, start the `dhcp` server. Clients connecting to the hotspot will be assigned an IP address from `10.5.5.100` to `10.5.5.255`
+    - Finally, start the `dhcp` server. Clients connecting to the hotspot will be assigned an IP address from `10.5.5.100` to `10.5.5.255`
 
-```bash
-sudo ifconfig wlan0 10.5.5.1 netmask 255.255.255.0
-sudo systemctl start isc-dhcp-server
-sudo systemctl enable isc-dhcp-server
-```
+    ```bash
+    sudo ifconfig wlan0 10.5.5.1 netmask 255.255.255.0
+    sudo systemctl start isc-dhcp-server
+    sudo systemctl enable isc-dhcp-server
+    ```
 
 6. Connect to the hotspot on the development board, for example, `sunrise`
-![image-20220601203025803](./image/network/image-20220601203025803.png)  
+
+    ![image-20220601203025803](./image/network/image-20220601203025803.png)  
 
 7. If you need to switch back to `Station` mode, you can do it as follows:
     ```bash

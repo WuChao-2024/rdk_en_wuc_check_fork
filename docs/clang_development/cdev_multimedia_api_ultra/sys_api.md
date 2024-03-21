@@ -48,7 +48,7 @@ Returns 0 if successful, otherwise returns another value.
 
 **[Description]**
 
-This function unbinds the two modules.This interface completes the unbinding of two already bound modules. The unbinding process needs to be completed before the module exits.
+This interface completes the unbinding of two already bound modules. The unbinding process needs to be completed before the module exits.
 
 **【Parameters】**
 

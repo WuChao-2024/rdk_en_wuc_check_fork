@@ -33,9 +33,9 @@ Resize tasks according to the input parameters.
 
   1. Currently, only resizing with the same ``hbDNNDataType`` is supported, and it must be of the ``IMG`` type.
   2. For inputs of type ``HB_DNN_IMG_TYPE_NV12`` or ``HB_DNN_IMG_TYPE_NV12_SEPARATE``, the width and height must be multiples of 2.
-  3. The scaling range is :math:`dst / src ∈ [1/185, 256)`.
-  4. The original image size should satisfy :math:`1 <= W <= 4080`, :math:`16 <= stride <= 4080`, and the ``stride`` must be a multiple of 16.
-  5. The output size should satisfy :math:`Wout <= 4080`, :math:`Hout <= 4080`.
+  3. The scaling range is `dst / src ∈ [1/185, 256)`.
+  4. The original image size should satisfy `1 <= W <= 4080`, `16 <= stride <= 4080`, and the ``stride`` must be a multiple of 16.
+  5. The output size should satisfy `Wout <= 4080`, `Hout <= 4080`.
   6. The ``roi`` must be inside the image.
   7. Up to 32 resize tasks can exist simultaneously.
 :::

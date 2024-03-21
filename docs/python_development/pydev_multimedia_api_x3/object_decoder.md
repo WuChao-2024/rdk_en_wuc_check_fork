@@ -198,12 +198,12 @@ def test_cam_bind_encode_decode_bind_display():
             print("encode get image failed count: %d" % a)
         a = a + 1
     ret = libsrcampy.unbind(cam, enc)
-dec.close()
-enc.close()
-cam.close_cam()
-print("test_cam_bind_encode_decode_bind_display done!!!")
+    dec.close()
+    enc.close()
+    cam.close_cam()
+    print("test_cam_bind_encode_decode_bind_display done!!!")
 
-test_cam_bind_encode_decode()
+    test_cam_bind_encode_decode()
 ```
 
 ## close

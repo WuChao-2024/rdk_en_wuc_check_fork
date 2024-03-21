@@ -7,7 +7,7 @@ The Hobot.GPIO library only supports PWM on pins with additional hardware PWM co
 
 Refer to `/app/40pin_samples/simple_pwm.py` for detailed information on how to use PWM channels.
 
-Test Code
+## Test Code
 
 Open the PWM channel specified by `output_pin`, with an initial duty cycle of 25%. Increase the duty cycle by 5% every 0.25 seconds until 100% is reached, and then decrease the duty cycle by 5% every 0.25 seconds. When the normal output waveform is present, you can measure the output signal and observe the waveform using an oscilloscope or logic analyzer.
 

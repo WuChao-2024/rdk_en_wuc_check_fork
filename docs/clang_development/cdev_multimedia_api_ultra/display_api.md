@@ -46,7 +46,9 @@ Destroy the `DISPLAY` object.
 
 **【Parameters】**
 
-- `obj`: Pointer to the initialized `DISPLAY` object.**[Return Type]**
+- `obj`: Pointer to the initialized `DISPLAY` object.
+
+**[Return Type]**
 
 None
 
@@ -94,7 +96,9 @@ Returns 0 on success, -1 on failure.
 
 `int32_t sp_display_set_image(void *obj, char *addr, int32_t size)`
 
-**[Description]**Send a frame image to the display module. The image format only supports `NV12` `YUV` image.
+**[Description]**
+
+Send a frame image to the display module. The image format only supports `NV12` image.
 
 **[Parameters]**
 
@@ -141,7 +145,8 @@ Returns 0 on success, -1 on failure
 
 Draws a string on the graphics layer of the display module.
 
-**[Parameters]**- `obj`: Initialized `DISPLAY` object pointer
+**[Parameters]**
+- `obj`: Initialized `DISPLAY` object pointer
 - `x`: The x value of the starting coordinate for drawing the string
 - `y`: The y value of the starting coordinate for drawing the string
 - `str`: The string to be drawn (encoded in GB2312)
@@ -172,7 +177,7 @@ Gets the resolution of the current connected display.
 
 **【Return Type】** 
 
-Void.
+None
 
 :::note
 

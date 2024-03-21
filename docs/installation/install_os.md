@@ -30,8 +30,8 @@ After downloading, unzip the Ubuntu system image file, such as `ubuntu-preinstal
 
 **Version description:**
 
-- Version 2.0: Made based on the RDK Linux open source code package, supporting the full range of hardware such as RDK X3 Pai and X3 module.
-- Version 1.0: Historical version of X3 Pai, only supporting X3 Pai hardware, the system image name is `system_sdcard.img`.
+- Version 2.0: Made based on the RDK Linux open source code package, supporting the full range of hardware such as RDK X3 and X3 module.
+- Version 1.0: Historical version of Sunrise X3, only supporting Sunrise X3 hardware, the system image name is `system_sdcard.img`.
 
 </TabItem>
 
@@ -45,8 +45,8 @@ After downloading, unzip the Ubuntu system image file, such as `ubuntu-preinstal
 
 **Version description:**
 
-- Version 2.0: Made based on the RDK Linux open source code package, supporting the full range of hardware such as RDK X3 Pai and X3 module.
-- Version 1.0: Historical version of X3 Pai, only supporting X3 Pai hardware, the system image name is `system_sdcard.img`
+- Version 2.0: Made based on the RDK Linux open source code package, supporting the full range of hardware such as RDK X3 and X3 module.
+- Version 1.0: Historical version of Sunrise X3, only supporting Sunrise X3 hardware, the system image name is `system_sdcard.img`
 
 </TabItem>
 
@@ -140,11 +140,12 @@ The `hbupdate` tool supports two versions: Windows and Linux, which start with `
 
    (1) Select the development board model, which is a required field.
 
-   - RDK_X3_2GB: RDK X3 (Sunrise X3 Series), 2GB RAM version, only supports burning the minimal system image
+   - RDK_X3_2GB: RDK X3 (Sunrise X3), 2GB RAM version, only supports burning the minimal system image
 
-   - RDK_X3_4GB: RDK X3 (Sunrise X3 Series), 4GB RAM version, only supports burning the minimal system image
+   - RDK_X3_4GB: RDK X3 (Sunrise X3), 4GB RAM version, only supports burning the minimal system image
 
-   - RDK_X3_MD_2GB: RDK X3 Module, 2GB RAM version- RDK_X3_MD_4GB: RDK X3 Module, 4GB memory version
+   - RDK_X3_MD_2GB: RDK X3 Module, 2GB RAM version
+   - RDK_X3_MD_4GB: RDK X3 Module, 4GB RAM version
 
    ![image-flash-system2](./image/install_os/image-flash-system2.png)
 
@@ -183,7 +184,7 @@ When burning the Ubuntu system on RDK Ultra development kit, you need to use the
 :::tip Note
 
   - Decompress the tool package and pay attention not to include **spaces, Chinese characters, special characters**, etc. in the decompression path.
-  - The tool communicates with RDK Ultra through Ethernet, so to ensure the burning speed, please make sure that the **PC supports Gigabit Ethernet and uses a direct connection**.
+  - The tool communicates with RDK Ultra through Ethernet to ensure the burning speed, please make sure that the **PC supports Gigabit Ethernet and uses a direct connection**.
   - The PC-side network needs to be configured in **Static IP mode** in advance, as follows:
     - IP: 192.168.1.195
     - netmask: 255.255.255.0

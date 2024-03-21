@@ -45,10 +45,10 @@ A tensor of size N * H * W * C can be represented by the following 4 nested loop
         }
     }
 
-Compared to "NCHW_NATIVE", "NHWC_NATIVE" has a different loop order, but it is not listed separately here.
+Compared to `NCHW_NATIVE`, `NHWC_NATIVE` has a different loop order, but it is not listed separately here.
 
 :::caution
-The term "native" mentioned in the following content specifically refers to this layout.
+The term native mentioned in the following content specifically refers to this layout.
 :::
 
 ## BPU Alignment Restriction Rules

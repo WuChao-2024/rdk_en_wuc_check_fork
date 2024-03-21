@@ -156,7 +156,7 @@ Returns the 'outputs' object.
 
 <font color='Blue'>【Note】</font>  
 
-N/A
+None
 
 ## Sample Code
 You can check the chapter [Model Inference Example](./pydev_dnn_demo) for more details.

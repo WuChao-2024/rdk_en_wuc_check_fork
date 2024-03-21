@@ -150,18 +150,18 @@ def test_encode():
     fin = open("output.img", "rb")
     input_img = fin.read()
     fin.close()
-while a < 100:
-    #send image data to encoder
-    ret = enc.encode_file(input_img)
-    print("Encoder encode_file return:%d" % ret)
-    #get encoded data
-    img = enc.get_img()
-    if img is not None:
-        fo.write(img)
-        print("encode write image success count: %d" % a)
-    else:
-        print("encode write image failed count: %d" % a)
-    a = a + 1
+    while a < 100:
+        #send image data to encoder
+        ret = enc.encode_file(input_img)
+        print("Encoder encode_file return:%d" % ret)
+        #get encoded data
+        img = enc.get_img()
+        if img is not None:
+            fo.write(img)
+            print("encode write image success count: %d" % a)
+        else:
+            print("encode write image failed count: %d" % a)
+        a = a + 1
 
 enc.close()
 print("test_encode done!!!")
