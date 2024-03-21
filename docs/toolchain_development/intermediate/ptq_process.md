@@ -92,7 +92,9 @@ The usage of the hb_mapper checker tool is as follows:
                     --proto ${proto} \
                     --model ${caffe_model/onnx_model} \
                     --input-shape ${input_node} ${input_shape} \
-```--output ${output}
+                    --output ${output}
+```
+
 
 hb_mapper checker parameters explanation:
 
@@ -141,7 +143,7 @@ For example: The following configuration contains an unrecognized operator type 
   }
   layer {
     name: "Convolution1"
-```type: "Convolution"
+    type: "Convolution"
     bottom: "data"
     top: "Convolution1"
     convolution_param {
@@ -193,6 +195,7 @@ If there is no ERROR, then the check is successful. The ``hb_mapper checker`` to
   conv2_2/sep  BPU  id(0)     HzSQuantizedConvconv3_1/dw BPU id(0) HzSQuantizedConv
 conv3_1/sep BPU id(0) HzSQuantizedConv
 ...
+```
 
 The result of each line represents the checking status of a model node, with four columns: Node, ON, Subgraph, and Type. They represent the node name, the hardware on which the node is executed, the subgraph to which the node belongs, and the Horizon operator name to which the node is mapped. If the model contains CPU operators in the network structure, the hb_mapper checker tool will split the part before and after the CPU operator into two subgraphs.
 
@@ -205,6 +208,7 @@ Ideally, all operators in the model's network structure should run on the BPU, w
 ![model_reshape](./image/intermediate/model_reshape.png)
 
 Therefore, the final checking result of the model will also show segmentation, as follows:
+
 
 ```
 2022-05-25 15:16:14,667 INFO The converted model node information:
@@ -235,7 +239,9 @@ fc_output/op                          CPU  --        Mul
 
 ![model_reshape](./image/intermediate/model_reshape_ONNX.png)
 
-Therefore, the final checking result of the model will also show segmentation, as follows:```
+Therefore, the final checking result of the model will also show segmentation, as follows:
+
+```
   ====================================================================================
   Node                                    ON   Subgraph  Type
   -------------------------------------------------------------------------------------
@@ -281,11 +287,15 @@ Therefore, the final checking result of the model will also show segmentation, a
 
 According to the hints provided by hb_mapper checker, generally, the operators running on BPU will have better performance. In this case, you can remove the CPU operators like pow and reshape from the model and calculate the corresponding functions in the post-processing to reduce the number of subgraphs.
 
-However, multiple subgraphs will not affect the overall conversion process but will affect the performance of the model to a large extent. It is recommended to adjust the model operators to run on BPU as much as possible. You can refer to the BPU operator support list in the Horizon Processor Operator Support List to replace the CPU operators with BPU operators with the same functions or move the CPU operators in the model to the pre- and post-processing of the model for CPU calculations.The model conversion phase will convert the floating-point model to a Horizon heterogeneous model, and after this phase, you will have a model that can run on the Horizon processor.
+However, multiple subgraphs will not affect the overall conversion process but will affect the performance of the model to a large extent. It is recommended to adjust the model operators to run on BPU as much as possible. You can refer to the BPU operator support list in the Horizon Processor Operator Support List to replace the CPU operators with BPU operators with the same functions or move the CPU operators in the model to the pre- and post-processing of the model for CPU calculations.
+
+### Model conversion
+
+The model conversion phase will convert the floating-point model to a Horizon heterogeneous model, and after this phase, you will have a model that can run on the Horizon processor.
 
 Before performing the conversion, please make sure that the validation model process has been successfully passed.
 
-The model conversion is completed using the "hb_mapper makertbin" tool, during which important processes such as model optimization and calibration quantization will be performed. Calibration requires preparing calibration data according to the model preprocessing requirements.
+The model conversion is completed using the `hb_mapper makertbin` tool, during which important processes such as model optimization and calibration quantization will be performed. Calibration requires preparing calibration data according to the model preprocessing requirements.
 
 In order to facilitate your comprehensive understanding of model conversion, this section will introduce calibration data preparation, conversion tool usage, conversion internal process interpretation, conversion result interpretation, and conversion output interpretation in order.
 
@@ -320,7 +330,8 @@ To avoid excessive code length, the implementation code of various simple transf
 
   It is recommended to refer to the preprocessing steps of the sample models in the Horizon model conversion "horizon_model_convert_sample" sample package, such as caffe and onnx models: "02_preprocess.sh" and "preprocess.py".
 :::
-```
+
+```python
   # This example uses skimage, there may be differences if using opencv
   # It is worth noting that the transformers do not reflect the mean subtraction and scale multiplication operations
   # The mean and scale operations have been integrated into the model, please refer to the norm_type/mean_value/scale_value configuration below
@@ -330,9 +341,7 @@ To avoid excessive code length, the implementation code of various simple transf
     ShortSideResizeTransformer(short_size=256),
     # Use CenterCrop to obtain a 224x224 image
     CenterCropTransformer(crop_size=224),
-```以下是将中文部分翻译成英文的内容：
 
-```python
 # Convert NHWC layout from skimage to NCHW layout required by the model
 HWC2CHWTransformer(),
 # Convert channel order from RGB to BGR required by the model
@@ -528,22 +537,22 @@ calibration_parameters:
 
   # Enable automatic processing of calibration image samples (using skimage read and resize to input node size)
   #preprocess_on: False# Algorithm type for calibration, with default calibration algorithm as the first priority
-calibration_type: 'default'
+  calibration_type: 'default'
 
-# Parameters for max calibration mode
-# max_percentile: 1.0
+  # Parameters for max calibration mode
+  # max_percentile: 1.0
 
-# Force the OP to run on CPU, generally not needed, can be enabled during model accuracy tuning phase for precision optimization
-# run_on_cpu:  {OP_name}
+  # Force the OP to run on CPU, generally not needed, can be enabled during model accuracy tuning phase for precision optimization
+  # run_on_cpu:  {OP_name}
 
-# Force the OP to run on BPU, generally not needed, can be enabled during model performance tuning phase for performance optimization
-# run_on_bpu:  {OP_name}
+  # Force the OP to run on BPU, generally not needed, can be enabled during model performance tuning phase for performance optimization
+  # run_on_bpu:  {OP_name}
 
-# Specify whether to calibrate for each channel
-# per_channel: False
+  # Specify whether to calibrate for each channel
+  # per_channel: False
 
-# Specify the data precision for output nodes
-# optimization: set_model_output_int8
+  # Specify the data precision for output nodes
+  # optimization: set_model_output_int8
 
 # Compiler parameter group
 compiler_parameters:
@@ -568,15 +577,16 @@ compiler_parameters:
   # Specify the number of processes during model compilation
   #jobs: 8
 
-# This parameter group does not need to be configured, only enabled when there are custom CPU operators
-#custom_op: 
+  # This parameter group does not need to be configured, only enabled when there are custom CPU operators
+  #custom_op: 
   # Calibration method for custom OP, recommend using registration method
   #custom_op_method: register
 
   # Implementation files for custom OP, multiple files can be separated with ";", this file can be generated from a template, see the custom OP documentation for details
   #op_register_files: sample_custom.py# The folder where the custom OP implementation file is located, please use a relative path
-#custom_op_dir: ./custom_op
+  #custom_op_dir: ./custom_op
 
+```
 The configuration file mainly includes four parameter groups: model parameter group, input information parameter group, calibration parameter group, and compilation parameter group. 
 
 In your configuration file, all four parameter groups need to exist, and specific parameters can be optional or mandatory. Optional parameters can be omitted.
@@ -600,63 +610,75 @@ The following is a description of the specific parameter information. There will
 
 - ###### Model Parameter Group
 
-| Parameter Name | Parameter Configuration Description | Value Range Description | Optional/Mandatory |
-|------------|----------|----------|--------|
-| ``prototxt`` | **Parameter Purpose**: Specify the prototxt file name of the Caffe floating-point model. <br/>**Parameter Description**: Required when the ``model-type`` in ``hb_mapper makerbin`` is set to ``caffe``. | **Value Range**: N/A. <br/> **Default Configuration**: N/A. | Optional |
-| ``caffe_model`` | **Parameter Purpose**: Specify the caffemodel file name of the Caffe floating-point model. <br/>**Parameter Description**: Required when the ``model-type`` in ``hb_mapper makerbin`` is set to ``caffe``. | **Value Range**: N/A. <br/> **Default Configuration**: N/A. | Optional |
-| ``onnx_model`` | **Parameter Purpose**: Specify the onnx file name of the ONNX floating-point model. <br/>**Parameter Description**: Required when the ``model-type`` in ``hb_mapper makerbin`` is set to ``onnx``. | **Value Range**: N/A. <br/> **Default Configuration**: N/A. | Optional |
-| ``march`` | **Parameter Purpose**: Specify the platform architecture that the mixed heterogeneous model needs to support. <br/>**Parameter Description**: The two optional configuration values correspond to the BPU microframeworks of RDK X3 and RDK Ultra, respectively. Choose according to your platform. | **Value Range**: ``bernoulli2`` or ``bayes``. <br/> **Default Configuration**: N/A. | Mandatory |
-| ``output_model_file_prefix`` | **Parameter Purpose**: Specify the name prefix of the converted mixed heterogeneous model. <br/>**Parameter Description**: The name prefix of the output fixed-point model file. | **Value Range**: N/A. <br/> **Default Configuration**: N/A. | Mandatory |
-| ``working_dir`` | **Parameter Purpose**: Specify the directory where the results of model conversion are stored. <br/>**Parameter Description**: The tool will automatically create the directory if it does not exist. | **Value Range**: N/A. <br/> **Default Configuration**: ``model_output``. | Optional |
-| ``layer_out_dump`` | **Parameter Purpose**: Specify whether to retain the ability to output intermediate layer values in the mixed heterogeneous model. <br/>**Parameter Description**: Outputting intermediate layer values is a means of debugging and is not normally|``input_type_train``| **参数作用**：指定原始浮点模型的输入数据类型。<br/>**参数说明**：每一个输入节点都需要配置一个确定的输入数据类型。存在多个输入节点时，设置的节点顺序需要与``input_name``里的顺序严格保持一致。多个值的配置方法请参考前文对``param_value``配置描述。数据类型的选择请参考： 转换内部过程解读 部分的介绍。| **取值范围**：``rgb``、``bgr``、``yuv444``、``gray``、``featuremap``。<br/> **默认配置**：无。|必选 |
-|``input_layout_train``| **参数作用**：指定原始浮点模型的输入数据排布。<br/>**参数说明**：每一个输入节点都需要配置一个确定的输入数据排布， 这个排布必须与原始浮点模型所采用的数据排布相同。存在多个输入节点时， 设置的节点顺序需要与 ``input_name`` 里的顺序严格保持一致。多个值的配置方法请参考前文对``param_value``配置描述。什么是数据排布请参考： 转换内部过程解读 部分的介绍。| **取值范围**：NHWC 、 NCHW。<br/> **默认配置**：无。|必选 |
-|``input_type_rt``| **参数作用**：转换后混合异构模型需要适配的输入数据格式。<br/>**参数说明**：这里是指明您需要使用的数据格式， 不要求与原始模型的数据格式一致， 但是需要注意在平台喂给模型的数据是使用这个格式。每一个输入节点都需要配置一个确定的输入数据类型，存在多个输入节点时， 设置的节点顺序需要与``input_name``里的顺序严格保持一致。多个值的配置方法请参考前文对``param_value``配置描述。数据类型的选择请参考： 转换内部过程解读 部分的介绍。| **取值范围**：``rgb``、``bgr``、``yuv444``、``nv12``、``gray``、``featuremap``。<br/> **默认配置**：无。|必选 |
-|``input_layout_rt``| **参数作用**：转换后混合异构模型需要适配的输入数据排布。<br/>**参数说明**：每一个输入节点都需要配置一个确定的输入数据排布， 这个输入是您希望给混合异构模型指定的排布。不合适的输入数据的排布设置将会影响性能， X3平台建议用户使用 NHWC 格式输入。若input_type_rt配置为nv12，则此处参数不需要配置。存在多个输入节点时，设置的节点顺序需要与``input_name``里的顺序严格保持一致。多个值的配置方法请参考前文对``param_value``配置描述。什么是数据排布请参考： 转换内部过程解读 部分的介绍。| **取值范围**：``NCHW``、 ``NHWC``。<br/> **默认配置**：无。|可选 |
-|``input_space_and_range``| **参数作用**：指定输入数据格式的特殊制式。<br/>**参数说明**：这个参数是为了适配不同ISP输出的yuv420格式， 在相应 input_type_rt 为 nv12 时，该配置才有效。regular 就是常见的yuv420格式，数值范围为 [0,255]；bt601_video 是另一种视频制式yuv420，数值范围为 [16,235]。更多信息可以通过网络资料了解bt601， 在没有明确需要的情况下，您不要配置此参数。| **取值范围**：``regular`` , ``bt601_video``。<br/> **默认配置**：``regular``。|可选 |
-|``input_shape``| **参数作用**：指定原始浮点模型的输入数据尺寸。<br/>**参数说明**：shape的几个维度以 x 连接，例如 1x3x224x224。原始浮点模型只有一个输入节点情况时可以不配置， 工具会自动读取模型文件中的尺寸信息。配置多个输入节点时，设置的节点顺序需要与``input_name``里的顺序严格保持一致。多个值的配置方法请参考前文对``param_value``配置描述。| **取值范围**：无。<br/> **默认配置**：无。|可选 |
-|``input_batch``| **参数作用**：指定转换后混合异构模型需要适配的输入batch数量。<br/>**参数说明**：这里input_batch为转换后混合异构bin模型输入batch数量， 但不影响转换后onnx的模型的输入batch数量。此参数不配置时默认为1。此参数仅适用于单输入模型，且``input_shape``第一维必须为1。| **取值范围**：``1-128``。<br/> **默认配置**：``1``。|可选 |
-|``norm_type``| **参数作用**：在模型中添加的输入数据预处理方法。<br/>**参数说明**：``no_preprocess`` 表示不添加任何数据预处理；``data_mean`` 表示提供减均值预处理；``data_scale`` 表示提供乘scale系数预处理；``data_mean_and_scale`` 表示提供先减均值再乘scale系数前处理。输入节点时多于一个时，设置的节点顺序需要与``input_name``里的顺序严格保持一致。多个值的配置方法请参考前文对``param_value``配置描述。配置该参数的影响请参考： 转换内部过程解读 部分的介绍。|**取值范围**：``data_mean_and_scale`` 、 ``data_mean`` 、``data_scale`` 、 ``no_preprocess``。<br/> **默认配置**：无。|必选 |
-|``mean_value``| **参数作用**：指定预处理方法的图像减去的均值。<br/>**参数说明**：当 ``norm_type`` 存在 ``data_mean_and_scale`` 或 data_mean 时需要配置该参数。对于每一个输入节点而言，存在两种配置方式。第一种是仅配置一个数值，表示所有通道都减去这个均值；第二种是提供与通道数量一致的数值（这些数值以空格分隔开）， 表示每个通道都会减去不同的均值。配置的输入节点数量必须与 norm_type 配置的节点数量一致， 如果存在某个节点不需要 mean 处理，则为该节点配置 ``'None'``。多个值的配置方法请参考前文对``param_value``配置描述。| **取值范围**：无。<br/> **默认配置**：无。|可选 |
-|``scale_value``| **参数作用**：指定预处理方法的数值scale系数。<br/>**参数说明**：当 ``norm_type`` 存在 ``data_mean_and_scale`` 或 ``data_scale`` 时需要配置该参数。对于每一个输入节点而言，存在两种配置方式。第一种是仅配置一个数值，表示所有通道都乘以这个系数；第二种是提供与通道数量一致的数值（这些数值以空格分隔开）， 表示每个通道都会乘以不同的系数。配置的输入节点数量必须与 ``norm_type`` 配置的节点数量一致， 如果存在某个节点不需要 ``scale`` 处理，则为该节点配置 ``'None'``。多个值的配置方法请参考前文对 ``param_value`` 配置描述。| **取值范围**：无。<br/> **默认配置**：无。|可选 |
+| Parameter Name | Description | Value Range | Optional/Required |
+|--------------|-------------|-------------|------------------|
+| `prototxt`    | **Purpose:** Specifies the filename of the Caffe float model prototxt file.<br/>**Description:** Mandatory for `hb_mapper makertbin` with `model-type` set to `caffe`. | N/A        | Optional          |
+| `caffe_model` | **Purpose:** Specifies the filename of the Caffe float model caffemodel file.<br/>**Description:** Mandatory for `hb_mapper makertbin` with `model-type` set to `caffe`. | N/A        | Optional          |
+| `onnx_model`  | **Purpose:** Specifies the filename of the ONNX float model onnx file.<br/>**Description:** Mandatory for `hb_mapper makertbin` with `model-type` set to `onnx`. | N/A        | Optional          |
+| `march`       | **Purpose:** Specifies the platform architecture supported by the mixed-heterogeneous model to be produced.<br/>**Description:** Two available options correspond to the BPU micro-framework for RDK X3 and RDK Ultra. Choose based on your platform. | `bernoulli2` or `bayes` | Required          |
+| `output_model_file_prefix` | **Purpose:** Specifies the prefix for the converted mixed-heterogeneous model's output file name.<br/>**Description:** Prefix for the output integer model file name. | N/A        | Required          |
+| `working_dir` | **Purpose:** Specifies the directory where the model conversion output will be stored.<br/>**Description:** If the directory does not exist, the tool will automatically create it. | N/A        | Optional (default: `model_output`) |
+| `layer_out_dump` | **Purpose:** Enables the ability to retain intermediate layer values in the mixed-heterogeneous model.<br/>**Description:** Intermediate layer values are used for debugging purposes. Disable this in normal scenarios. | `True` or `False` | Optional (default: `False`) |
+| `output_nodes` | **Purpose:** Specifies the model's output nodes.<br/>**Description:** Generally, the conversion tool automatically identifies the model's output nodes. This parameter is used to support specifying some intermediate layers as outputs. Provide specific node names, following the same format as the `param_value` description. Note that setting this parameter prevents the tool from automatically detecting outputs; the nodes you specify become the entire output. | N/A        | Optional          |
+| `remove_node_type` | **Purpose:** Sets the type of nodes to remove.<br/>**Description:** Hidden parameter, not setting or leaving blank won't affect the model conversion process. This parameter is used to support specifying node types to delete. Removed nodes must appear at the beginning or end of the model, connected to inputs or outputs. Caution: Nodes will be deleted in order, dynamically updating the model structure. The tool checks if a node is at an input or output before deletion. Order matters. | "Quantize", "Transpose", "Dequantize", "Cast", "Reshape". Separate by ";". | Optional          |
+| `remove_node_name` | **Purpose:** Sets the name of nodes to remove.<br/>**Description:** Hidden parameter, not setting or leaving blank won't affect the model conversion process. This parameter is used to support specifying node names to delete. Removed nodes must appear at the beginning or end of the model, connected to inputs or outputs. Caution: Nodes will be deleted in order, dynamically updating the model structure. The tool checks if a node is at an input or output before deletion. Order matters. | N/A        | Optional          |
+| `set_node_data_type` | **Purpose:** Configures the output data type of a specific op as int16, only supported for **RDK Ultra configuration!**<br/>**Description:** In the model conversion process, most ops default to int8 for input and output data types. This parameter allows you to specify the output data type of a specific op as int16 under certain constraints. See the [int16 configuration details](#int16_config) for more information.<br/>**Note:** This functionality has been merged into the `node_info` parameter, which will be deprecated in future versions. | Supported operators listed in the [model operator support list](./supported_op_list) for RDK Ultra. | Optional          |
+| `debug_mode` | **Purpose:** Saves calibration data for precision debugging analysis.<br/>**Description:** This parameter saves calibration data for precision debugging analysis in .npy format. This data can be directly loaded into the model for inference. If not set, you can save the data yourself and use the precision debugging tool for analysis. | `"dump_calibration_data"` | Optional          |
+| `node_info` | **Purpose:** Supports configuring the input and output data types of specific ops as int16, and forces certain ops to run on CPU or BPU. Only supported for **RDK Ultra configuration!**<br/>**Description:** To reduce YAML parameters, we've combined the capabilities of `set_node_data_type`, `run_on_cpu`, and `run_on_bpu` into this parameter and expanded it to support configuring the input data type of specific ops as int16.<br/>**Usage of `node_info`:**<br/>- Run an op on BPU/CPU (example with BPU):<br/>node_info: {<br/>"node_name": {<br/>"ON": "BPU",<br/>}<br/>}<br/>- Configure node data types:<br/>node_info: "node_name1:int16;node_name2:int16"<br/>- Run an op on BPU and configure its input and output data types:<br/>node_info: {<br/>"node_name": {<br/>"ON": "BPU",<br/>"InputType": "int16",<br/>"OutputType": "int16"<br/>}<br/>}<br/>* `InputType`: 'int16' applies to all inputs. For specifying a particular input's data type, append a number, e.g., `'InputType0': 'int16'` for the first input, `'InputType1': 'int16'` for the second input.<br/>* `OutputType` doesn't support specifying a particular output, applying to all outputs. It doesn't support individual types like `OutputType0` or `OutputType1`.<br/>**Value Range:** Refer to the [model operator support list](./supported_op_list) for RDK Ultra for supported int16 ops and those that can run on CPU or BPU.<br/>**Default Configuration:** None | Optional          |
 
 
 
-- ###### 校准参数组
+- ###### Input Parameters Group
 
-| 参数名称 | 参数配置说明   | 取值范围说明 |    可选/必选     |
-|------------|----------|----------|--------|
-|``cal_data_dir``| **参数作用**：指定模型校准使用的标定样本的存放目录。<br/>**参数说明**：目录内校准数据需要符合输入配置的要求。具体请参考 准备校准数据 部分的介绍。配置多个输入节点时， 设置的节点顺序需要与 ``input_name`` 里的顺序严格保持一致。多个值的配置方法请参考前文对 ``param_value`` 配置描述。当calibration_type为 ``load``, ``skip`` 时，cal_data_dir不用填。注意： 为了方便您的使用，如果未发现cal_data_type的配置，我们将根据文件夹 后缀对数据类型进行配置。如果文件夹后缀以 ``_f32`` 结尾，则认为数据 类型是float32，否则认为数据类型是uint8。当然，我们强烈建议您通过cal_data_type参数对数据类型进行约束。| **取值范围**：无。<br/> **默认配置**：无。|可选 |
-|``cal_data_type``| **参数作用**：指定校准数据二进制文件的数据存储类型。<br/>**参数说明**：指定模型校准时使用的二进制文件的数据存储类型。没有指定值的情况下将会使用文件夹名字后缀来做判断。| **取值范围**：``float32``、``uint8``。<br/> **默认配置**：无。|可选 |
-|``preprocess_on``| **参数作用**：开启图片校准样本自动处理。<br/>**参数说明**：该选项仅适用于4维图像输入的模型， 非4维模型不要打开该选项。在启动该功能时，cal_data_dir 目录下存放的都是jpg/bmp/png 等图片数据，工具会使用skimage读取图片， 并resize到输入节点需要的尺寸。为了保证校准的效果，建议您保持该参数关闭。使用的影响请参考 准备校准数据 部分的介绍。| **取值范围**：``True`` 、 ``False``。<br/> **默认配置**： ``False``。|可选 |
-|``calibration_type``| **参数作用**：校准使用的算法类型。<br/>**参数说明**：每 ``kl`` 和 ``max`` 都是公开的校准量化算法， 其基本原理可以通过网络资料查阅。使用 ``load`` 方式校准时, qat模型必须是通过plugin导出的的模型。``mix`` 是一个集成多种校准方法的搜索策略，能够自动确定量化敏感节点，并在节点粒度上从不同的校准方法中挑选出最佳方法，最终构建一个融合了多种校准方法优势的组合校准方式。``default`` 是一个自动搜索的策略， 会尝试从系列校准量化参数中获得一个相对效果较好的组合。建议您先尝试 ``default``， 如果最终的精度结果不满足预期， 再根据 精度调优 部分建议配置不同的校准参数。若您只想尝试对模型性能进行验证，但对精度没有要求， 则可以尝试 “skip” 方式进行校准。该方式会使用随机数进行校准， 不需要您准备校准数据，比较适合初次尝试对模型结构进行验证。注意： 使用skip方式时，因使用随机数校准, 得到的模型不可用于精度验证。| **取值范围**：``default``、``mix`、```kl``、``max``、``load`` 和 ``skip``。<br/> **默认配置**：``default``。|必选 |
-|``max_percentile``| **参数作用**：该参数为 ``max`` 校准方法的参数，用以调整 ``max`` 校准的截取点。<br/>**参数说明**：此参数仅在 ``calibration_type`` 为 ``max`` 时有效。常用配置选项有：0.99999/0.99995/0.99990/0.99950/0.99900。建议您先尝试 ``calibration_type`` 配置 ``default``， 如果最终的精度结果不满足预期， 再根据 精度调优 部分建议调整该参数。| **取值范围**：``0.0``~``1.0`` 。<br/> **默认配置**：``1.0`` 。|可选 |
-|``per_channel``| **参数作用**：控制是否针对featuremap的每个channel进行校准。<br/>**参数说明**：``calibration_type`` 设置非default时有效。建议您先尝试 ``default``， 如果最终的精度结果不满足预期， 再根据 精度调优 部分建议调整该参数。| **取值范围**：``True`` 、 ``False``。<br/> **默认配置**：``False``。|可选 |
-|``run_on_cpu``| **参数作用**：强制指定算子在CPU上运行。<br/>**参数说明**：CPU上虽然性能不及BPU，但是提供的是float精度计算。如果您确定某些算子需要在CPU上计算， 可以通过该参数指定。 设置值为模型中的具体节点名称，多个值的配置方法请参考前文对 ``param_value`` 配置描述。<br/> **注意：** **RDK Ultra** 中该参数相关功能已合并至 ``node_info`` 参数中，后续版本计划废弃。**RDK X3** 仍继续使用。 | **取值范围**：无。<br/> **默认配置**：无。|可选 |
-|``run_on_bpu``| **参数作用**：强制指定OP在BPU上运行。<br/>**参数说明**：为了保证最终量化模型的精度，少部分情况下， 转换工具会将一些具备BPU计算条件的算子放在CPU上运行。如果您对性能有较高的要求，愿意以更多一些量化损失为代价， 则可以通过该参数明确指定算子运行在BPU上。设置值为模型中的具体节点名称， 多个值的配置方法请参考前文对 ``param_value`` 配置描述。<br/> **注意：** **RDK Ultra** 中该参数相关功能已合并至 ``node_info`` 参数中，后续版本计划废弃。**RDK X3** 仍继续使用。| **取值范围**：无。<br/> **默认配置**：无。|可选 |
-|``optimization``| **参数作用**：使模型以 int8/int16 格式输出。<br/>**参数说明**：指定值为set_model_output_int8时，设置模型为 int8 格式低精度输出；指定值为set_model_output_int16时，设置模型为 int16 格式低精度输出。<br/> **注意：**  **RDK X3** 只支持设置set_model_output_int8， <br/>**RDK Ultra** 可设置set_model_output_int8或者set_model_output_int16。|**取值范围**：``set_model_output_int8`` 或者 ``set_model_output_int16`` 。<br/> **默认配置**：无。|可选 |
+| Parameter Name | Description | Value Range | Optional/Required |
+| --- | --- | --- | --- |
+| `input_name` | **Purpose**: Specifies the input node name of the original floating-point model.<br/>**Description**: Not required when the floating-point model has only one input node. Must be configured for models with multiple input nodes to ensure accurate order of type and calibration data inputs. Multiple values can be set as described for `param_value`. | N/A | Optional |
+| `input_type_train` | **Purpose**: Specifies the input data type of the original floating-point model.<br/>**Description**: Each input node must have a configured data type. For models with multiple input nodes, the order should match that in `input_name`. Multiple values can be set as described for `param_value`. Data types available: refer to the explanation in the "Conversion Internal Process" section. | Values: `rgb`, `bgr`, `yuv444`, `gray`, `featuremap` | Required |
+| `input_layout_train` | **Purpose**: Specifies the input data layout of the original floating-point model.<br/>**Description**: Each input node requires a specific layout, which must match the model's original layout. Order should align with `input_name`. Multiple values can be set as described for `param_value`. Learn more about layouts in the "Conversion Internal Process" section. | Values: NHWC, NCHW | Required |
+| `input_type_rt` | **Purpose**: The input format needed for the converted heterogeneous model.<br/>**Description**: Specifies the desired input format, not necessarily matching the original model's format, but important for the platform to feed data into the model. One type per input node, with order matching `input_name`. Multiple values can be set as described for `param_value`. Data types available: refer to the explanation in the "Conversion Internal Process" section. | Values: `rgb`, `bgr`, `yuv444`, `nv12`, `gray`, `featuremap` | Required |
+| `input_layout_rt` | **Purpose**: The input data layout for the converted heterogeneous model.<br/>**Description**: Specifies the desired input layout for each node, which can differ from the original model. For NV12 input_type_rt, this parameter is unnecessary. Order should match `input_name`. Multiple values can be set as described for `param_value`. Learn more about layouts in the "Conversion Internal Process" section. | Values: NCHW, NHWC | Optional (if `input_type_rt` is NV12) |
+| `input_space_and_range` | **Purpose**: Specifies the special format of input data, particularly for ISP outputs in yuv420 format.<br/>**Description**: Used for adapting to different ISP formats, valid only if `input_type_rt` is set to `nv12`. Choices: `regular` for common yuv420, `bt601_video` for another video standard. Keep as `regular` unless specifically needed. | Values: `regular`, `bt601_video` | Optional |
+| `input_shape` | **Purpose**: Specifies the dimensions of the input data for the original floating-point model.<br/>**Description**: Dimensions should be separated by `x`, e.g., `1x3x224x224`. Can be omitted for single-input models with the tool automatically reading size information from the model file. Order should match `input_name`. Multiple values can be set as described for `param_value`. | N/A | Optional |
+| `input_batch` | **Purpose**: The number of batches for the converted heterogeneous model to adapt to.<br/>**Description**: The batch size for the converted heterogeneous bin model, not affecting the ONNX model's batch size. Defaults to 1 if not specified. Only applicable for single-input models where the first dimension of `input_shape` is 1. | Range: `1-128` | Optional |
+| `norm_type` | **Purpose**: The preprocessing method added to the model's input data.<br/>**Description**: `no_preprocess` means no preprocessing; `data_mean` for mean subtraction; `data_scale` for scaling; `data_mean_and_scale` for both mean subtraction and scaling. Must be consistent with the order of `input_name`. Multiple values can be set as described for `param_value`. See the "Conversion Internal Process" section for impact. | Values: `data_mean_and_scale`, `data_mean`, `data_scale`, `no_preprocess` | Required |
+| `mean_value` | **Purpose**: The image mean value for the preprocessing method.<br/>**Description**: Required if `norm_type` includes `data_mean_and_scale` or `data_mean`. Two configuration options: a single value for all channels or channel-specific values (separated by spaces). Channel count should match `norm_type` nodes. Set to `'None'` for nodes without mean processing. Multiple values can be set as described for `param_value`. | N/A | Optional |
+| `scale_value` | **Purpose**: The scale coefficient for the preprocessing method.<br/>**Description**: Required if `norm_type` includes `data_mean_and_scale` or `data_scale`. Similar to `mean_value`, two configurations are allowed: a single value for all channels or channel-specific values (separated by spaces). Channel count should match `norm_type` nodes. Set to `'None'` for nodes without scale processing. Multiple values can be set as described for `param_value`. | N/A | Optional |
+
+- ###### Calibration Parameter Group
+
+| Parameter Name | Description | Value Range | Optional/Required |
+| --- | --- | --- | --- |
+| `cal_data_dir` | Specifies the directory containing calibration samples for model calibration. <br/>**Description**: The data in this directory should adhere to the input configuration requirements. Please refer to the section on [Preparing Calibration Data](https://...) for more details. When configuring multiple input nodes, the order of the specified nodes must strictly match that in `input_name`. Multiple value configurations can be done as described earlier for `param_value`. For `calibration_type` of `load`, `skip`, this parameter is not needed. Note: To facilitate your use, if no `cal_data_type` configuration is found, we will infer the data type based on the file extension. If the file extension ends with `_f32`, it will be considered float32; otherwise, uint8. However, we strongly recommend constraining the data type using the `cal_data_type` parameter. | N/A | Optional |
+| `cal_data_type` | Specifies the binary file data storage type for calibration data.<br/>**Description**: The data storage type used by the model during calibration. If not specified, the tool will determine the type based on the file name suffix. | `float32`, `uint8` | Optional |
+| `preprocess_on` | Enables automatic preprocessing of image calibration samples.<br/>**Description**: This option is only applicable to models with 4D image inputs. Do not enable this for non-4D models. When enabled, the tool reads jpg/bmp/png files in the `cal_data_dir` and resizes them to the required dimensions for input nodes. It is recommended to keep this parameter disabled to ensure calibration accuracy. Refer to the [Preparing Calibration Data](https://...) section for more information on its impact. | `True`, `False` | Optional |
+| `calibration_type` | Calibration algorithm type to use.<br/>**Description**: Both `kl` and `max` are public calibration quantization algorithms, whose basic principles can be found in online resources. When using `load`, the QAT model must be exported using a plugin. `mix` is an integrated search strategy that automatically determines sensitive quantization nodes and selects the best method at the node granularity, ultimately constructing a calibration combination that leverages the advantages of multiple methods. `default` is an automated search strategy that attempts to find a relatively better combination of calibration parameters from a series. We suggest starting with `default`. If the final accuracy does not meet expectations, refer to the [Precision Tuning](https://...) section for suggested parameter adjustments. If you just want to verify the model performance without accuracy requirements, try the `skip` mode, which uses random numbers for calibration and does not require calibration data, suitable for initial model structure validation. Note: Using the `skip` mode results in models calibrated with random numbers, which are not suitable for accuracy validation. | `default`, `mix`, `kl`, `max`, `load`, `skip` | Required |
+| `max_percentile` | Parameter for the `max` calibration method, used to adjust the cutoff point for `max` calibration.<br/>**Description**: Only valid when `calibration_type` is set to `max`. Common options include: 0.99999/0.99995/0.99990/0.99950/0.99900. Start with `calibration_type` set to `default`, and adjust this parameter if the final accuracy is unsatisfactory, as advised in the [Precision Tuning](https://...) section. | `0.0` - `1.0` | Optional |
+| `per_channel` | Controls whether to calibrate each channel individually within a featuremap.<br/>**Description**: Effective when `calibration_type` is not set to `default`. Start with `default` and adjust this parameter if necessary, as suggested in the [Precision Tuning](https://...) section. | `True`, `False` | Optional |
+| `run_on_cpu` | Forces operators to run on CPU.<br/>**Description**: Although CPU performance is inferior to BPU, it provides float precision calculations. Specify this parameter if you're certain that some operators need to run on CPU. Set values to specific node names in your model, following the same configuration method as described earlier for `param_value`. **Note**: In RDK Ultra, this parameter functionality has been merged into the `node_info` parameter and is planned to be deprecated in future versions. It continues to be available in RDK X3. | N/A | Optional |
+| `run_on_bpu` | Forces an operator to run on BPU.<br/>**Description**: To maintain the accuracy of the quantized model, occasionally, the conversion tool may place some operators that can run on BPU on CPU. If you have higher performance requirements and are willing to accept slightly more quantization loss, you can explicitly specify that an operator runs on BPU. Set values to specific node names in your model, following the same configuration method as described earlier for `param_value`. **Note**: In RDK Ultra, this parameter functionality has been merged into the `node_info` parameter and is planned to be deprecated in future versions. It continues to be available in RDK X3. | N/A | Optional |
+| `optimization` | Sets the model output format to int8 or int16.<br/>**Description**: If set to `set_model_output_int8`, the model will output in low-precision int8 format; if set to `set_model_output_int16`, the model will output in low-precision int16 format. **Note**: RDK X3 only supports `set_model_output_int8`, while RDK Ultra supports both `set_model_output_int8` and `set_model_output_int16`. | `set_model_output_int8`, `set_model_output_int16` | Optional |
 
 
-- ###### 编译参数组 {#compiler_parameters}
 
-| 参数名称 | 参数配置说明   | 取值范围说明 |    可选/必选     |
-|------------|----------|----------|--------|
-|``compile_mode``| **参数作用**：编译策略选择。<br/>**参数说明**：``latency`` 以优化推理时间为目标；bandwidth 以优化ddr的访问带宽为目标。如果模型没有严重超过预期的带宽占用，建议您使用 ``latency`` 策略。| **取值范围**：``latency``、 ``bandwidth``。<br/> **默认配置**：``latency``。|必选 |
-|``debug``| **参数作用**：是否打开编译的debug信息。<br/>**参数说明**：开启该参数的场景下，模型的静态分析的性能结果将保存在模型中，您可以在模型成功转换后生成的静态性能评估文件html页和hb_perf时产生的html页内，在Layer Details选项卡中查看模型逐层BPU算子的性能信息（包括计算量、计算耗时和数据搬运耗时）。 默认情况下，建议您保持该参数关闭。| **取值范围**：``True`` 、 ``False``。<br/> **默认配置**： ``False``。|可选 |
-|``core_num``| **参数作用**：模型运行核心数。<br/>**参数说明**：地平线平台支持利用多个AI加速器核心同时完成一个推理任务， 多核心适用于输入尺寸较大的情况， 理想状态下的双核速度可以达到单核的1.5倍左右。如果您的模型输入尺寸较大，对于模型速度有极致追求， 可以配置 ``core_num=2``。<br/> **注意：** **RDK Ultra** 该选项尚不支持, 请勿配置! | **取值范围**：``1``、 ``2`` 。<br/> **默认配置**：``1``。|可选 |=
-|``optimize_level``| **参数作用**：模型编译的优化等级选择。<br/>**参数说明**：优化等级可选范围为 ``O0`` ~ ``O3``。``O0`` 不做任何优化, 编译速度最快，优化程度最低。``O1`` - ``O3`` 随着优化等级提高， 预期编译后的模型的执行速度会更快， 但是所需编译时间也会变长。正常用于生成和验证性能的模型， 必须使用 ``O3`` 级别优化才能保证得到最优性能。某些流程验证或精度调试过程中， 可以尝试使用更低级别优化加快过程速度。| **取值范围**：``O0`` 、 ``O1`` 、 ``O2`` 、 ``O3``。<br/> **默认配置**：无。|必选 |
-|``input_source``| **参数作用**：设置上板bin模型的输入数据来源。<br/>**参数说明**：这个参数是适配工程环境的选项， 建议您已经全部完成模型验证后再配置。``ddr`` 表示数据来自内存，``pyramid`` 和 ``resizer`` 表示来自处理器上的固定硬件。注意：如果设置为resizer，模型的 h*w 要小于18432。具体在工程环境中如何适配 ``pyramid`` 和 ``resizer`` 数据源， 此参数配置有点特殊，例如模型输入名称为 data, 数据源为内存(ddr), 则此处应该配置值为 ``{"data": "ddr"}``。| **取值范围**：``ddr``, ``pyramid``, ``resizer``<br/> **默认配置**：无，默认会根据input_type_rt的值从可选范围中自动选择。|可选 |
-|``max_time_per_fc``| **参数作用**：指定模型的每个function-call的最大可连续执行时间(单位us)。<br/>**参数说明**：编译后的数据指令模型在BPU上进行推理计算时， 它将表现为1个或者多个function-call（BPU的执行粒度）的调用，取值为0代表不做限制。该参数用来限制每个function-call最大的执行时间, 模型只有在单个function-call执行完时才有机会被抢占。详情参见 模型优先级控制 部分的介绍。- 此参数仅用于实现模型抢占功能，如无需实现该功能则可以忽略。<br/> - 模型抢占功能仅支持在开发板端实现，不支持PC端模拟器实现。| **取值范围**：``0或1000-4294967295``。<br/> **默认配置**：``0``。|可选 |
-|``jobs``| **参数作用**：设置编译bin模型时的进程数。<br/>**参数说明**：在编译bin模型时，用于设置进程数。 一定程度上可提高编译速度。| **取值范围**：``机器支持的最大核心数范围内。``<br/> **默认配置**：无。|可选 |
+- ###### Compiler Parameters {#compiler_parameters}
 
+| Parameter Name | Description | Value Range | Optional/Required |
+|--------------|-------------|-------------|------------------|
+| `compile_mode` | **Purpose**: Select the compilation strategy.<br/>**Description**: Choose between `latency` for inference time optimization or `bandwidth` for DDR access bandwidth optimization. For models without significant bandwidth exceedance, use the `latency` strategy is recommended.| **Value Range**: `latency`, `bandwidth`.<br/> **Default**: `latency`. | Required |
+| `debug` | **Purpose**: Enable debug information in the compilation process.<br/>**Description**: Enabling this parameter saves performance analysis results in the model, allowing you to view layer-wise BPU operator performance (including compute, compute time, and data movement time) in the generated static performance assessment files. It is recommended to keep it disabled by default.| **Value Range**: `True`, `False`.<br/> **Default**: `False`. | Optional |
+| `core_num` | **Purpose**: Number of cores for model execution.<br/>**Description**: Horizon Platform supports using multiple AI accelerator cores simultaneously for inference tasks. Multiple cores are beneficial for larger input sizes, with double-core speed typically around 1.5 times that of single-core. If your model has large inputs and追求极致速度, set `core_num=2`. **Note**: This option is not supported for RDK Ultra, please do not configure.| **Value Range**: `1`, `2`.<br/> **Default**: `1`. | Optional |
+| `optimize_level` | **Purpose**: Model compilation optimization level.<br/>**Description**: The optimization levels range from `O0` (no optimization, fastest compile) to `O3` (higher optimization, slower compile). Normal performance models should use `O3` for optimal performance. Lower levels can be used for faster development or debugging processes.| **Value Range**: `O0`, `O1`, `O2`, `O3`.<br/> **Default**: None. | Required |
+| `input_source` | **Purpose**: Set the source of input data for the on-board bin model.<br/>**Description**: This parameter is for engineering environment compatibility. Configure after model validation. Options include `ddr` (memory), `pyramid`, and `resizer`. Note: If set to `resizer`, the model's h*w should be less than 18432. In an engineering environment, adapting `pyramid` and `resizer` sources requires specific configuration, e.g., if the model input name is `data` and the source is memory (ddr), set as `{"data": "ddr"}`.| **Value Range**: `ddr`, `pyramid`, `resizer`<br/> **Default**: None (auto-selected based on `input_type_rt`). | Optional |
+| `max_time_per_fc` | **Purpose**: Maximum continuous execution time per function call (in us).<br/>**Description**: In the compiled data instruction model, each inference on BPU is represented by one or more function calls (BPU execution granularity). A value of 0 means no limit. This parameter limits the max execution time per function call, allowing the model to be interrupted if necessary. See the section on Model Priority Control for details. - This parameter is for implementing model preemption; ignore if not needed.<br/> - Model preemption is only supported on development boards, not PC simulators.| **Value Range**: `0` or `1000-4294967295`.<br/> **Default**: `0`. | Optional |
+| `jobs` | **Purpose**: Number of processes for compiling the bin model.<br/>**Description**: Sets the number of processes during bin model compilation, potentially improving compile speed.| **Value Range**: Up to the maximum number of supported cores on the machine.<br/> **Default**: None. | Optional |
 
-- ###### 自定义算子参数组
+- ##### Custom Operator Parameter Group
 
-| 参数名称 | 参数配置说明   | 取值范围说明 |    可选/必选     |
-|------------|----------|----------|--------|
-|``custom_op_method``| **参数作用**：自定义算子策略选择。<br/>**参数说明**：目前仅支持register策略。| **取值范围**：``register``。<br/> **默认配置**：无。|可选 |
-|``op_register_files``| **参数作用**：自定义算子的Python实现文件名称。<br/>**参数说明**：多个文件可用 ``;`` 分隔| **取值范围**：无。<br/> **默认配置**： 无。|可选 |
-|``custom_op_dir``| **参数作用**：自定义算子的Python实现文件存放路径。<br/>**参数说明**：设置路径时，请使用相对路径。| **取值范围**：无 。<br/> **默认配置**：无。|可选 |
-
+| Parameter Name | Description of Configuration | Range of Values | Optional/Mandatory |
+|--------------|--------------------------------|-----------------|--------------------|
+| `custom_op_method` | **Purpose**: Select strategy for custom operator.<br/>**Description**: Currently, only the 'register' strategy is supported.| **Range**: `register`.<br/> **Default**: None.| Optional |
+| `op_register_files` | **Purpose**: Names of Python files implementing the custom operator(s).<br/>**Description**: Multiple files can be separated by `;`.| **Range**: None.<br/> **Default**: None.| Optional |
+| `custom_op_dir` | **Purpose**: Path to the directory containing the Python files for the custom operator(s).<br/>**Description**: Please use relative path when setting the path.| **Range**: None.<br/> **Default**: None.| Optional |
 
 ##### RDK Ultra int16 Configuration Instructions {#int16_config}
 
@@ -753,7 +775,18 @@ Therefore: `mean_yaml = 255 mean, scale_yaml = \frac{1}{255std}`.
 By configuring the parameters in the YAML configuration file, whether to add the HzPreprocess node is determined.
 When configuring mean/scale, when performing model conversion, a HzPreprocess node will be added to the input, which can be understood as performing a convolution operation on the input data.
 
-The calculation formula in the HzPreprocess node is: `((input (range [-128,127]) + 128) - mean) * scale`, where ``weight = scale``, ``bias = (128 - mean) * scale``.#### Conversion Internal Process Interpretation
+The calculation formula in the HzPreprocess node is: `((input (range [-128,127]) + 128) - mean) * scale`, where ``weight = scale``, ``bias = (128 - mean) * scale``.
+
+
+:::caution Note
+
+  1. After adding mean/scale in the YAML, there is no need to include MeanTransformer and ScaleTransformer in the preprocessing.
+  2. Adding mean/scale in the YAML will place the parameters within the HzPreprocess node, which is a BPU (Base Processing Unit) node.
+
+:::
+
+
+#### Conversion Internal Process Interpretation
 
 During the model conversion stage, the floating-point model is transformed into the Horizon mixed heterogeneous model. In order to efficiently run this heterogeneous model on embedded devices, the model conversion focuses on solving two key issues: **input data processing** and **model optimization compilation**. This section will discuss these two key issues in detail.
 
@@ -791,14 +824,14 @@ The first row in the table represents the types supported by `input_type_rt`, an
 
 - A special case of nv12 is when "input_space_and_range" is set to "bt601_video" (refer to the previous description of the "input_space_and_range" parameter). In contrast to the regular nv12 case, the value range in this case changes from [0,255] to [16,235], and each value is still represented by UINT8.
 - The data format type for the input feature map of the model only requires the data to be four-dimensional, and each value is represented by float32. For example, models processing radar and audio often use this format.
+:::
 
 :::tip Tip
+  The calibration data only needs to be processed until input_type_train, and be careful not to perform duplicate normalization operations.
 
-The calibration data only needs to be processed until input_type_train, and be careful not to perform duplicate normalization operations.
+  The "input_type_rt" and "input_type_train" are fixed in the algorithm toolchain's processing flow. If you are certain that no conversion is needed, you can set both "input_type" configurations to be the same. This way, "input_type" will be treated as a pass-through without affecting the actual execution performance of the model.
 
-The "input_type_rt" and "input_type_train" are fixed in the algorithm toolchain's processing flow. If you are certain that no conversion is needed, you can set both "input_type" configurations to be the same. This way, "input_type" will be treated as a pass-through without affecting the actual execution performance of the model.
-
-Similarly, the data preprocessing is also fixed in the flow. If you don't need any preprocessing, you can disable this feature by configuring norm_type, without affecting the actual execution performance of the model.
+  Similarly, the data preprocessing is also fixed in the flow. If you don't need any preprocessing, you can disable this feature by configuring norm_type, without affecting the actual execution performance of the model.
 :::
 
 The **model optimization compilation** completes several important stages, including model parsing, model optimization, model calibration and quantization, and model compilation. The internal workflow is shown in the following diagram:
@@ -828,6 +861,8 @@ The bold part in the table is the data type specified by "input_type_rt", and th
 - RGB_128 represents RGB data subtracting 128, and each value is represented by int8.
 - BGR_128 represents BGR data subtracting 128, and each value is represented by int8.
 - GRAY_128 represents gray data subtracting 128, and each value is represented by int8.- featuremap is a four-dimensional tensor data, and each value is represented as float32.
+:::
+
 
 **Model Optimization Phase** implements some optimization strategies for the model that are suitable for the Horizon platform, such as BN fusion into Conv. 
 The output of this phase is an optimized_float_model.onnx file. The computational precision of this ONNX model is still float32, and the optimization will not affect the computational results of the model. 
@@ -1014,6 +1049,7 @@ Each subgraph result provides detailed reference information.
 The reference information page may vary depending on whether you have enabled the debug configuration.
 The Layer Details shown in the following figure can only be obtained when the `debug` parameter is set to `True` in the YAML configuration file.
 For more information on configuring the `debug` parameter, please refer to the section on [Using hb_mapper makertbin tool to convert models](#makertbin).
+:::
 
 Layer Details provide analysis at the specific operator level and can be used as a reference in the model debugging and analysis stage. For example, if certain BPU operators are causing low model performance, the analysis results can help you locate the specific operator.
 
@@ -1211,7 +1247,9 @@ If the model's time consumption is severe, you can also optimize the performance
 
 :::
 
-#### Model Performance OptimizationBased on the performance analysis results above, you may find that the model performance is not as expected. This section introduces Horizon's suggestions and measures to improve model performance, including checking YAML configuration parameters, handling CPU operators, high-performance model design suggestions, and using Horizon-friendly structures and models.
+#### Model Performance Optimization
+
+Based on the performance analysis results above, you may find that the model performance is not as expected. This section introduces Horizon's suggestions and measures to improve model performance, including checking YAML configuration parameters, handling CPU operators, high-performance model design suggestions, and using Horizon-friendly structures and models.
 
 :::caution Note
  Some of the modification suggestions in this section may affect the parameter space of the original floating-point model. Therefore, you need to retrain the model. To avoid repeatedly adjusting and training the model during performance tuning, it is recommended that you use random parameters to export the model for performance verification until you obtain satisfactory model performance.
@@ -1253,7 +1291,9 @@ If the operator does not have the BPU support capability, you need to perform co
     ```bash
 
       remove_node_type: "Quantize; Dequantize"
-    ```- The bin model can be modified using the hb_model_modifier tool:
+    ```
+  
+  - The bin model can be modified using the hb_model_modifier tool:
 
     ```bash
       hb_model_modifier x.bin -a Quantize -a Dequantize
@@ -1292,7 +1332,9 @@ This section focuses on the hardware characteristics of Horizon Processors. Hori
 
   We are continually exploring more model structures and business models, and we will provide more diverse models for your reference. These outputs will be periodically updated to https://github.com/HorizonRobotics-Platform/ModelZoo/tree/master. If you still cannot find a suitable model, please feel free to reach out to us on the [Horizon Official Technical Community](https://developer.horizon.ai). We will provide more targeted guidance and suggestions based on your specific problems. 
 
-### Model Accuracy Analysis {#accuracy_evaluation}PTQ post-quantization method based on tens or hundreds of calibration data unavoidably incurs certain precision loss. Horizon's PTQ conversion tool has been extensively verified through practical use, and in most cases, the precision loss of the model can be kept within 1%.
+### Model Accuracy Analysis {#accuracy_evaluation}
+
+PTQ post-quantization method based on tens or hundreds of calibration data unavoidably incurs certain precision loss. Horizon's PTQ conversion tool has been extensively verified through practical use, and in most cases, the precision loss of the model can be kept within 1%.
 
 This section first introduces how to correctly analyze the model precision. If the evaluation shows that the precision is lower than expected, you can refer to the content in the **Precision Optimization** section for model precision optimization.
 
@@ -1400,19 +1442,63 @@ image = image - 128
 # Convert to int8 for bgr_128
 image = image.astype(np.int8)
   
-return imageThis section of the inspection is mainly for users who are preparing calibration data and evaluation code for the reference algorithm toolchain development package examples. The following common errors may occur:
+return image
+```
 
-- Incorrect specification of ``read_mode``: In the "02_preprocess.sh" script, the reading mode can be specified with the ``--read_mode`` parameter, which supports ``opencv`` and ``skimage``. In addition, in the "preprocess.py" script, the reading mode can be set with the ``imread_mode`` parameter, which also needs to be modified. When using skimage to read images, the resulting channel order is ``RGB``, with values ranging from ``0~1`` and data type ``float``; while using opencv, the resulting channel order is ``BGR``, with values ranging from ``0~255`` and data type ``uint8``.
 
-- Incorrect storage format setting for calibration dataset: Currently, Horizon uses ``numpy.tofile`` to save calibration data, which does not save shape and dtype information. If the ``input_type_train`` is not in the ``featuremap`` format, the dtype of the data will be determined by whether the calibration data path contains the keyword "f32". If it contains the keyword "f32", the data will be parsed as float32; otherwise, it will be parsed as uint8. In addition, to facilitate the parsing of calibration data, starting from version v2.2.3a of the X3 algorithm toolchain, a new parameter called ``cal_data_type`` has been added to the YAML file to set the data storage type for the binary files.
 
-- Inconsistent implementation of transformer: Horizon provides a series of common preprocessing functions stored in the file ``/horizon_model_convert_sample/01_common/python/data/transformer.py``. The implementation of some preprocessing operations may differ. For example, ResizeTransformer uses the default interpolation method of opencv (linear). If a different interpolation method is needed, the transformer.py source code can be modified to ensure consistency with the preprocessing code used during training. For more details, please refer to the "transformer usage" section in the [common questions](../../common_questions/toolchain#transposetransformer) chapter.
+#### Precision Optimization
 
-- It is recommended that you continue to use the data processing library used during the training and validation stages of the original floating-point model when using Horizon algorithm toolchain. Different libraries may implement typical functions like resize and crop differently, which may affect the model accuracy, especially for models with poor robustness.
+Based on the previous precision analysis, if you determine that the model's quantization accuracy does not meet expectations, the following two main scenarios can be addressed:
 
-- Check if the image dataset is properly set. The number of calibration images should be around "one hundred" and it is preferable to cover various occasions of the data distribution. For example, in multi-task or multi-classification scenarios, the calibration image dataset should cover different prediction branches or categories. Avoid using abnormal images (e.g., overexposed images) that deviate from the data distribution.
+- **Significant Loss (greater than 4%)**
+  This issue is often caused by inappropriate YAML configuration or an imbalanced validation dataset. It is recommended to follow Horizon's suggested steps for troubleshooting one by one.
 
-- Verify the accuracy using the ``***_original_float_model.onnx`` model. In normal cases, the accuracy of this model should align with the original floating-point model accuracy up to "three to five decimal places". If the alignment level is not satisfied, it indicates that the data processing needs to be carefully examined.
+- **Small Loss (1.5% to 3%)**
+  After excluding issues from scenario 1, if there's still a slight loss in accuracy, it's usually due to the model's inherent sensitivity. In this case, use Horizon's provided precision tuning tools for optimization.
+
+- **After Trying 1 and 2**
+  If the precision still doesn't meet expectations, try using our precision debugging tool for further attempts.
+
+The overall process for addressing precision issues is illustrated below:
+
+![accuracy_problem](./image/intermediate/accuracy_problem.png)
+
+**Significant Loss (Greater than 4%)**
+
+If the model suffers from a loss greater than 4%, it's typically because of incorrect YAML configuration or an imbalanced calibration dataset. You should check the following aspects:
+
+**Pipeline Check**
+
+The pipeline refers to the entire process from data preprocessing, model conversion, inference, post-processing, to accuracy evaluation. Please refer to the corresponding chapters in the text for checks.
+
+In practical problem-solving experiences, we've found that most issues arise from changes during the original float model training phase that aren't promptly updated in the model conversion stage, leading to unexpected accuracy validation results.
+
+**Model Conversion Configuration Check**
+
+- `input_type_rt` and `input_type_train`: These parameters determine the data format required for the mixed-heterogeneous post-converted model compared to the original float model. Ensure they match your expectations, especially regarding the BGR and RGB channel order.
+
+- `norm_type`, `mean_value`, `scale_value`, etc. Verify that these parameters are correctly configured. Directly inserting mean and scale operations through the conversion configuration can lead to duplicate preprocessing, which is a common mistake.
+
+**Data Processing Consistency Check**
+
+This part applies mainly to users who prepare calibration data and evaluation code using reference algorithm toolchain development packages. Common errors include:
+
+- Incorrect `read_mode` specification: In `02_preprocess.sh`, you can specify the image reading method with the `--read_mode` parameter, supporting `opencv` and `skimage`. Similarly, in `preprocess.py`, ensure the `imread_mode` parameter is set correctly. Using `skimage` may read RGB channels with values between `0~1` as `float`, while `opencv` reads BGR with values between `0~255` as `uint8`.
+
+- Incorrect storage format for calibration datasets: Horizon uses `numpy.tofile` for saving calibration data, which does not preserve shape or type information. If `input_type_train` is not in "featuremap" format, the program will infer the data type based on whether the calibration data path contains "f32". From X3 algorithm toolchain v2.2.3a, a new parameter `cal_data_type` has been added to set the binary file data storage type.
+
+- Inconsistent transformer implementation: Horizon provides common preprocessing functions in `/horizon_model_convert_sample/01_common/python/data/transformer.py`. Differences in ResizeTransformer implementation might exist, such as using OpenCV's default interpolation method (linear). To modify other interpolation methods, edit the `transformer.py` source code and ensure consistency with the training-time preprocessing code. Refer to the [**Transformer Usage**](../../common_questions/toolchain#transposetransformer) section for more details.
+
+- Continue using the original float model's data processing library during the Horizon algorithm toolchain. For less robust models, discrepancies in resize, crop, and other common functions across libraries can affect precision.
+
+- Ensure a reasonable validation image set. The calibration dataset should contain around "a hundred" images, covering various scenarios in the data distribution. For multi-task or multi-class models, the validation set should cover all prediction branches or classes.
+
+- Avoid using abnormal images that deviate from the data distribution, such as overexposed ones.
+
+- Re-validate the accuracy using the `***_original_float_model.onnx` model. Normally, this model's accuracy should align to the original float model's accuracy to three to five decimal places. If the alignment is not met, it indicates the need for a more thorough review of your data processing.
+
+
 
 ##### Minor Accuracy Improvement
 
@@ -1486,7 +1572,11 @@ Using the accuracy debug tool mainly involves the following steps:
 For the current version of the accuracy debug tool: For the **RDK Ultra** corresponding to the ``bayes`` architecture model, both command line and API methods are supported for debugging, while for the **RDK X3** corresponding to the ``bernoulli2`` architecture model, only the API method is supported for debug.
 :::
 
-The overall process is shown in the following diagram:- **Saving Calibration Models and Data**
+The overall process is shown in the following diagram:
+
+![accuracy_debug_process](./image/intermediate/accuracy_debug_process.png)
+
+**Saving Calibration Models and Data**
 
 To enable the accuracy debug feature, the `debug_mode="dump_calibration_data"` needs to be set in the YAML file, and the calibration data (calibration_data) and the corresponding calibrated model (calibrated_model.onnx) need to be saved. Specifically:
 
@@ -1533,7 +1623,9 @@ The folder structure of the calibration_data is as follows:
   |--------0.npy
   |--------1.npy
   |-------- ...
-```- **Importing and Using the Precision Debug Module**
+```
+
+- **Importing and Using the Precision Debug Module**
 
 Next, you need to import the debug module in your code and use the `get_sensitivity_of_nodes` interface to retrieve the quantization sensitivity of nodes (defaulting to the cosine similarity of model outputs).
 
@@ -1580,7 +1672,9 @@ Here are the printed results when `verbose=True`:
   MaxPool_12  0.9999853235024673  0.0004039733791544747
   Conv_10     0.999985763659844   0.0004040437432614943
   Gemm_17     0.9999913985912616  0.0002379088904350423
-```In addition, the API will return the quantization sensitivity information of the nodes to you in the form of a dictionary (Dict) for subsequent use and analysis.
+```
+
+In addition, the API will return the quantization sensitivity information of the nodes to you in the form of a dictionary (Dict) for subsequent use and analysis.
 
 ```shell
 
@@ -1679,16 +1773,17 @@ When verbose=True, the print result is as follows:
   MaxPool_2   0.9993462241612948  0.017706592209064044
   Conv_6      0.9998359175828787  0.004541242333988731
   MaxPool_5   0.9998616805443397  0.0038416787014844325
-```Conv_0      0.9999297948984     0.0019312848587735342
+  Conv_0      0.9999297948984     0.0019312848587735342
   Gemm_19     0.9999609772975628  0.0010773885699633795
   Conv_8      0.9999629625907311  0.0010301886404004807
   Gemm_15     0.9999847687207736  0.00041888411550854263
   MaxPool_12  0.9999853235024673  0.0004039733791544747
   Conv_10     0.999985763659844   0.0004040437432614943
   Gemm_17     0.9999913985912616  0.0002379088904350423
+```
 
 Return:
-
+```
 {'Conv_3': {'cosine-similarity': '0.999009567957658', 'mse': '0.027825591154396534'}, 
   'MaxPool_2': {'cosine-similarity': '0.9993462241612948', 'mse': '0.017706592209064044'}, 
   'Conv_6': {'cosine-similarity': '0.9998359175828787', 'mse': '0.004541242333988731'}, 
@@ -1699,9 +1794,35 @@ Return:
   'Gemm_15': {'cosine-similarity': '0.9999847687207736', 'mse': '0.00041888411550854263'}, 
   'MaxPool_12': {'cosine-similarity': '0.9999853235024673', 'mse': '0.0004039733791544747'}, 
   'Conv_10': {'cosine-similarity': '0.999985763659844', 'mse': '0.0004040437432614943'}, 
-  'Gemm_17': {'cosine-similarity': '0.9999913985912616', 'mse': '0.0002379088904350423'}} ...}|``non_quantize_node 或 -nq``| **Parameter Purpose**: Specify the type of accumulated error. <br/>**Parameter Description**: Optional parameter. Specifies the nodes in the model that are not quantized while ensuring that all other nodes are quantized. <br/>By judging whether this parameter is a nested list, it determines whether only one node is not quantized or partially quantized. <br/>For example: <br/>- non_quantize_node=['Conv_2','Conv_9']: Unquantize nodes Conv_2 and Conv_9 while ensuring that all other nodes are quantized. <br/>- non_quantize_node=[['Conv_2'],['Conv_9','Conv_2']]: Unquantize node Conv_2 and simultaneously unquantize nodes Conv_2 and Conv_9 to test the accumulated error of the model. <br/>Note: quantize_node and non_quantize_node cannot be None at the same time, one of them must be specified.| **Value Range**: All nodes in the calibration model. <br/> **Default Configuration**: None. |Optional|
-|``metric 或 -m``| **Parameter Purpose**: Error measurement method. <br/>**Parameter Description**: Sets the calculation method for computing model error. | **Value Range**: ``'cosine-similarity'``, ``'mse'``, ``'mre'``, ``'sqnr'``, ``'chebyshev'`` <br/> **Default Configuration**: ``'cosine-similarity'``. |Optional|
-|``average_mode 或 -a``| **Parameter Purpose**: Specify the output mode of the cumulative error curve. <br/>**Parameter Description**: Default is False. If True, the average value of the accumulated error is obtained as the result. | **Value Range**: ``True``, ``False``.<br/> **Default Configuration**: ``False``. |Optional|
+  'Gemm_17': {'cosine-similarity': '0.9999913985912616', 'mse': '0.0002379088904350423'}} ...}
+```  
+
+
+
+- **plot_acc_error** 
+
+This is a function that quantifies a single node in a floating-point model and calculates the error between the output of this node in the model and the corresponding output in the floating-point model, generating a cumulative error curve.
+
+**Command Line Format**:
+
+```shell
+hmct-debugger plot-acc-error MODEL_OR_FILE CALIBRATION_DATA --other options
+```
+You can view related parameters by using `hmct-debugger plot-acc-error -h/--help`.
+
+**Parameter Groups**:
+
+| Parameter Name | Description | Value Range | Optional/Required |
+|---------------|-------------|-------------|--------------------|
+| `save_dir` or `-s` | **Purpose**: Path to save the results.<br/>**Description**: Optional, specifies the path for saving the analysis results. | N/A | Optional |
+| `calibrated_data` | **Purpose**: Specifies calibration data.<br/>**Description**: Required, specifies the calibration data to be analyzed. | N/A | Required |
+| `model_or_file` | **Purpose**: Specifies the calibrated model.<br/>**Description**: Required, specifies the calibrated model to be analyzed. | N/A | Required |
+| `quantize_node` or `-q` | **Purpose**: Quantizes a specified node in the model and visualizes the cumulative error curve.<br/>**Description**: Optional parameter. Specifies the node in the model to be quantized, ensuring that all other nodes remain unquantized. The parameter can be a nested list to handle single or partial node quantization. Examples:<br/>- quantize_node=['Conv_2','Conv_9']: Quantizes Conv_2 and Conv_9 individually while keeping others unquantized.<br/>- quantize_node=[['Conv_2'],['Conv_9','Conv_2']]: Tests model cumulative error with both Conv_2 and Conv_9 quantized separately.<br/>- Special parameters: 'weight' and 'activation'.<br/>When:<br/>- quantize_node = ['weight']: Only quantizes weights, not activations.<br/>- quantize_node = ['activation']: Only quantizes activations, not weights.<br/>- quantize_node = ['weight','activation']: Weights and activations are quantized separately.<br/>Note: Both quantize_node and non_quantize_node cannot be None, one must be provided. | All nodes in the calibrated model. | Optional |
+| `non_quantize_node` or `-nq` | **Purpose**: Specifies the type of nodes for which to calculate cumulative error.<br/>**Description**: Optional parameter. Specifies nodes that should not be quantized, with all others quantized. Similar to `quantize_node`, it can be a nested list for single or partial node de-quantization. See the examples for `quantize_node`.<br/>Note: Both quantize_node and non_quantize_node cannot be None, one must be provided. | All nodes in the calibrated model. | Optional |
+| `metric` or `-m` | **Purpose**: Error measurement method.<br/>**Description**: Sets the way to compute model errors. | Options: `'cosine-similarity'`, `'mse'`, `'mre'`, `'sqnr'`, `'chebyshev'` | Optional |
+| `average_mode` or `-a` | **Purpose**: Specifies the output mode for the cumulative error curve.<br/>**Description**: Defaults to False. If set to True, the average of the cumulative errors is returned as the result. | Options: `True`, `False` | Optional |
+
+
 
 ```shell
 
@@ -1745,9 +1866,10 @@ API function usage:
 Command line usage:
 
 ```shell
-
   hmct-debugger plot-acc-error calibrated_model.onnx calibrated_data -q ['Conv_2','Conv_90']
-```**Description**: When the `quantize_node` is a single list, for the specified `quantize_node`, each node in the `quantize_node` is quantized separately while keeping other nodes in the model unquantized. After obtaining the corresponding model, the error between the output of each node in the model and the corresponding node in the floating-point model is calculated, resulting in an accumulated error curve.
+```
+
+**Description**: When the `quantize_node` is a single list, for the specified `quantize_node`, each node in the `quantize_node` is quantized separately while keeping other nodes in the model unquantized. After obtaining the corresponding model, the error between the output of each node in the model and the corresponding node in the floating-point model is calculated, resulting in an accumulated error curve.
 
 When `average_mode = False`:
 
@@ -1986,11 +2108,10 @@ Use ``hmct-debugger plot-distribution -h/--help`` to view related parameters.
   import horizon_nn.debug as dbg
 
   dbg.plot_distribution(
-```save_dir: str, 
-model_or_file: ModelProto or str,
-calibrated_data: str or CalibrationDataSet,
-nodes_list: List[str] or str) 
-
+    save_dir: str, 
+    model_or_file: ModelProto or str,
+    calibrated_data: str or CalibrationDataSet,
+    nodes_list: List[str] or str) 
 ```
 
 **Analysis Result Display**:
@@ -2085,132 +2206,116 @@ Activation calibration node:
 The output result is shown in the following figure:
 
 ![box_plot](./image/intermediate/box_plot.png)
-图中：
 
-  - 横坐标表示节点输入数据的通道数，图例中输入数据有96个通道。
 
-  - 纵坐标表示每个channel的数据分布范围，其中红色实线表示该channel数据的中位数，蓝色虚线表示均值。
+Here's how the chart is structured:
 
+- The x-axis represents the number of channels in the input data nodes, with the legend indicating that there are 96 channels.
+
+- The y-axis shows the range of data distribution for each channel. The red solid line denotes the median of the channel data, while the blue dashed line indicates the mean.
 
 - **runall**
 
 :::caution 注意
 
-  当前版本 runall 功能只适用于 **RDK Ultra** 产品。
+  runall can be used on only **RDK Ultra**
 :::
 
-**功能**：一键运行原本debug工具中的所有功能。
-
-**命令行格式**：
+**Command Line Format**:
 
 ```shell
+hmct-debugger runall MODEL_OR_FILE CALIBRATION_DATA --other options
+```
+You can view related parameters using `hmct-debugger runall -h/--help`.
 
-  hmct-debugger runall MODEL_OR_FILE CALIBRATION_DATA --other options
+**Parameter Groups**:
+
+| Parameter Name | Description | Value Range | Optional/Required |
+|--------------|-------------|------------|------------------|
+| `model_or_file` | Specifies the calibrated model.<br/> **Description**: Required, specifies the model to be analyzed.| N/A | Required |
+| `calibrated_data` | Specifies the calibration data.<br/> **Description**: Required, provides the data needed for analysis.| N/A | Required |
+| `save_dir` or `-s` | Specifies the save path.<br/> **Description**: Sets the path for saving the analysis results.| N/A | Optional |
+| `ns_metrics` or `-nm` | Measures node quantization sensitivity.<br/> **Description**: Defines the way to calculate node quantization sensitivity. It can be a list (List), calculating sensitivity in multiple ways but only the first method's result is sorted. A higher ranking indicates greater error introduced by quantizing the node.| Values: `'cosine-similarity'`, `'mse'`, `'mre'`, `'sqnr'`, `'chebyshev'`.<br/> **Default**: `'cosine-similarity'` | Optional |
+| `output_node` or `-o` | Specifies the output node.<br/> **Description**: Allows you to specify an intermediate node for output and calculate its quantization sensitivity. If left default (None), the precision debugger uses the model's final output to calculate sensitivity for all nodes.| N/A | Optional |
+| `node_type` or `-nt` | Node type.<br/> **Description**: The type of node to calculate sensitivity for, including: `node` (normal node), `weight` (weight calibration node), `activation` (activation calibration node).| Values: `'node'`, `'weight'`, `'activation'`.<br/> **Default**: `'node'` | Optional |
+| `data_num` or `-dn` | Number of data points for sensitivity calculation.<br/> **Description**: Sets the number of data points used for calculating node sensitivity. Defaults to None, using all data in `calibration_data`. Must be between 1 and the total number of calibration data points.| Range: Positive, less than or equal to the total calibration data count.<br/> **Default**: None | Optional |
+| `verbose` or `-v` | Enables terminal output.<br/> **Description**: If set to True, displays sensitivity information on the terminal. If `metrics` contains multiple measures, they are sorted based on the first one.| Values: `True`, `False`.<br/> **Default**: `False` | Optional |
+| `interested_nodes` or `-i` | Selects specific nodes of interest.<br/> **Description**: If specified, only retrieves sensitivity for the specified nodes, ignoring others. Takes priority over `node_type` if set. If left default (None), calculates sensitivity for all quantifiable nodes in the model.| N/A | Optional |
+| `dis_nodes_list` or `-dnl` | Analyzed nodes.<br/> **Description**: Specifies the nodes to analyze. For weight calibration nodes, it shows the original and calibrated weights distribution. For activation calibration nodes, it displays input data distribution. For normal nodes, it shows output data distribution before and after quantization, along with the error distribution.| N/A | Optional |
+| `cw_nodes_list` or `-cn` | Calibration nodes.<br/> **Description**: Specifies calibration nodes. | N/A | Optional |
+| `axis` or `-a` | Channel dimension.<br/> **Description**: Specifies the position of the channel information within the node's shape. Defaults to None, assuming axis=1 for activation calibration nodes, and reads the `axis` attribute from the node for weight calibration nodes.| Range: Less than the dimension of the node's input data.<br/> **Default**: None | Optional |
+| `quantize_node` or `-qn` | Quantizes specified nodes, showing cumulative error curves.<br/> **Description**: Optionally quantizes specified nodes, ensuring others remain unquantized. The parameter is a nested list to determine single-node or partial quantization. Examples: `quantize_node=['Conv_2','Conv_9']`, `quantize_node=[['Conv_2'],['Conv_9','Conv_2']]`. Special values: `'weight'` and `'activation'`.<br/> **Range**: All nodes in the calibrated model.<br/> **Default**: None | Optional |
+| `non_quantize_node` or `-nqn` | Specifies nodes not to quantify for cumulative error calculation.<br/> **Description**: Optionally excludes specified nodes from quantization, ensuring all others are quantized. Follows similar logic as `quantize_node` with a nested list.<br/> **Range**: All nodes in the calibrated model.<br/> **Default**: None | Optional |
+| `ae_metric` or `-am` | Cumulative error measurement.<br/> **Description**: Specifies the method for calculating model error.| Values: `'cosine-similarity'`, `'mse'`, `'mre'`, `'sqnr'`, `'chebyshev'`.<br/> **Default**: `'cosine-similarity'` | Optional |
+| `average_mode` or `-avm` | Cumulative error curve output mode.<br/> **Description**: Defaults to False. If set to True, returns the average value of the cumulative error as the result.| Values: `True`, `False`.<br/> **Default**: `False` | Optional |
+
+**API Usage Example**:
+
+```python
+import horizon_nn.debug as dbg
+dbg.runall(model_or_file='calibrated_model.onnx',
+           calibrated_data='calibration_data')
 ```
 
-可通过 ``hmct-debugger runall -h/--help`` 查看相关参数。
- 
-**参数组**：
-
-| 参数名称 | 参数配置说明   | 取值范围说明 |    可选/必选     |
-|------------|----------|----------|--------|
-|``model_or_file``| **参数作用**：指定校准模型。<br/>**参数说明**：必选，指定需要分析的校准模型。| **取值范围**：无。<br/> **默认配置**：无。|必选 |
-|``calibrated_data``| **参数作用**：指定校准数据。<br/>**参数说明**：必选，指定分析所需要的校准数据。| **取值范围**：无。<br/> **默认配置**： 无。|必选 |
-|``save_dir 或 -s``| **参数作用**：保存路径。<br/>**参数说明**：指定分析结果的保存路径。| **取值范围**：无 。<br/> **默认配置**：无。|可选 |
-|``ns_metrics 或 -nm``| **参数作用**：节点量化敏感度的度量方式。<br/>**参数说明**：指定节点量化敏感度的计算方式，该参数可以为列表(List)，即以多种方式计算量化敏感度，但是输出结果仅以列表中第一位的计算方式进行排序，排名越靠前说明量化该节点引入的误差越大。| **取值范围**：``'cosine-similarity'`` , ``'mse'`` , ``'mre'`` , ``'sqnr'`` , ``'chebyshev'`` 。<br/> **默认配置**：``'cosine-similarity'``。|可选 |
-|``output_node 或 -o``| **参数作用**：指定输出节点。<br/>**参数说明**：此参数支持您指定中间节点作为输出并计算节点量化敏感度。若保持默认参数None，则精度debug工具会获取模型的最终输出, 并在此基础上计算节点的量化敏感度。| **取值范围**：校准模型中的具有对应校准节点的普通节点。<br/> **默认配置**：None。|可选 |
-|``node_type 或 -nt``| **参数作用**：节点类型。<br/>**参数说明**：需要计算量化敏感度的节点类型，包括：node（普通节点）、weight（权重校准节点）、activation（激活校准节点）。| **取值范围**：``'node'`` , ``'weight'`` , ``'activation'``。<br/> **默认配置**：``'node'``。|可选 |
-|``data_num 或 -dn``| **参数作用**：计算量化敏感度需要的数据数量。<br/>**参数说明**：设置计算节点量化敏感度时所需要的数据数量。默认为None，此时默认使用calibration_data中的所有数据进行计算。 最小设置为1，最大为 calibration_data中的数据数量。| **取值范围**：大于0，小于等于calibration_data中数据的总数。<br/> **默认配置**：None 。|可选 |
-|``verbose 或 -v``| **参数作用**：选择是否将信息打印在终端上。<br/>**参数说明**：若为True，则将量化敏感度信息打印在终端上。若metrics包含多种度量方式，则按照第一位进行排序。| **取值范围**：``True`` 、 ``False``。<br/> **默认配置**：``False``。|可选 |
-|``interested_nodes 或 -i``| **参数作用**：设置感兴趣节点。<br/>**参数说明**：若指定则只获取该节点的量化敏感度，其余节点不获取。同时，若该参数被指定，将忽视node_type指定的节点类型，也就是说该参数的优先级要高于node_type。若保持默认参数None，则计算模型中所有可被量化节点的量化敏感度。| **取值范围**：校准模型中的所有节点。<br/> **默认配置**：None。|可选 |
-|``dis_nodes_list 或 -dnl``| **参数作用**：指定需要分析的节点。<br/>**参数说明**：指定需要分析的节点。<br/>若nodes_list中的节点类型为： <br/>- 权重校准节点：绘制原始权重和经过校准之后的权重的数据分布。<br/>- 激活校准节点：绘制激活校准节点的输入数据分布。<br/>- 普通节点：绘制该节点在量化前后的输出数据分布，同时绘制二者之间的误差分布。 <br/>注：nodes_list为 list 类型，可指定一系列节点，并且上述三种类型节点可同时指定。| **取值范围**：校准模型中的所有节点。<br/> **默认配置**：无。|可选 |
-|``cw_nodes_list 或 -cn``| **参数作用**：指定校准节点。<br/>**参数说明**：指定校准节点。| **取值范围**：校准模型中的所有权重校准节点和激活校准节点。<br/> **默认配置**：无。|可选 |
-|``axis 或 -a``| **参数作用**：指定channel所在的维度。 <br/>**参数说明**：channel信息所在shape中的位置。参数默认为None，此时对于激活校准节点，默认认为节点输入数据的第二个维度表示channel信息，即axis=1；对于权重校准节点，会读取该节点属性中的axis参数作为channel信息。| **取值范围**：小于节点输入数据的维度。<br/> **默认配置**：None。|可选 |
-|``quantize_node 或 -qn``| **参数作用**：只量化模型中指定的节点，查看误差累积曲线。<br/>**参数说明**：可选参数。指定模型中需要量化的节点，同时保证其余节点均不量化。<br/>通过判断该参数是否为嵌套列表进而决定是单节点量化还是部分量化。<br/>例如：<br/>- quantize_node=['Conv_2','Conv_9']：分别只量化Conv_2和Conv_9，同时保证其余节点不量化。<br/>- quantize_node=[['Conv_2'],['Conv_9','Conv_2']]：只量化Conv_2以及同时量化Conv_2和Conv_9，分别测试模型累积误差。 <br/>- quantize_node 包含两个特殊参数：'weight' 和 'activation'。<br/>当：<br/>- quantize_node = ['weight']：只量化权重，不量化激活。<br/>- quantize_node = ['activation']：只量化激活，不量化权重。<br/>- quantize_node = ['weight','activation']：权重和激活分别量化。<br/>注：quantize_node和non_quantize_node不可同时为None，必须指定其一。| **取值范围**：校准模型中的所有节点。<br/> **默认配置**：None。|可选 |
-|``non_quantize_node 或 -nqn``| **参数作用**：指定累积误差的类型。<br/>**参数说明**：可选参数。指定模型中不量化的节点，同时保证其余节点全都量化。<br/>通过判断该参数是否为嵌套列表进而决定是单节点不量化还是部分量化。<br/>例如：<br/>- non_quantize_node=['Conv_2','Conv_9']：分别解除Conv_2和Conv_9节点的量化，同时保证其余节点全部量化。<br/>- non_quantize_node=[['Conv_2'],['Conv_9','Conv_2']]：只解除Conv_2量化以及同时解除Conv_2和Conv_9量化，分别测试模型累积误差。 <br/>注：quantize_node和non_quantize_node不可同时为None，必须指定其一。| **取值范围**：校准模型中的所有节点。<br/> **默认配置**：None。|可选 |
-|``ae_metric 或 -am``| **参数作用**：累积误差度量方式。<br/>**参数说明**：设置计算模型误差的计算方式。| **取值范围**：``'cosine-similarity'`` , ``'mse'`` , ``'mre'`` , ``'sqnr'`` , ``'chebyshev'`` <br/> **默认配置**：``'cosine-similarity'``。|可选 |
-|``average_mode 或 -avm``| **参数作用**：指定累积误差曲线的输出模式。<br/>**参数说明**：默认为False。若为True，那么获取累积误差的平均值作为结果。| **取值范围**：``True`` 、 ``False``。<br/> **默认配置**：``False``。|可选 |
-
-
-API使用方法：
+**Command Line Usage Example**:
 
 ```shell
-
-  # Import debug module
-  import horizon_nn.debug as dbg
-  
-  dbg.runall(model_or_file='calibrated_model.onnx',
-             calibrated_data='calibration_data')
+hmct-debugger runall calibrated_model.onnx calibration_data
 ```
 
-Command line usage:
+The `runall` workflow:
 
-```shell
+![Runall Workflow](./image/intermediate/runall.png)
 
-  hmct-debugger runall calibrated_model.onnx calibration_data
-```
+When all parameters are set to defaults, the tool performs the following steps:
 
-Runall process:
+1. Calculates quantization sensitivity for weight and activation calibration nodes.
+2. Draws data distributions for the top 5 nodes from step 1 for weight and activation calibration.
+3. Creates box plots for channel-wise data distribution for the nodes from step 2.
+4. Plots cumulative error curves when quantizing weights and activations separately.
 
-![runall](./image/intermediate/runall.png)
+If `node_type='node'`, the tool retrieves the top 5 nodes and their corresponding calibration nodes, displaying data distributions and box plots.
 
-When all parameters are kept default, the tool will execute the following functions sequentially:
+Based on previous optimization experience, this strategy covers most scenarios. If issues persist, follow the [**Precision Optimization Checklist**](../../common_questions/toolchain#checklist) to gather detailed model configuration information, ensure all troubleshooting steps have been completed, and report the filled checklist, the original float model file, and relevant configuration files to the Horizon support team or the [**Horizon Official Technical Community**](https://developer.horizon.ai/) for further assistance.
 
-1. Get the quantization sensitivities for both weight calibration nodes and activation calibration nodes separately.
 
-2. Based on the result of step 1, plot the data distribution of the top 5 weight calibration nodes and the top 5 activation calibration nodes.
 
-3. For the nodes obtained in step 2, plot the boxplot of the data distribution between channels.
+### Other Tool Usage Instructions
 
-4. Plot the cumulative error curves for quantizing only weight and only activation separately.
-
-When ``node_type='node'`` is specified, the tool will obtain the top 5 nodes, find the corresponding calibration nodes for each node, and obtain the data distribution and boxplot of the calibration nodes.
-
-Based on past experience with optimization, the above strategies are already capable of handling various practical problems.
-
-If the above attempts still fail to solve your problem, please follow the steps in the [**Accuracy Optimization Checklist**](../../common_questions/toolchain#checklist) document to fill in the specific information of the model configuration for inspection, ensure that every step of the troubleshooting has been completed, and determine which specific step of the model conversion has an exception based on the checklist. Then, provide the complete information of the **Accuracy Optimization Checklist**, the original floating-point model file, and the model quantization related configuration files to Horizon technical support team or raise your question in the [**Horizon Official Technical Community**](https://developer.horizon.ai/). We will provide support within 24 hours.
-
-### Other Tool Instructions
-
-This section mainly introduces the usage of other debug tools besides the model conversion tool. These tools can assist developers in model modification, model analysis, data preprocessing, and other operations. The list of tools is as follows:
+This section primarily introduces the usage of debugging tools other than model conversion tools. These tools assist developers in model modification, analysis, and data preprocessing tasks. The list of tools is as follows:
 
 - hb_perf
-
 - hb_pack
-
 - hb_model_info
-
-- hb_model_modifier- hb_model_verifier
+- hb_model_modifier
+- hb_model_verifier
 - hb_eval_preprocess
 
+#### **hb_perf** Tool
 
-#### ``hb_perf`` Tool
-
-``hb_perf`` is an analysis tool for analyzing the performance of Horizon quantized hybrid models.
+**hb_perf** is a tool for analyzing the performance of Horizon's quantized mixed models.
 
 - Usage
 
 ```
 hb_perf [OPTIONS] BIN_FILE
 ```
+- Command Line Arguments
 
-- Command-Line Arguments
-
-Command-Line arguments for ``hb_perf``:
+hb_perf command-line arguments:
 
   --version<br/>
-    Display the version and exit.
+    Displays the version and exits.
 
   -m<br/>
-    Followed by the model name. When BIN_FILE is a packed model, it only outputs the model compilation information of the specified model.
-    
+    Followed by the model name. When specifying BIN_FILE as a packed model, only outputs information about the specified model.
+
   --help<br/>
-    Display the help information.
+    Displays help information.
 
 - Output Explanation
 
-The model information will be outputted in the `hb_perf_result` folder in the current directory.
-There will be a folder named after the model, and the model information will be displayed in an `html` file named after its model name. The directory structure is shown in the example below:
+The model information will be saved in the `hb_perf_result` folder in the current directory. There will be a subfolder with the same name as the model, containing an HTML file with its details. The directory structure would look like this example:
 
 ```shell
   hb_perf_result/
@@ -2223,11 +2328,17 @@ There will be a folder named after the model, and the model information will be 
       └── temp.hbm
 ```
 
-If the model was not set as debug mode during compilation (``compiler_parameters.debug:True``), the ``hb_perf`` tool will generate the following prompt. This prompt only indicates that the per-layer information is not included in the subgraph information, and it does not affect the generation of the overall model information.
+If the model was not compiled in debug mode (`compiler_parameters.debug:True`) during the build process, `hb_perf` may produce the following warning:
+
 ```
 2021-01-12 10:41:40,000 WARNING bpu model don't have per-layer perf info.
-2021-01-12 10:41:40,000 WARNING if you need per-layer perf info please enable[compiler_parameters.debug:True] when use makertbin.
+2021-01-12 10:41:40,000 WARNING if you need per-layer perf info, please enable [compiler_parameters.debug:True] when using makertbin.
 ```
+
+This warning indicates that per-layer performance information is not included in the subgraph information but does not affect the generation of overall model information.
+
+
+
 #### "hb_pack" Tool
 
 "hb_pack" is a tool used to package multiple mixed model (*.bin) files into one model file.
@@ -2374,7 +2485,9 @@ Since deleting specific nodes will affect the input of the model, the tool is on
   hb_model_modifier model.bin
 ```
 
-2. Delete a single specified node (node1 is taken as an example):```bash
+2. Delete a single specified node (node1 is taken as an example)
+
+```bash
   hb_model_modifier model.bin -r node1
 ```
 
@@ -2383,6 +2496,7 @@ Since deleting specific nodes will affect the input of the model, the tool is on
 ```bash
   hb_model_modifier model.bin -r node1 -r node2 -r node3
 ```
+
 4. Delete nodes of a certain class (e.g., Dequantize):
 
 ```bash
@@ -2398,6 +2512,7 @@ Since deleting specific nodes will affect the input of the model, the tool is on
 ```bash
   hb_model_modifier model.bin -a Reshape -a Cast -a Dequantize -r node1 -r node2 -r node3
 ```
+
 - Command line arguments
 
 Command line arguments for hb_model_modifier
@@ -2424,7 +2539,9 @@ The Quantize node is used to quantize the input data of the model from float typ
   qx = clamp(round(x / scale) + zero\_point, -128, 127)
 ```
 
-``round(x)`` performs floating-point rounding, and the ``clamp(x)`` function clamps the data to integer values between -128 and 127. ``zero_point`` is the asymmetrical quantization zero point offset value, and for symmetrical quantization, ``zero_point = 0``.The reference implementation of C++ is as follows:
+``round(x)`` performs floating-point rounding, and the ``clamp(x)`` function clamps the data to integer values between -128 and 127. ``zero_point`` i#### `hb_model_verifiers the asymmetrical quantization zero point offset value, and for symmetrical quantization, ``zero_point = 0``.
+
+The reference implementation of C++ is as follows:
 ```cpp
   int64_t quantized_value =
       static_cast/<int64_t/>(std::round(value / static_cast/<double/(scale)));
@@ -2473,7 +2590,9 @@ hb_model_info version 1.7.0
 ...
 --------- deleted nodes -
 deleted nodes: data_res2a_branch1_HzQuantize_TransposeInput0
-```#### `hb_model_verifier` Tool
+```
+
+#### `hb_model_verifier` Tool
 
 The `hb_model_verifier` tool is used to verify the results of the specified quantized model and the runtime model. 
 This tool performs inference on the specified images using the quantized model, as well as the runtime model on the board and on the x86 simulator. If the IP address of the board is specified and the `hrt_tools` is installed on the board (if not, you can use the `install.sh` script under `package/board` in the toolchain SDK package to install it), the tool will also perform inference on the runtime model on the board. Similarly, if the host has installed `hrt_tools` (if not, you can use the `install.sh` script under `package/host` in the toolchain SDK package to install it), the tool will perform inference on the runtime model on the x86 host. After the inference, the tool compares the results of the three models pairwise and gives a conclusion of whether the results match. If no image is specified, the tool will use default images for inference (random tensor data will be generated for feature map models).

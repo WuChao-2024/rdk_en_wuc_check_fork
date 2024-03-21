@@ -45,7 +45,9 @@ Currently, the supported display resolutions for the HDMI interface are as follo
 - 1024x600
 - 800x480
 
-## MIPI CSI InterfaceRDK X3 Module carrier board provides three sets of MIPI CSI interfaces for CAM 0/1/2, which can support the simultaneous connection of 3 Camera modules, meeting the needs of different users. The specific details are as follows:
+## MIPI CSI Interface
+
+RDK X3 Module carrier board provides three sets of MIPI CSI interfaces for CAM 0/1/2, which can support the simultaneous connection of 3 Camera modules, meeting the needs of different users. The specific details are as follows:
 
 1. CAM 0/2 (Interface 16/17) adopts a 15-pin FPC connector and can directly connect with various Camera modules such as Raspberry Pi OV5647, IMX219, IMX477, etc.
 2. CAM 1 (Interface 11) adopts a 24-pin FPC connector and supports various Camera modules such as F37, GC4663, IMX415, etc.

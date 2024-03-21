@@ -46,7 +46,10 @@ The specifications of the camera modules are as follows:
 
 The purchasing method for camera modules can be found on the community accessory page, [Purchase Link](https://developer.horizon.cc/accessory).
 
-:::caution NoteImportant Reminder: It is strictly prohibited to plug or unplug the camera module while the development board is powered on, as it may easily damage the camera module.
+:::caution Note
+
+Important Reminder: It is strictly prohibited to plug or unplug the camera module while the development board is powered on, as it may easily damage the camera module.
+:::
 
 ## USB Interface
 

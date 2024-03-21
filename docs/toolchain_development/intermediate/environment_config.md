@@ -109,6 +109,30 @@ Then run the Docker container by executing the following command.
       -v "$dataset_path":/data \
       openexplorer/ai_toolchain_ubuntu_20_x3j5_gpu:"${version}"
   ```
+
+  
+
+- On the GPU development machine, execute the following command within a Docker container:
+
+    ```bash
+    # Command to run the docker image
+
+    export version=v1.0.0
+    export ai_toolchain_package_path=/home/users/xxx/ai_toolchain_package
+    export dataset_path=/home/users/xxx/data/
+
+    docker run -it --runtime=nvidia \
+        -e NVIDIA_DRIVER_CAPABILITIES=compute,utility \
+        -e NVIDIA_VISIBLE_DEVICES=all \
+        --rm \
+        --shm-size="15g" \
+        -v "$ai_toolchain_package_path":/open_explorer \
+        -v "$dataset_path":/data \
+        openexplorer/ai_toolchain_ubuntu_20_x3j5_gpu:"${version}"
+    ```
+
+
+
 :::info Note
 
   When executing the above command:
@@ -266,7 +290,9 @@ ddk_vcs uninstall is used to uninstall a specific module. The usage is as follow
 ### ddk_vcs patch
 
 
-"ddk_vcs patch ddk_patch.tar.gz" is used to install pre-made patch packages. The usage is as follows:```bash
+"ddk_vcs patch ddk_patch.tar.gz" is used to install pre-made patch packages. The usage is as follows:
+
+```bash
 
   [horizon@gpu-dev004]$ ddk_vcs patch ddk_patch.tar.gz
   bpu_predict installed successfully, version: 1.7.2_patch0, platform: aarch64

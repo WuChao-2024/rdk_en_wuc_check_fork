@@ -47,7 +47,9 @@ When burning the eMMC system image on the RDK X3 module, the Horizon `hbupdate` 
 
 The following precautions should be taken when using the tool:
 - Unzip the compressed file of the tool, and make sure that the decompression path does not contain any **spaces, Chinese characters, special characters**, etc.
-- The tool communicates with the RDK X3 module through the USB port, so you need to install the USB driver in advance. Please refer to the following description for the specific method.## Installing USB Driver
+- The tool communicates with the RDK X3 module through the USB port, so you need to install the USB driver in advance. Please refer to the following description for the specific method.
+
+## Installing USB Driver
 
 For a PC using the Windows operating system, before using the flashing tool, it is necessary to confirm if the fastboot driver has been installed. Please follow the steps below for confirmation:
 

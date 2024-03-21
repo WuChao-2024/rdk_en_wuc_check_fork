@@ -40,8 +40,6 @@ ISP's functions are relatively complex. It needs to interact with the sensor, lo
 ### SIF Debug Information
 
 View SIF debug information:
-```
-Please translate the parts in Chinese to English while keeping the original format and content:
 
 ```
 cat /sys/devices/platform/soc/a4001000.sif/cfg_info
@@ -87,7 +85,9 @@ View enabled pipelines:
 
 ```
 cat /sys/devices/platform/soc/a4042000.pym/info/enabled_pipeline
-```Check the configuration of each pipe: 
+```
+
+Check the configuration of each pipe: 
 
 ```bash
 cat /sys/devices/platform/soc/a4042000.pym/info/pipelinex_info # x takes values of 0-7
@@ -135,7 +135,10 @@ cat /sys/kernel/debug/vpu/vdec
 
 ### JENC Debug Information
 
-View encoding information:cat /sys/kernel/debug/jpu/jenc
+View encoding information:
+```
+cat /sys/kernel/debug/jpu/jenc
+```
 
 ![](./image/debug_info/1944f201c81a20991a2623a464ac749c.png)
 

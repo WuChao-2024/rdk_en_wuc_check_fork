@@ -138,71 +138,101 @@ int32_t HB_VDEC_DestroyChn(VDEC_CHN VdChn);
 【Reference Code】
 > Reference code for HB_VDEC_ResetChn.
 
+
+
 ### HB_VDEC_StartRecvStream
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VDEC_StartRecvStream(VDEC_CHN VdChn);
 ```
-【Function Description】
-> The decoder starts to receive the stream sent by the user.int32_t HB_VDEC_ResetChn(VDEC_CHN VdChn);
-```
-【功能描述】
-> 复位解码通道，清空解码缓冲区。
+**Function Description**
+> Starts the decoder to receive user-sent streams.
 
-【参数描述】
+**Parameter Descriptions**
 
-| 参数名称 |                        描述                        | 输入/输出 |
-| :------: | :------------------------------------------------: | :-------: |
-|  VdChn   | 编码通道号。<br/>取值范围：[0, VDEC_MAX_CHN_NUM)。 |   输入    |
+| Parameter Name | Description | Input/Output |
+| :-------------: | :----------: | :---------: |
+|   VdChn        | Video decoding channel number.<br/>Range: [0, VDEC_MAX_CHN_NUM). |   Input    |
 
-【返回值】
+**Return Values**
 
-| 返回值 |               描述 |
-| :----: | :-----------------|
-|   0    |               成功 |
-|  非0   | 失败，返回错误码。 |
+| Return Value | Description |
+| :--------: | :---------: |
+|      0     |   Success   |
+| Non-zero   | Failure, returns an error code. |
 
-【注意事项】
-> 无
-
-【参考代码】
-> HB_VDEC_ResetChn参考代码```cpp
-int32_t HB_VDEC_ResetChn(VDEC_CHN VdChn);
-```
-【Function Description】
-> Reset the video decoding channel.
-
-【Parameter Description】
-
-| Parameter |             Description            | I/O |
-| :-------: | :-------------------------------: | :-: |
-|   VdChn   | Encoding channel number.<br/>Range: [0, VDEC_MAX_CHN_NUM). | Input |
-
-【Return Value】
-
-| Return Value |            Description           |
-| :----------: | :-----------------------------: |
-|      0       |            Success               |
-|    Non-0     | Failed, return error code. |
-
-【Notes】
+**Notes**
 > None
 
-【Reference Code】
-```cpp
+**Reference Code**
+> See HB_VDEC_ResetChn for a reference.
+
+### HB_VDEC_StopRecvStream
+**Function Declaration**
+```C
+int32_t HB_VDEC_StopRecvStream(VDEC_CHN VdChn);
+```
+**Function Description**
+> Stops the decoder from receiving user-sent streams.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description | Input/Output |
+| :-------------: | :----------: | :---------: |
+|   VdChn        | Video decoding channel number.<br/>Range: [0, VDEC_MAX_CHN_NUM). |   Input    |
+
+**Return Values**
+
+| Return Value | Description |
+| :--------: | :---------: |
+|      0     |   Success   |
+| Non-zero   | Failure, returns an error code. |
+
+**Notes**
+> None
+
+**Reference Code**
+> See HB_VDEC_ResetChn for a reference.
+
+### HB_VDEC_ResetChn
+**Function Declaration**
+```C
+int32_t HB_VDEC_ResetChn(VDEC_CHN VdChn);
+```
+**Function Description**
+> Resets the video decoding channel.
+
+**Parameter Descriptions**
+
+| Parameter Name | Description | Input/Output |
+| :-------------: | :----------: | :---------: |
+|   VdChn        | Video decoding channel number.<br/>Range: [0, VDEC_MAX_CHN_NUM). |   Input    |
+
+**Return Values**
+
+| Return Value | Description |
+| :--------: | :---------: |
+|      0     |   Success   |
+| Non-zero   | Failure, returns an error code. |
+
+**Notes**
+> None
+
+**Reference Code**
+```C
 VDEC_CHN VDEC_Chn = 0;
 int32_t s32Ret = 0;
 int32_t Width = 1920;
 int32_t Height = 1080;
-VDEC_CHN_ATTR_S m_VdecChnAttr ;
-memset(&m_VdecChnAttr , 0, sizeof(VDEC_CHN_ATTR_S));
+VDEC_CHN_ATTR_S m_VdecChnAttr;
+memset(&m_VdecChnAttr, 0, sizeof(VDEC_CHN_ATTR_S));
 m_VdecChnAttr.enType = PT_H264;
 m_VdecChnAttr.enMode = VIDEO_MODE_FRAME;
 m_VdecChnAttr.enPixelFormat = HB_PIXEL_FORMAT_NV12;
 m_VdecChnAttr.u32FrameBufCnt = 10;
 m_VdecChnAttr.u32StreamBufCnt = 10;
 m_VdecChnAttr.u32StreamBufSize = Width * Height * 1.5;
-m_VdecChnAttr.bExternalBitStreamBuf  = HB_TRUE;
+m_VdecChnAttr.bExternalBitStreamBuf = HB_TRUE;
 
 if (m_VdecChnAttr.enType == PT_H265) {
     m_VdecChnAttr.stAttrH265.bandwidth_Opt = HB_TRUE;
@@ -217,55 +247,99 @@ if (m_VdecChnAttr.enType == PT_H264) {
     m_VdecChnAttr.stAttrH264.enDecMode = VIDEO_DEC_MODE_NORMAL;
     m_VdecChnAttr.stAttrH264.enOutputOrder = VIDEO_OUTPUT_ORDER_DISP;
 }
-```| s32MilliSec | 获取图像超时时间。<br/>取值范围：[-1, + ∞ )<br/> -1：阻塞。<br/> 0：非阻塞。<br/> 大于 0：超时时间。 |
 
-【返回值】
+s32Ret = HB_VDEC_CreateChn(VDEC_Chn, &m_VdecChnAttr);
+HB_VDEC_SetChnAttr(VDEC_Chn, &m_VdecChnAttr);
+HB_VDEC_StartRecvStream(VDEC_Chn);
+HB_VDEC_StopRecvStream(VDEC_Chn);
+HB_VDEC_ResetChn(VDEC_Chn);
+HB_VDEC_DestroyChn(VDEC_Chn);
+```
 
-| 返回值 |                 描述 |
-| :----: | :------------------- |
-|   0    |                 成功 |
-|  非0   | 失败，返回错误码。   |
+### HB_VDEC_SendStream
+**Function Declaration**
+```C
+int32_t HB_VDEC_SendStream(VDEC_CHN VdChn, const VIDEO_STREAM_S *pstStream, int32_t s32MilliSec);
+```
+**Function Description**
+> Sends stream data to the video decoding channel.
 
-【注意事项】
+**Parameter Descriptions**
 
-【参考代码】|  s32MilliSec  | Timeout for obtaining the image.<br/>Value range: [-1, +∞)<br/>-1: Block.<br/>0: Non-block.<br/>Greater than 0: Timeout. |
+| Parameter Name   | Description | Input/Output |
+| :--------------: | :----------: | :---------: |
+|    VdChn         | Video decoding channel number.<br/>Range: [0, VDEC_MAX_CHN_NUM). |   Input    |
+|   pstStream     | Pointer to decoded stream data. |   Input    |
+| s32MilliSec      | Timeout for sending the stream.<br/>Range: [-1, +∞)<br/>-1: Blocking.<br/>0: Non-blocking.<br/>Positive: Timeout in milliseconds. |
 
-【Return Value】
+**Return Values**
 
-| Return Value |               Description |
-| :----: | :-----------------|
-|   0    |               Success |
-|  Non-zero   | Failure, return error code. |
+| Return Value | Description |
+| :--------: | :---------: |
+|      0     |   Success   |
+| Non-zero   | Failure, returns an error code. |
 
-【Notes】
+**Notes**
+> None
 
-【Reference Code】
+**Reference Code**
+
+### HB_VDEC_GetFrame
+**Function Declaration**
+```C
+int32_t HB_VDEC_GetFrame(VDEC_CHN VdChn, VIDEO_FRAME_S *pstFrameInfo, int32_t s32MilliSec);
+```
+**Function Description**
+> Retrieves a decoded image from the video decoding channel.
+
+**Parameter Descriptions**
+
+| Parameter Name   | Description | Input/Output |
+| :--------------: | :----------: | :---------: |
+|    VdChn         | Video decoding channel number.<br/>Range: [0, VDEC_MAX_CHN_NUM). |   Input    |
+| pstFrameInfo     | Pointer to the retrieved decoded image information. |   Input    |
+| s32MilliSec      | Timeout for retrieving the frame.<br/>Range: [-1, +∞)<br/>-1: Blocking.<br/>0: Non-blocking.<br/>Positive: Timeout in milliseconds. |
+
+**Return Values**
+
+| Return Value | Description |
+| :--------: | :---------: |
+|      0     |   Success   |
+| Non-zero   | Failure, returns an error code. |
+
+**Notes**
+> None
+
+**Reference Code**
 
 ### HB_VDEC_ReleaseFrame
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VDEC_ReleaseFrame(VDEC_CHN VdChn, const VIDEO_FRAME_S *pstFrameInfo);
 ```
-【Function Description】
-> Release the image of the video decoding channel.
+**Function Description**
+> Releases a decoded image from the video decoding channel.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name |                        Description                        | Input/Output |
-| :------: | :------------------------------------------------: | :-------: |
-|  VdChn   | Encoding channel number.<br/>Value range: [0, VDEC_MAX_CHN_NUM). |   Input    |
-pstFrameInfo	Pointer to the decoded image information.	Input
+| Parameter Name | Description | Input/Output |
+| :------------: | :----------: | :---------: |
+|    VdChn       | Video decoding channel number.<br/>Range: [0, VDEC_MAX_CHN_NUM). |   Input    |
+| pstFrameInfo   | Pointer to the decoded image information. |   Input    |
 
-【Return Value】
+**Return Values**
 
-| Return Value |               Description |
-| :----: | :-----------------|
-|   0    |               Success |
-|  Non-zero   | Failure, return error code. |
+| Return Value | Description |
+| :--------: | :---------: |
+|      0     |   Success   |
+| Non-zero   | Failure, returns an error code. |
 
-【Notes】
+**Notes**
+> None
 
-【Reference Code】
+**Reference Code**
+
+
 
 ### HB_VDEC_GetFd
 【Function Declaration】
@@ -277,7 +351,8 @@ int32_t HB_VDEC_GetFd(VDEC_CHN VdChn, int32_t *fd);
 
 【Parameter Description】
 
-| Parameter Name |                        Description                        | Input/Output || :------: | :------------------------------------------------: | :-------: |
+| Parameter Name |                        Description                        | Input/Output |
+| :------: | :------------------------------------------------: | :-------: |
 |  VdChn   | Encoding channel number.<br/>Range: [0, VDEC_MAX_CHN_NUM) |   Input    |
 |    fd    |               Returns the file handle of the encoding channel.               |   Output    |
 
@@ -326,7 +401,9 @@ int32_t HB_VDEC_GetFd(VDEC_CHN VdChn, int32_t *fd);
     HB_VDEC_GetFd(VDEC_Chn, &fd);
     HB_VDEC_CloseFd(VDEC_Chn, fd);
     s32Ret = HB_VDEC_DestroyChn(VDEC_Chn);
-```### HB_VDEC_CloseFd
+```
+
+### HB_VDEC_CloseFd
 【Function Declaration】
 ```C
 int32_t HB_VDEC_CloseFd(VDEC_CHN VdChn, int32_t fd);
@@ -354,105 +431,154 @@ int32_t HB_VDEC_CloseFd(VDEC_CHN VdChn, int32_t fd);
 【Reference Code】
 > Reference code for HB_VDEC_GetFd
 
+
+
 ### HB_VDEC_GetChnAttr
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VDEC_GetChnAttr(VDEC_CHN VdChn, VDEC_CHN_ATTR_S *pstAttr);
 ```
-【Function Description】
-> Get the parameters of the video decoding channel.
+**Function Description**
+> Retrieves video decoding channel parameters.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name |                      Description                      | Input/Output |
-| :------------: | :---------------------------------------------------: | :----------: |
-|     VdChn      |         Encoding channel number.<br/>Range: [0, VDEC_MAX_CHN_NUM).        |    Input     |
-|    pstAttr     |                Pointer to the decoded channel attributes.                |    Output    |
+| Parameter Name | Description | Input/Output |
+| :-------------: | :----------: | :---------: |
+|   VdChn        | Channel ID. <br/>Range: [0, VDEC_MAX_CHN_NUM). |   Input     |
+| pstAttr        | Pointer to decoded channel attributes. |   Output    |
 
-【Return Value】
+**Return Values**
 
-| Return Value |                         Description                          |
-| :----------: | :----------------------------------------------------------: |
-|       0      |                           Success                            |
-|     Non-zero    |      Failed, returns error code.     |### HB_VDEC_SetChnAttr
-【Function Declaration】
+| Return Value | Description |
+| :---------: | :-----------|
+|    0       | Success     |
+| Non-zero    | Failure, returns an error code. |
+
+**Note**
+> None
+
+**Reference Code**
+```C
+    VDEC_CHN VDEC_Chn = 0;
+    int32_t s32Ret = 0;
+    int32_t Width = 1920;
+    int32_t Height = 1080;
+
+    VDEC_CHN_ATTR_S m_VdecChnAttr;
+    memset(&m_VdecChnAttr, 0, sizeof(VDEC_CHN_ATTR_S));
+    m_VdecChnAttr.enType = PT_H264;
+    m_VdecChnAttr.enMode = VIDEO_MODE_FRAME;
+    m_VdecChnAttr.enPixelFormat = HB_PIXEL_FORMAT_NV12;
+    m_VdecChnAttr.u32FrameBufCnt = 10;
+    m_VdecChnAttr.u32StreamBufCnt = 10;
+    m_VdecChnAttr.u32StreamBufSize = Width * Height * 1.5;
+    m_VdecChnAttr.bExternalBitStreamBuf = HB_TRUE;
+
+    if (m_VdecChnAttr.enType == PT_H265) {
+        m_VdecChnAttr.stAttrH265.bandwidth_Opt = HB_TRUE;
+        m_VdecChnAttr.stAttrH265.enDecMode = VIDEO_DEC_MODE_NORMAL;
+        m_VdecChnAttr.stAttrH265.enOutputOrder = VIDEO_OUTPUT_ORDER_DISP;
+        m_VdecChnAttr.stAttrH265.cra_as_bla = HB_FALSE;
+        m_VdecChnAttr.stAttrH265.dec_temporal_id_mode = 0;
+        m_VdecChnAttr.stAttrH265.target_dec_temporal_id_plus1 = 2;
+    }
+    if (m_VdecChnAttr.enType == PT_H264) {
+        m_VdecChnAttr.stAttrH264.bandwidth_Opt = HB_TRUE;
+        m_VdecChnAttr.stAttrH264.enDecMode = VIDEO_DEC_MODE_NORMAL;
+        m_VdecChnAttr.stAttrH264.enOutputOrder = VIDEO_OUTPUT_ORDER_DISP;
+    }
+
+    s32Ret = HB_VDEC_CreateChn(VDEC_Chn, &m_VdecChnAttr);
+    HB_VDEC_SetChnAttr(VDEC_Chn, &m_VdecChnAttr);
+    HB_VDEC_GetChnAttr(VDEC_Chn, &VdecChnAttr);
+    s32Ret = HB_VDEC_DestroyChn(VDEC_Chn);
+```
+
+### HB_VDEC_SetChnAttr
+**Function Declaration**
 ```C
 int32_t HB_VDEC_SetChnAttr(VDEC_CHN VdChn, const VDEC_CHN_ATTR_S *pstAttr);
 ```
-【Function Description】
-> Set video decoding channel parameters.
+**Function Description**
+> Sets video decoding channel parameters.
 
-【Parameter Description】| Parameter Name |                    Description                    | Input/Output |
-| :------------: | :-----------------------------------------------: | :----------: |
-|     VdChn      |    Encoding channel number.<br/>Value range: [0, VDEC_MAX_CHN_NUM).    |    Input     |
-|    pstAttr     |          Pointer to the decoded channel attributes.          |    Input     |
+**Parameter Descriptions**
 
-【Return Value】
+| Parameter Name | Description | Input/Output |
+| :-------------: | :----------: | :---------: |
+|   VdChn        | Channel ID. <br/>Range: [0, VDEC_MAX_CHN_NUM). |   Input     |
+| pstAttr        | Pointer to decoded channel attributes. |   Input    |
 
-| Return Value |                   Description                  |
-| :----------: | :-------------------------------------------: |
-|      0       |                   Success                     |
-|   Non-zero   |         Failure, returns error code.          |
+**Return Values**
 
-【Note】
+| Return Value | Description |
+| :---------: | :-----------|
+|    0       | Success     |
+| Non-zero    | Failure, returns an error code. |
+
+**Note**
 > None
 
-【Reference Code】
-> Reference code for HB_VDEC_GetChnAttr
+**Reference Code**
+> HB_VDEC_GetChnAttr reference code
 
 ### HB_VDEC_QueryStatus
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VDEC_QueryStatus(VDEC_CHN VdChn, VDEC_CHN_STATUS_S *pstStatus);
 ```
-【Function Description】
-> Query the status of the decoding channel.
+**Function Description**
+> Queries the status of a decoding channel.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-| Parameter Name |                    Description                    | Input/Output |
-| :------------: | :-----------------------------------------------: | :----------: |
-|     VdChn      |    Decoding channel number.<br/>Value range: [0, VDEC_MAX_CHN_NUM).    |    Input     |
-|    pstStatus   |            Pointer to the decoding channel status.            |    Input     |
+| Parameter Name  | Description | Input/Output |
+| :-------------: | :----------: | :---------: |
+|   VdChn         | Decoding channel ID. <br/>Range: [0, VDEC_MAX_CHN_NUM). |   Input    |
+| pstStatus      | Pointer to channel status. |   Input    |
 
-【Return Value】
+**Return Values**
 
-| Return Value |                   Description                  |
-| :----------: | :-------------------------------------------: |
-|      0       |                   Success                     |
-|   Non-zero   |         Failure, returns error code.          |
+| Return Value | Description |
+| :---------: | :-----------|
+|    0       | Success     |
+| Non-zero    | Failure, returns an error code. |
 
-【Note】
+**Note**
 > None
 
-【Reference Code】
+**Reference Code**
 
 ### HB_VDEC_GetUserData
-【Function Declaration】
+**Function Declaration**
 ```C
 int32_t HB_VDEC_GetUserData(VDEC_CHN VdChn, VDEC_USERDATA_S *pstUserData, int32_t s32MilliSec);
-```【Function Description】
-> Get user data for video decoding channel.
+```
+**Function Description**
+> Retrieves video decoding channel user data.
 
-【Parameter Description】
+**Parameter Descriptions**
 
-|  Parameter Name |                  Description                 | Input/Output |
-| :-------------: | :-----------------------------------------: | :----------: |
-|     VdChn       | Encoding channel ID.<br/>Range: [0, VDEC_MAX_CHN_NUM). |    Input     |
-|  pstUserData    |            Pointer to user data             |    Input     |
-|  s32MilliSec    |               Timeout period                |    Input     |
+| Parameter Name   | Description | Input/Output |
+| :--------------: | :----------: | :---------: |
+|    VdChn        | Channel ID. <br/>Range: [0, VDEC_MAX_CHN_NUM). |   Input     |
+| pstUserData      | Pointer to user data. |   Input    |
+| s32MilliSec     | Timeout in milliseconds. |   Input    |
 
-【Return Value】
+**Return Values**
 
-| Return Value |          Description          |
-| :----------: | :---------------------------: |
-|      0       |             Success             |
-|    Non-zero   | Failure, returning error code |
+| Return Value | Description |
+| :---------: | :-----------|
+|    0       | Success     |
+| Non-zero    | Failure, returns an error code. |
 
-【Notes】
+**Note**
 > None
 
-【Reference Code】
+**Reference Code**
+
+
 
 ### HB_VDEC_ReleaseUserData
 【Function Declaration】
@@ -529,7 +655,8 @@ typedef enum HB_VIDEO_DEC_MODE_E {
     VIDEO_DEC_MODE_IRAP,
     VIDEO_DEC_MODE_REF,
     VIDEO_DEC_MODE_THUMB,
-```VIDEO_DEC_MODE_BUTT } VIDEO_DEC_MODE_E;
+    VIDEO_DEC_MODE_BUTT 
+} VIDEO_DEC_MODE_E;
 ```
 [Member Description]
 
@@ -540,7 +667,8 @@ typedef enum HB_VIDEO_DEC_MODE_E {
 |   VIDEO_DEC_MODE_REF   |         Decode reference frame           |
 | VIDEO_DEC_MODE_THUMB | Decode IRAP frame without DPB |
 
-VDEC_ATTR_H264_S
+### VDEC_ATTR_H264_S
+
 [Description]
 > Define H264 decoding parameters.
 
@@ -561,7 +689,8 @@ typedef struct HB_VDEC_ATTR_H264_S {
 | enOutputOrder |                     Decoding image output order, decoding sequence output or display sequence output.                      |
 | bandwidth_Opt |   Enable bandwidth saving mode, this mode supports VPU to ignore compress format non-reference frame or linear format non-display frame written into frame buffer, in order to save bandwidth. |
 
-VDEC_ATTR_H265_S
+### VDEC_ATTR_H265_S
+
 [Description]
 > Define H265 decoding parameters.
 
@@ -579,7 +708,8 @@ typedef struct HB_VDEC_ATTR_H265_S {
 
 [Member Description]
 
-|      Member       |                                                   Meaning                                                   ||:--------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------:|
+|      Member       |                                                   Meaning                                                   |
+|:--------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------:|
 |          enDecMode         |                                                      Decoding mode, normal decoding or skip frame mode decoding.                                                      |
 |        enOutputOrder       |                                                   Decoding image output order, decoding order output or display order output.                                                    |
 |          cra_as_bla        |                                                                  Enable CRA as BLA processing                                                                   |

@@ -33,6 +33,7 @@ sidebar_position: 2
 - Check whether the red power indicator on the development board is on.
 - Check the connection between the development board and the serial interface board, refer to the [Debug UART](../installation/hardware_interface#debug_uart) chapter for more details.
 - Check the serial port parameter configuration in the terminal software, the correct configuration is as follows:  
+
 ![image-20221124200013163](./image/interface/image-20221124200013163.png)
 
 ### Network Interface
@@ -51,6 +52,7 @@ sidebar_position: 2
 
 - The prompt "Connection timed out" indicates a network communication error. Please refer to the [SSH login](../installation/remote_login#ssh) chapter for network configuration confirmation.
 - The prompt "Authentication failed" indicates incorrect user or password for login. Please confirm and try again.
+
 ![image-20221124201544978](./image/interface/image-20221124201544978.png)
 
 <font color='Blue'>【Question】</font>

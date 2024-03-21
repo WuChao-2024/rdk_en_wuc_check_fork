@@ -24,7 +24,8 @@ For detailed information about the audio sub-board, please refer to the [Audio D
 ### Installation
 
 1. Connect the adapter board to the 40-pin header of the RDK X3 as shown in the diagram below:
-![image-audio-driver-hat-setup](./image/image-audio-driver-hat-setup.jpg)
+
+    ![image-audio-driver-hat-setup](./image/image-audio-driver-hat-setup.jpg)
 
 2. Use the command `cat /sys/class/socinfo/som_name` to check the type of the development board and set the switch status of the audio sub-board according to the returned value.
    - If the returned value is 5 or 6, set all three DIP switches to the `ON` position.
@@ -96,8 +97,7 @@ tinycap ./4chn_test.wav -D 0 -d 1 -c 4 -b 16 -r 48000 -p 512 -n 4 -t 5
 tinyplay ./2chn_test.wav -D 0 -d 0
 ```
 
-### Audio Loopback TestPlayback   controlC0  pcmC0D0c  pcmC0D0p  pcmC0D1c  pcmC0D1p  pcmC1D0c  pcmC1D0p  timer
-```
+### Audio Loopback Test
 
 The playback and capture signals of the audio board are used in recording channels 7 & 8, so the 8-channel recording command should be used for collection.
 
@@ -199,7 +199,9 @@ tinycap ./2chn_test.wav -D 0 -d 0 -c 2 -b 16 -r 48000 -p 512 -n 4 -t 5
 - Playback of stereo audio:
 
 ```
-```tinyplay ./2chn_test.wav -D 0 -d 1
+tinyplay ./2chn_test.wav -D 0 -d 1
+```
+
 
 ## Coexistence of Audio Subboard and USB Sound Card
 

@@ -23,47 +23,86 @@ Please read on for more details.
 To obtain the horizon_runtime_sample package, please refer to the [Deliverables Instructions](/toolchain_development/intermediate/environment_config#deliverables_instructions).
 :::
 
-#### Introduction to Sample Code Package Structure
+
+
+### Sample Code Package Structure Introduction
 
 ```bash
   +---horizon_runtime_sample
   |── README.md
   ├── code                                      # Sample source code
-  │   ├── 00_quick_start                        # Quick start example, a sample code that uses mobilenetv1 to perform inference on a single image
-  │   │   ├── CMakeLists.txt
-  │   │   ├── CMakeLists_x86.txt
-  │   │   └── src
-  │   ├── 01_api_tutorial                       # BPU SDK DNN API usage example code
-  │   │   ├── CMakeLists.txt
-  │   │   ├── mem
-  │   │   ├── model
-  │   │   ├── resize
-  │   │   ├── roi_infer
-  │   │   └── tensor
-  │   ├── 02_advanced_samples                   # Special feature examples
-  │   │   ├── CMakeLists.txt
-  │   │   ├── custom_identity
-  │   │   ├── multi_input
-  │   │   ├── multi_model_batch
-  │   │   └── nv12_batch
-  │   ├── 03_misc                               # Miscellaneous examples
-  │   │   ├── CMakeLists.txt
-```- **lenet_gray**: LeNet-5 model for grayscale image classification.
-- **resnet_feature**: ResNet model for feature extraction.
-- **CMakeLists.txt**: CMake configuration file.
-- **build_ultra.sh**: Compilation script for aarch64 architecture for RDK Ultra.
-- **build_xj3.sh**: Compilation script for aarch64 architecture for RDK X3.
-- **deps_gcc9.3**: Compilation dependency library directory.
-- **ultra**: Example scripts and data for RDK Ultra.
-- **data**: Preloaded data files for classification, detection, and miscellaneous tasks.
-- **model**: Model files and README.md for reference.
-- **runtime -> ../../../model_zoo/runtime/horizon_runtime_sample**: Symbolic link to the models in the model zoo package. Board runtime environment needs to specify the model path.
-- **script**: Example scripts for aarch64 architecture.
-- **script_x86**: Example scripts for x86 architecture.
-- **xj3**: Example scripts and data for RDK X3.- **ultra**: RDK Ultra development board example running script, with pre-loaded data and related models.
-- **build_xj3.sh**: RDK X3 program One-click compilation script.
-- **build_ultra.sh**: RDK Ultra program One-click compilation script.
-- **deps/deps_gcc9.3**: Third-party dependencies required by the sample code, which users can replace or trim according to their actual needs when developing their own code programs.
+  │   ├── 00_quick_start                        # Quick start example: Using mobilenetv1 for single image inference and result parsing with the DNN API.
+  │   │   ├── CMakeLists.txt
+  │   │   ├── CMakeLists_x86.txt
+  │   │   └── src
+  │   ├── 01_api_tutorial                       # DNN SDK API usage tutorial
+  │   │   ├── CMakeLists.txt
+  │   │   ├── mem
+  │   │   ├── model
+  │   │   ├── resize
+  │   │   ├── roi_infer
+  │   │   └── tensor
+  │   ├── 02_advanced_samples                   # Special feature examples
+  │   │   ├── CMakeLists.txt
+  │   │   ├── custom_identity
+  │   │   ├── multi_input
+  │   │   ├── multi_model_batch
+  │   │   └── nv12_batch
+  │   ├── 03_misc                               # Miscellaneous examples for non-NV12 input models.
+  │   │   ├── CMakeLists.txt
+  │   │   ├── lenet_gray
+  │   │   └── resnet_feature
+  │   ├── CMakeLists.txt
+  │   ├── build_ultra.sh                        # Script for aarch64 compilation on RDK Ultra
+  │   ├── build_xj3.sh                          # Script for aarch64 compilation on RDK X3
+  │   └── deps_gcc9.3                           # Third-party dependencies required for the sample code. Users should replace or trim as needed for their own projects.
+  ├── ultra
+  │   ├── data                                  # Preloaded data files
+  │   │   ├── cls_images
+  │   │   ├── custom_identity_data
+  │   │   ├── det_images
+  │   │   └── misc_data
+  │   ├── model
+  │   │   ├── README.md
+  │   │   └── runtime -> ../../../model_zoo/runtime/horizon_runtime_sample   # Soft link pointing to the model in the OE package. Board-side runtime environment requires users to specify the model path manually.
+  │   ├── script                                # aarch64 sample execution scripts
+  │   │   ├── 00_quick_start
+  │   │   ├── 01_api_tutorial
+  │   │   ├── 02_advanced_samples
+  │   │   ├── 03_misc
+  │   │   └── README.md
+  │   └── script_x86                            # x86 sample execution scripts
+  │       ├── 00_quick_start
+  │       └── README.md
+  ├── xj3
+  │   ├── data                                  # Preloaded data files
+  │   │   ├── cls_images
+  │   │   ├── custom_identity_data
+  │   │   ├── det_images
+  │   │   └── misc_data
+  │   ├── model
+  │   │   ├── README.md
+  │   │   └── runtime -> ../../../model_zoo/runtime/horizon_runtime_sample   # Soft link pointing to the model in the OE package. Board-side runtime environment requires users to specify the model path manually.
+  │   ├── script                                # aarch64 sample execution scripts
+  │   │   ├── 00_quick_start
+  │   │   ├── 01_api_tutorial
+  │   │   ├── 02_advanced_samples
+  │   │   ├── 03_misc
+  │   │   └── README.md
+  │   └── script_x86                            # x86 sample execution scripts
+  │       ├── 00_quick_start
+  │       └── README.md
+```
+- **00_quick_start**: Quick start using the `dnn` API, demonstrating single-image inference with MobileNetV1 and result parsing.
+- **01_api_tutorial**: DNN SDK API usage tutorial, including **mem**, **model**, **resize**, **roi_infer**, and **tensor** components.
+- **02_advanced_samples**: Special feature examples, such as **custom_identity**, **multi_input**, **multi_model_batch**, and **nv12_batch** functionality.
+- **03_misc**: Miscellaneous examples for non-NV12 input models.
+- **xj3**: RDK X3 development board sample execution scripts, preloaded with data and related models.
+- **ultra**: RDK Ultra development board sample execution scripts, preloaded with data and related models.
+- **build_xj3.sh**: One-click compilation script for RDK X3.
+- **build_ultra.sh**: One-click compilation script for RDK Ultra.
+- **deps/deps_gcc9.3**: Third-party dependencies required for the sample code. Users should replace or trim as needed for their own projects.
+
 
 
 :::caution Note
@@ -110,77 +149,77 @@ The model inference​ example script is mainly in the xj3/script and xj3/script
       ├── 01_api_tutorial
       │   ├── model.sh
       │   ├── README.md
-```  │   ├── resize_bgr.sh
-  │   ├── resize_y.sh
-  │   ├── roi_infer.sh
-  │   ├── sys_mem.sh
-  │   └── tensor.sh
-  ├── 02_advanced_samples
-  │   ├── custom_arm_op_custom_identity.sh
-  │   ├── README.md
-  │   └── run_multi_model_batch.sh
-  ├── 03_misc
-  │   ├── README.md
-  │   ├── run_lenet.sh
-  │   └── run_resnet50_feature.sh
-  ├── aarch64
-  │   ├── bin
-  │   │   ├── model_example
-  │   │   ├── resize_bgr_example
-  │   │   ├── resize_y_example
-  │   │   ├── roi_infer
-  │   │   ├── run_custom_op
-  │   │   ├── run_lenet_gray
-  │   │   ├── run_mobileNetV1_224x224
-  │   │   ├── run_multi_model_batch
-  │   │   ├── run_resnet_feature
-  │   │   ├── sys_mem_example
-  │   │   └── tensor_example
-  │   └── lib
-  │       ├── libdnn.so
-  │       ├── libhbrt_bernoulli_aarch64.so
-  │       └── libopencv_world.so.3.4
-  └── README.md
+      │   ├── resize_bgr.sh
+      │   ├── resize_y.sh
+      │   ├── roi_infer.sh
+      │   ├── sys_mem.sh
+      │   └── tensor.sh
+      ├── 02_advanced_samples
+      │   ├── custom_arm_op_custom_identity.sh
+      │   ├── README.md
+      │   └── run_multi_model_batch.sh
+      ├── 03_misc
+      │   ├── README.md
+      │   ├── run_lenet.sh
+      │   └── run_resnet50_feature.sh
+      ├── aarch64
+      │   ├── bin
+      │   │   ├── model_example
+      │   │   ├── resize_bgr_example
+      │   │   ├── resize_y_example
+      │   │   ├── roi_infer
+      │   │   ├── run_custom_op
+      │   │   ├── run_lenet_gray
+      │   │   ├── run_mobileNetV1_224x224
+      │   │   ├── run_multi_model_batch
+      │   │   ├── run_resnet_feature
+      │   │   ├── sys_mem_example
+      │   │   └── tensor_example
+      │   └── lib
+      │       ├── libdnn.so
+      │       ├── libhbrt_bernoulli_aarch64.so
+      │       └── libopencv_world.so.3.4
+      └── README.md
 
-# RDK Ultra Script Information
-├─script
-  ├── 00_quick_start
-  │   ├── README.md
-  │   └── run_mobilenetV1.sh
-  ├── 01_api_tutorial
-  │   ├── model.sh
-  │   ├── README.md
-  │   ├── roi_infer.sh
-  │   ├── sys_mem.sh
-  │   └── tensor.sh
-  ├── 02_advanced_samples
-  │   ├── plugin
-  │   │   └── custom_arm_op_custom_identity.sh
-  │   ├── README.md
-  │   ├── run_multi_input.sh
-  │   ├── run_multi_model_batch.sh
-  │   └── run_nv12_batch.sh├── 03_misc
-  │   ├── README.md
-  │   ├── run_lenet.sh
-  │   └── run_resnet50_feature.sh
-  ├── aarch64                        # Compilation generates executable programs and dependency libraries
-  │   ├── bin
-  │   │   ├── model_example
-  │   │   ├── roi_infer
-  │   │   ├── run_custom_op
-  │   │   ├── run_lenet_gray
-  │   │   ├── run_mobileNetV1_224x224
-  │   │   ├── run_multi_input
-  │   │   ├── run_multi_model_batch
-  │   │   ├── run_nv12_batch
-  │   │   ├── run_resnet_feature
-  │   │   ├── sys_mem_example
-  │   │   └── tensor_example
-  │   └── lib
-  │       ├── libdnn.so
-  │       ├── libhbrt_bayes_aarch64.so
-  │       └── libopencv_world.so.3.4
-  └── README.md
+    # RDK Ultra Script Information
+    ├─script
+      ├── 00_quick_start
+      │   ├── README.md
+      │   └── run_mobilenetV1.sh
+      ├── 01_api_tutorial
+      │   ├── model.sh
+      │   ├── README.md
+      │   ├── roi_infer.sh
+      │   ├── sys_mem.sh
+      │   └── tensor.sh
+      ├── 02_advanced_samples
+      │   ├── plugin
+      │   │   └── custom_arm_op_custom_identity.sh
+      │   ├── README.md
+      │   ├── run_multi_input.sh
+      │   ├── run_multi_model_batch.sh
+      │   └── run_nv12_batch.sh├── 03_misc
+      │   ├── README.md
+      │   ├── run_lenet.sh
+      │   └── run_resnet50_feature.sh
+      ├── aarch64                        # Compilation generates executable programs and dependency libraries
+      │   ├── bin
+      │   │   ├── model_example
+      │   │   ├── roi_infer
+      │   │   ├── run_custom_op
+      │   │   ├── run_lenet_gray
+      │   │   ├── run_mobileNetV1_224x224
+      │   │   ├── run_multi_input
+      │   │   ├── run_multi_model_batch
+      │   │   ├── run_nv12_batch
+      │   │   ├── run_resnet_feature
+      │   │   ├── sys_mem_example
+      │   │   └── tensor_example
+      │   └── lib
+      │       ├── libdnn.so
+      │       ├── libhbrt_bayes_aarch64.so
+      │       └── libopencv_world.so.3.4
+      └── README.md
 
 ```
 
@@ -200,24 +239,30 @@ The quick_start directory under 00_quick_start is an example of quick starting t
 ```
 - ``run_mobilenetV1.sh``: This script implements the example function of reading a single image using the MobilenetV1 model for inference.
 
-
 #### api_tutorial
 
-The examples in the 01_api_tutorial directory are used to introduce how to use the embedded API. The directory includes the following scripts:
 
-``` shell
-  ├── model.sh
-  ├── resize_bgr.sh
-  ├── resize_y.sh-  ``roi_infer.sh``: This script is mainly used to implement the function of reading model information. To use it, enter the 01_api_tutorial directory and then execute ``sh model.sh``, as shown below:
+The `api_tutorial` directory contains examples demonstrating how to use embedded APIs. Its subscripts are as follows:
+
+```shell
+|-- model.sh
+|-- resize_bgr.sh
+|-- resize_y.sh
+|-- roi_infer.sh
+|-- sys_mem.sh
+|-- tensor.sh
+```
+
+- `model.sh`: This script primarily handles reading model information. To use it, navigate to the `01_api_tutorial` directory and execute `sh model.sh`, like this:
 
 :::caution Caution
 
-  The following example logs are the results of actual tests using the **RDK X3** development board. If the **RDK Ultra** development board is used, there may be differences in the log information. Please refer to the specific test results!
+The following example logs are based on actual testing on the **RDK X3** development board. Results may differ when using the **RDK Ultra** board; please refer to your specific test results.
 :::
 
 ```shell
 #!/bin/sh
-/userdata/ruxin.song/xj3/script/01_api_tutorial# sh model.sh
+/usr/local/ruxin.song/xj3/script/01_api_tutorial# sh model.sh
 ../aarch64/bin/model_example --model_file_list=../../model/runtime/mobilenetv1/mobilenetv1_nv12_hybrid_horizonrt.bin
 I0000 00:00:00.000000 24638 vlog_is_on.cc:197] RAW: Set VLOG level for "*" to 3
 [HBRT] set log level as 0. version = 3.12.1
@@ -227,17 +272,17 @@ I0108 04:19:27.245879 24638 model_example.cc:104] model count:1, model[0]: mobil
 I0108 04:19:27.246064 24638 model_example.cc:112] hbDNNGetModelHandle [mobilenetv1_nv12] success!
 I0108 04:19:27.246139 24638 model_example.cc:189] [mobilenetv1_nv12] Model Info:  input num: 1, input[0] validShape: ( 1, 3, 224, 224 ), alignedShape: ( 1, 4, 224, 224 ), tensorLayout: 2, tensorType: 1, output num: 1, output[0] validShape: ( 1, 1000, 1, 1 ), alignedShape: ( 1, 1000, 1, 1 ), tensorLayout: 2, tensorType: 13
 ```
--  ``sys_mem.sh``: This script is mainly used to guide how to use the ``hbDNNResize`` API. The code in the example demonstrates how to crop a part of an image with the coordinates [5,19,340,343] from a 1352x900 size image, resize it to 402x416, and save it. To use it, enter the 01_api_tutorial directory and then execute ``sh resize_bgr.sh``, as shown below:
+- `resize_bgr.sh`: This script demonstrates how to use the `hbDNNResize` API. The example code in the script resizes a 1352x900 image, crops a portion with coordinates [5, 19, 340, 343], and saves the resized image (402x416) as `resize_bgr.jpg`. Run it by executing `sh resize_bgr.sh`:
 
 :::caution Caution
 
-  The following example logs are the results of actual tests using the **RDK X3** development board. If the **RDK Ultra** development board is used, there may be differences in the log information. Please refer to the specific test results!
+The following example logs are based on the **RDK X3** development board. Results may vary for the **RDK Ultra** board; please refer to your actual test results.
 :::
 
 ```shell
 #!/bin/sh
 
-/userdata/ruxin.song/xj3/script/01_api_tutorial# sh resize_bgr.sh
+/usr/local/ruxin.song/xj3/script/01_api_tutorial# sh resize_bgr.sh
 ../aarch64/bin/resize_bgr_example --image_file=../../data/det_images/kite.jpg --resize_height=416 --resize_width=402 --resized_image=./resize_bgr.jpg --crop_x1=5 --crop_x2=340 --crop_y1=19 --crop_y2=343
 I0000 00:00:00.000000 24975 vlog_is_on.cc:197] RAW: Set VLOG level for "*" to 3
 I0108 06:58:03.327212 24975 resize_bgr_example.cc:116] Original shape: 1352x900 ,dest shape:402x416 ,aligned shape:402x416
@@ -246,18 +291,19 @@ I0108 06:58:03.327212 24975 resize_bgr_example.cc:116] Original shape: 1352x900 
 I0108 06:58:03.328739 24975 resize_bgr_example.cc:139] resize success!
 I0108 06:58:03.335835 24975 resize_bgr_example.cc:143] wait task done finished!
 ```
-After successful execution, the current directory will save the image named resize_bgr.jpg.
+After execution, the `resize_bgr.jpg` image will be successfully saved in the current directory.
 
--  ``tensor.sh``: This script is mainly used to guide how to use the ``hbDNNResize`` API. The code in the example demonstrates how to resize an image to 416x402. To use it, enter the 01_api_tutorial directory and then execute ``sh resize_y.sh``, as shown below::::caution Caution
+- `resize_y.sh`: This script guides the usage of the `hbDNNResize` API. It resizes an image to a size of 416x402. Run it by executing `sh resize_y.sh`:
 
-The following examples are the actual test results using the **RDK X3** development board. The log information may vary if using the **RDK Ultra** development board. Please refer to the specific test results!
+:::caution Caution
 
+Logs are from the **RDK X3** development board. Results may vary for the **RDK Ultra** board; please refer to your actual test results.
 :::
 
 ```shell
 #!/bin/sh
 
-/userdata/ruxin.song/xj3/script/01_api_tutorial# sh resize_y.sh
+/usr/local/ruxin.song/xj3/script/01_api_tutorial# sh resize_y.sh
 ../aarch64/bin/resize_y_example --image_file=../../data/det_images/kite.jpg --resize_height=416 --resize_width=402 --resized_image=./resize_y.jpg
 I0000 00:00:00.000000 24992 vlog_is_on.cc:197] RAW: Set VLOG level for "*" to 3
 I0108 06:59:36.887241 24992 resize_y_example.cc:101] Original shape: 1352x900 ,dest shape:402x416 ,aligned shape:402x416
@@ -267,40 +313,40 @@ I0108 06:59:36.888770 24992 resize_y_example.cc:119] resize success
 I0108 06:59:36.891711 24992 resize_y_example.cc:123] wait resize success
 I0108 06:59:36.891798 24992 resize_y_example.cc:129] spent time: 0.003463
 ```
+After execution, the `resize_y.jpg` image will be successfully saved in the current directory.
 
-Once executed successfully, the current directory will save an image named resize_y.jpg.
+- `roi_infer.sh`: This script demonstrates how to use the `hbDNNRoiInfer` API. It resizes an image to the model input size, converts it to NV12 format, and performs inference (inferencing) with a given ROI (Region of Interest).
 
-- ``roi_infer.sh``: This script mainly guides how to use the ``hbDNNRoiInfer`` API. The example code is for resizing an image to the input size of the model, converting it to nv12 data, and performing model inference (infer) on the given roi box.
-To use it, simply enter the 01_api_tutorial directory and execute ``sh roi_infer.sh``.
+- `sys_mem.sh`: This script guides the usage of the `hbSysAllocMem`, `hbSysFlushMem`, and `hbSysFreeMem` APIs. Execute it directly within the `01_api_tutorial` directory by running `sh sys_mem.sh`.
 
-- ``sys_mem.sh``: This script mainly guides how to use the ``hbSysAllocMem``, ``hbSysFlushMem``, and ``hbSysFreeMem`` APIs.
-To use it, simply enter the 01_api_tutorial directory and execute ``sh sys_mem.sh``.
-
-- ``tensor.sh``: This script mainly guides how to prepare the input and output tensors of the model.
-To use it, simply enter the 01_api_tutorial directory and execute ``sh tensor.sh`` as shown below:
+- `tensor.sh`: This script demonstrates how to prepare model inputs and outputs. Execute it in the `01_api_tutorial` directory by running `sh tensor.sh`, as shown below:
 
 :::caution Caution
 
-The following examples are the actual test results using the **RDK X3** development board. The log information may vary if using the **RDK Ultra** development board. Please refer to the specific test results!
-
+Logs are from the **RDK X3** development board. Results may vary for the **RDK Ultra** board; please refer to your actual test results.
 :::
 
 ```shell
-/userdata/ruxin.song/xj3/script/01_api_tutorial# sh tensor.sh
+/usr/local/ruxin.song/xj3/script/01_api_tutorial# sh tensor.sh
 Tensor data type:0, Tensor layout: 2, shape:1x1x721x1836, aligned shape:1x1x721x1840
 Tensor data type:1, Tensor layout: 2, shape:1x3x773x329, aligned shape:1x3x773x336
 Tensor data type:2, Tensor layout: 2, shape:1x3x108x1297, aligned shape:1x3x108x1312
 Tensor data type:5, Tensor layout: 2, shape:1x3x858x477, aligned shape:1x3x858x477
 Tensor data type:5, Tensor layout: 0, shape:1x920x102x3, aligned shape:1x920x102x3
-Tensor data type:4, Tensor layout: 2, shape:1x3x723x1486, aligned shape:1x3x723x1486
-Tensor data type:4, Tensor layout: 0, shape:1x372x366x3, aligned shape:1x372x366x3
-Tensor data type:3, Tensor layout: 2, shape:1x3x886x291, aligned shape:1x3x886x291
-Tensor data type:3, Tensor layout: 0, shape:1x613x507x3, aligned shape:1x613x507x3
+Tensor
 ```
+
 
 #### advanced_samples
 
-The examples under the 02_advanced_samples directory are used to demonstrate the use of special features in custom operators. The directory includes the following scripts:- `custom_arm_op_custom_identity.sh`: This script is mainly used for custom operator model inference. To use it, enter the `02_advanced_samples` directory and execute `sh custom_arm_op_custom_identity.sh` directly as shown below:
+The examples under the 02_advanced_samples directory are used to demonstrate the use of special features in custom operators. The directory includes the following scripts:
+
+```shelll
+  ├── custom_arm_op_custom_identity.sh
+  └── run_multi_model_batch.sh
+```
+
+- `custom_arm_op_custom_identity.sh`: This script is mainly used for custom operator model inference. To use it, enter the `02_advanced_samples` directory and execute `sh custom_arm_op_custom_identity.sh` directly as shown below:
 
 :::caution Note
 
@@ -357,12 +403,50 @@ I0000 00:00:00.000000 17060 vlog_is_on.cc:197] RAW: Set VLOG level for "*" to 3
     I0317 12:37:18.296805 17060 main.cpp:232] mobilenetv2 class result id: 340
     I0317 12:37:18.296887 17060 main.cpp:236] release task successI0108 07:23:35.510927 25139 run_lenet_gray.cc:217] TOP 4 result id: 2
 ```
-- ``run_resnet50_feature.sh``: This script mainly implements the inference function of the resnet50 model for feature data input. The example code quantizes and pads the feature data to meet the input conditions of the model, and then inputs it to the model for inference.
-  To use, go to the 03_misc directory and execute ``sh run_resnet50_feature.sh`` directly, as shown below:
+
+
+
+#### misc
+
+The `03_misc` directory contains examples for using models with non-nv12 inputs. It consists of the following scripts:
+
+```shell
+  ├── run_lenet.sh
+  └── run_resnet50_feature.sh
+```
+- `run_lenet.sh`: This script primarily implements the inference functionality of a LeNet model with Y data input. To use it, navigate to the `03_misc` directory and execute `sh run_lenet.sh`, as shown below:
 
 :::caution Note
 
-  The following example logs are the actual results obtained using the RDK X3 development board. If the RDK Ultra development board is used, the log information may vary. Please refer to the specific test results for accuracy!
+  The following example logs are from actual tests on an **RDK X3** development board. Logs may differ for an **RDK Ultra** board; refer to your specific test results!
+:::
+
+```shell
+    /userdata/ruxin.song/xj3/script/03_misc# sh run_lenet.sh
+    ../aarch64/bin/run_lenet_gray --model_file=../../model/runtime/lenet_gray/lenet_gray_hybrid_horizonrt.bin --data_file=../../data/misc_data/7.bin --image_height=28 --image_width=28 --top_k=5
+    I0000 00:00:00.000000 25139 vlog_is_on.cc:197] RAW: Set VLOG level for "*" to 3
+    [HBRT] set log level as 0. version = 3.12.1
+    [BPU_PLAT]BPU Platform Version(1.2.2)!
+    [HorizonRT] The model builder version = 1.3.3
+    I0108 07:23:35.507514 25139 run_lenet_gray.cc:145] hbDNNInitializeFromFiles success
+    I0108 07:23:35.507737 25139 run_lenet_gray.cc:153] hbDNNGetModelNameList success
+    I0108 07:23:35.507771 25139 run_lenet_gray.cc:160] hbDNNGetModelHandle success
+    I0108 07:23:35.508070 25139 run_lenet_gray.cc:176] prepare y tensor success
+    I0108 07:23:35.508178 25139 run_lenet_gray.cc:189] prepare tensor success
+    I0108 07:23:35.509909 25139 run_lenet_gray.cc:200] infer success
+    I0108 07:23:35.510721 25139 run_lenet_gray.cc:205] task done
+    I0108 07:23:35.510790 25139 run_lenet_gray.cc:210] task post process finished
+    I0108 07:23:35.510832 25139 run_lenet_gray.cc:217] TOP 0 result id: 7
+    I0108 07:23:35.510857 25139 run_lenet_gray.cc:217] TOP 1 result id: 9
+    I0108 07:23:35.510879 25139 run_lenet_gray.cc:217] TOP 2 result id: 3
+    I0108 07:23:35.510903 25139 run_lenet_gray.cc:217] TOP 3 result id: 4
+    I0108 07:23:35.510927 25139 run_lenet_gray.cc:217] TOP 4 result id: 2
+```
+- `run_resnet50_feature.sh`: This script mainly demonstrates the inference functionality of a ResNet50 model with feature data input. The example code preprocesses the feature data by quantizing and padding it to meet the model's requirements before feeding it into the model. To use it, navigate to the `03_misc` directory and run `sh run_resnet50_feature.sh`, as follows:
+
+:::caution Note
+
+  See above note for logs.
 :::
 
 ```shell
@@ -386,6 +470,9 @@ I0000 00:00:00.000000 17060 vlog_is_on.cc:197] RAW: Set VLOG level for "*" to 3
     I0108 07:25:41.373445 25155 run_resnet_feature.cc:204] TOP 3 result id: 78
     I0108 07:25:41.373468 25155 run_resnet_feature.cc:204] TOP 4 result id: 72
 ```
+
+
+
 ### Auxiliary tools and common operations
 
 #### Logs
@@ -417,11 +504,11 @@ For the configuration of model inference DNN API logs, please refer to the "Conf
 
    b. Model CPU operators:
    
-      i. Any CPU operators not included in the detection model.
-      
-      ii. The Softmax and Reshape at the tail of the classification model are CPU operators.
-      
-      iii. The Argmax at the tail of the segmentation model DeepLabV3+ is a CPU operator.
+        i. Any CPU operators not included in the detection model.
+        
+        ii. The Softmax and Reshape at the tail of the classification model are CPU operators.
+        
+        iii. The Argmax at the tail of the segmentation model DeepLabV3+ is a CPU operator.
 
    c. Output dequantization CPU node: completes the int8 to float32 output dequantization operation. The quantization time is proportional to the output shape size.
 
@@ -501,7 +588,6 @@ To obtain the ai_benchmark example package for public model accuracy and perform
       │   ├── classification            # Classification model example
       │   │   ├── efficientnet_lite0
       │   │   ├── efficientnet_lite1
-```
       │   │   ├── efficientnet_lite2
       │   │   ├── efficientnet_lite3
       │   │   ├── efficientnet_lite4
@@ -552,42 +638,58 @@ To obtain the ai_benchmark example package for public model accuracy and perform
       │   │   └── runtime -> ../../../../model_zoo/runtime/ai_benchmark/ptq   # Symbolic link to the model in the OE package, the model path needs to be specified separately in the board-side runtime environment
       ├── README.md
       ├── script                        # Execution scripts│   ├── aarch64                   # Compiled executable files and dependency libraries
-│   ├── classification            # Classification model examples
-│   │   ├── efficientnasnet_m
-│   │   ├── efficientnasnet_s
-│   │   ├── efficientnet_lite0
-│   │   ├── efficientnet_lite1
-│   │   ├── efficientnet_lite2
-│   │   ├── efficientnet_lite3
-│   │   ├── efficientnet_lite4
-│   │   ├── googlenet
-│   │   ├── mobilenetv1
-│   │   ├── mobilenetv2
-│   │   ├── resnet18
-│   │   └── vargconvnet
-│   ├── config                    # Model inference configuration files
-│   │   └── model  
-│   ├── detection                 # Detection model examples
-│   │   ├── centernet_resnet101
-│   │   ├── preq_qat_fcos_efficientnetb0
-│   │   ├── preq_qat_fcos_efficientnetb2
-│   │   ├── preq_qat_fcos_efficientnetb3
-│   │   ├── ssd_mobilenetv1
-│   │   ├── yolov2_darknet19
-│   │   ├── yolov3_darknet53
-│   │   ├── yolov3_vargdarknet
-│   │   └── yolov5x
-│   ├── segmentation              # Segmentation model examples
-│   │   ├── deeplabv3plus_efficientnetb0
-│   │   ├── deeplabv3plus_efficientnetm1
-│   │   ├── deeplabv3plus_efficientnetm2
-│   │   └── fastscnn_efficientnetb0
-│   ├── env.sh                    # Environment script
-│   └── README.md
-└── tools                         # Accuracy assessment tools
-       ├── python_tools
-       └── README.md
-```We provide an open-source model library, which includes commonly used classification, detection, and segmentation models. The naming convention for the models is as follows: {model_name}_{backbone}_{input_size}_{input_type}, and developers can use them directly.
+      │   ├── classification            # Classification model examples
+      │   │   ├── efficientnasnet_m
+      │   │   ├── efficientnasnet_s
+      │   │   ├── efficientnet_lite0
+      │   │   ├── efficientnet_lite1
+      │   │   ├── efficientnet_lite2
+      │   │   ├── efficientnet_lite3
+      │   │   ├── efficientnet_lite4
+      │   │   ├── googlenet
+      │   │   ├── mobilenetv1
+      │   │   ├── mobilenetv2
+      │   │   ├── resnet18
+      │   │   └── vargconvnet
+      │   ├── config                    # Model inference configuration files
+      │   │   └── model  
+      │   ├── detection                 # Detection model examples
+      │   │   ├── centernet_resnet101
+      │   │   ├── preq_qat_fcos_efficientnetb0
+      │   │   ├── preq_qat_fcos_efficientnetb2
+      │   │   ├── preq_qat_fcos_efficientnetb3
+      │   │   ├── ssd_mobilenetv1
+      │   │   ├── yolov2_darknet19
+      │   │   ├── yolov3_darknet53
+      │   │   ├── yolov3_vargdarknet
+      │   │   └── yolov5x
+      │   ├── segmentation              # Segmentation model examples
+      │   │   ├── deeplabv3plus_efficientnetb0
+      │   │   ├── deeplabv3plus_efficientnetm1
+      │   │   ├── deeplabv3plus_efficientnetm2
+      │   │   └── fastscnn_efficientnetb0
+      │   ├── env.sh                    # Environment script
+      │   └── README.md
+      └── tools                         # Accuracy assessment tools
+            ├── python_tools
+            └── README.md
+```
+
+
+
+- **code**: This directory contains the source code for the model evaluation program, used to assess model performance and accuracy.
+- **xj3**: Provides pre-compiled applications and various benchmark scripts to test the performance and accuracy of multiple models on the Horizon BPU, specifically for **RDK X3**.
+- **ultra**: Offers pre-compiled applications and benchmark scripts to evaluate the performance and accuracy of various models on the Horizon BPU, designed for **RDK Ultra**.
+- **build_ptq_xj3.sh**: One-click build script for the development board program (for **RDK X3**).
+- **build_ptq_ultra.sh**: One-click build script for the development board program (for **RDK Ultra**).
+- **deps/deps_gcc9.3**: Dependencies required for the example code, primarily including:
+```bash
+  gflags  glog  hobotlog nlohmann opencv  rapidjson
+```
+#### Sample Models
+
+We provide an open-source model library containing commonly used classification, detection, and segmentation models. The naming convention for these models is: {model_name}_{backbone}_{input_size}_{input_type}, which developers can directly utilize.
+
 
 :::tip Tip
 The bin models in the table below are all compiled and converted using the horizon_model_convert_sample model conversion example package. Please refer to the [horizon_model_convert_sample](../beginner.md#env_install) chapter for instructions on how to obtain them.
@@ -619,7 +721,7 @@ The bin models in the table below are all compiled and converted using the horiz
 The evaluation examples mainly use datasets such as VOC, COCO, ImageNet, Cityscapes, FlyingChairs, KITTI, Culane, Nuscenes, and Mot17.
 
 Please download them in a Linux environment using the following links:
-
+```
   VOC: http://host.robots.ox.ac.uk/pascal/VOC/ (using the VOC2012 version)
 
   COCO: https://cocodataset.org/#download
@@ -634,7 +736,8 @@ Please download them in a Linux environment using the following links:
 
   CULane: https://xingangpan.github.io/projects/CULane.htmlnuScenes: https://www.nuscenes.org/nuscenes#download
 
-mot17: https://opendatalab.com/MOT17
+  mot17: https://opendatalab.com/MOT17
+```
 
 #### Environment Setup
 
@@ -681,7 +784,7 @@ The following examples are based on the testing results of the **RDK X3** develo
   │   ├── data_name_list
   |   |   ├── coco_detlist.list
   │   |   ├── imagenet.list
-```│   |   └── voc_detlist.list
+  │   |   └── voc_detlist.list
   ├── classification      # Classification model evaluation
   │   ├── efficientnet_lite0
   │   │   ├── accuracy.sh
@@ -780,7 +883,8 @@ Enter the directory of the model to be evaluated and execute `sh fps.sh` to test
 
 The following examples are the test results using the **RDK X3** development board. If the **RDK Ultra** development board is used, the information may vary. Please refer to the specific test results!
 :::
-``````shell
+
+```shell
   I0419 02:35:00.044417 39094 output_plugin.cc:109]  Throughput: 176.39fps      # Model frame rate
 ```
 
@@ -796,7 +900,7 @@ The following examples are the test results using the **RDK X3** development boa
   The following example is based on the test results using **RDK X3** development board. If using **RDK Ultra** development board, the information may vary. Please refer to specific test results for accuracy.
 :::
 
-Content of "fps.sh" script:
+Content of `fps.sh` script:
 
 ```shell
   #!/bin/sh
@@ -810,7 +914,7 @@ Content of "fps.sh" script:
     --log_level=1
 ```
 
-Content of "latency.sh" script:
+Content of `latency.sh` script:
 
 ```shell
   #!/bin/sh
@@ -831,7 +935,7 @@ Content of "latency.sh" script:
   Note: When the max_cache parameter is in effect, the images will be preprocessed and read into memory. To ensure the stable operation of your program, please do not set a value that is too large. We recommend setting the value to no more than 30.
 :::Taking the fcos_efficientnetb0 model as an example, the contents of the workflow_fps.json configuration file are as follows:
 
-```
+```json
  {
     "input_config": {
       "input_type": "image",                                    # Input data format, supports image or bin file
@@ -878,9 +982,11 @@ Content of "latency.sh" script:
       }
     ]
   }
-```workflow_latency.json as follows:
-
 ```
+
+workflow_latency.json as follows:
+
+```json
 {
    "input_config":{
       "input_type":"image",
@@ -926,7 +1032,9 @@ Content of "latency.sh" script:
       }
    ]
 }
-```#### Accuracy Evaluation
+```
+
+#### Accuracy Evaluation
 
 The accuracy evaluation of the model consists of four steps:
 
@@ -1168,7 +1276,9 @@ After mounting the data, please log in to the development board. For the login m
 The program on the board side will generate an `eval.log` file in the current directory, which is the result file of the prediction.
 
 
-- #### Accuracy Calculation:::caution 注意
+- #### Accuracy Calculation
+
+:::caution Caution
 
   Please perform the accuracy calculation in the environment of the "development machine" model conversion.
 :::
@@ -1401,17 +1511,22 @@ The following code block takes the mobilenetv1 model as an example, starts runni
     "min_time": 4.008
   }
 }
+```
+
 
 The above output shows the "model_latency" and "task_latency". The "model_latency" outputs the time consumption for each OP in the model, while the "task_latency" outputs the time consumption for each task module in the model.
 
-Note:
+:::info Note
 
 - The profiler.log file will only be generated if the program exits normally.
+:::
 
 #### Dump Tool
 
 This section mainly introduces the method of enabling the dump tool. Generally, it is not necessary to pay attention to it. The dump tool is only used when the model accuracy is abnormal.
-By setting the environment variable "export HB_DNN_DUMP_PATH=${path}", the input and output of each node in the model inference process can be dumped. Based on the dumped output, it is possible to check whether there are consistency issues between the model inference on the development machine simulator and the development board: that is, whether the outputs of the same model and the same input on the development machine simulator and the development board are exactly the same.## Instructions for Model-on-Board Analysis Tool
+By setting the environment variable "export HB_DNN_DUMP_PATH=${path}", the input and output of each node in the model inference process can be dumped. Based on the dumped output, it is possible to check whether there are consistency issues between the model inference on the development machine simulator and the development board: that is, whether the outputs of the same model and the same input on the development machine simulator and the development board are exactly the same.
+
+## Instructions for Model-on-Board Analysis Tool
 
 ### Overview
 
@@ -1507,7 +1622,9 @@ If the same parameter input is specified repeatedly, the parameters will be over
 If input is repeated without adding the command line parameter ``--model_file``, the value after the command line parameter will be used, and parameters without arguments will not be recognized. For example, in the following example, ``yyy.bin`` will be ignored and the parameter value will be ``xxx.bin``:
 ```
   hrt_model_exec model_info --model_file=xxx.bin yyy.bin
-```#### ``infer``
+```
+
+#### ``infer``
 
 - Overview
 
@@ -1551,10 +1668,14 @@ The program runs single-threaded to process one frame of data and outputs the ti
 #### ``Multi-input Model Explanation``
 
 The ``infer`` function of the tool supports the inference of multi-input models, supports image input, binary file input, and text file input, and the input data is separated by commas.
-The input information of the model can be viewed through ``model_info``.hrt_model_exec infer --model_file=xxx.bin --input_file=xxx.jpg,input.txt
+The input information of the model can be viewed through ``model_info``.
+
+```
+hrt_model_exec infer --model_file=xxx.bin --input_file=xxx.jpg,input.txt
 ```
 
-#### "Supplementary Explanation of Input Parameters"
+#### `Supplementary Explanation of Input Parameters`
+
 - `input_file`
 
 For image type input, the file name extension must be one of the following: `bin` / `JPG` / `JPEG` / `jpg` / `jpeg`. For feature input, the file name extension must be one of the following: `bin` / `txt`. Each input file needs to be separated by a comma. For example: `xxx.jpg,input.txt`.
@@ -1598,7 +1719,7 @@ Control the float type output data in txt format. The `hybrid_dequantize_process
 The `dump_intermediate` parameter supports both `infer` and `perf` modes.// Output float type data
 hrt_model_exec infer --model_file=xxx.bin --input_file="xx.bin" --enable_dump=true --hybrid_dequantize_process=true
 
-```
+
 ``hybrid_dequantize_process`` parameter currently only supports four-dimensional models.
 
 #### ``perf``
@@ -1645,10 +1766,15 @@ hrt_model_exec perf --model_file=xxx.bin,xxx.bin --model_name=xx
 #### ``Multi-thread Latency Data Explanation``
 
 The purpose of multiple threads is to fully utilize BPU resources. Multiple threads process ``frame_count`` frames or execute for perf_time until data processing is completed/execution time ends and the program terminates.
-In the multi-thread ``perf`` process, you can execute the following command to obtain the real-time occupancy of BPU resources.hrut_somstatus -n 10000 -d 1
+In the multi-thread ``perf`` process, you can execute the following command to obtain the real-time occupancy of BPU resources.
+
+```bash
+hrut_somstatus -n 10000 -d 1
+```
 
 Output:
 
+```bash
 =====================1=====================
 temperature-->
         CPU      : 37.5 (C)
@@ -1662,6 +1788,7 @@ bpu status information---->
           min        cur             max             ratio
         bpu0: 400000000 1000000000      1000000000      0
         bpu1: 400000000 1000000000      1000000000      0
+```
 
 :::info Remarks
 
@@ -1671,13 +1798,13 @@ In "perf" mode, the latency measurement of a single thread represents the actual
 
 #### Supplementary explanation of input parameters
 
-- "profile_path"
+- `profile_path`
 
 Directory where the profile log file is generated.
 This parameter can be set by setting the environment variable "export HB_DNN_PROFILER_LOG_PATH=${path}" to view the OP and task scheduling time during model execution.
 Generally, setting "--profile_path='.'" is sufficient, which means that the log file is generated in the current directory and the log file is named profiler.log.
 
-- "thread_num"
+- `thread_num`
 
 Number of threads (parallelism), indicating the maximum number of tasks processed in parallel.
 When testing latency, the value needs to be set to 1, so that there is no resource contention and the latency test is more accurate.
