@@ -415,7 +415,7 @@ This section primarily covers the operators supported by the Horizon Processor f
 | ReduceMin | CPU computation |  |  |
 | ReduceProd | CPU computation |  |  |
 | ReduceSum | BPU acceleration | 1. Supports int16 input and output.<br/>2. Input supports 2-5 dimensions, requires axes attribute with 1 axis, no reduction across more than 1 dimension.| Axes supported: 0, 1, or equal to input data dimensions. |
-| ReduceSumSquare | CPU computation |  chaowu
+| ReduceSumSquare | CPU computation |  |   |   |
 
 | Relu                    | BPU acceleration      | Unlimited                                                                                               | Only supports float type.                                                                              |
 | Reshape                 | BPU acceleration      | 1. Supports int16 inputs and outputs.<br/>2. Supports 1-10 dimensional inputs and outputs.                      | None.                                                                                                  |
