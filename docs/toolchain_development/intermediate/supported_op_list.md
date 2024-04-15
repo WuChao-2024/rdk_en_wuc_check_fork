@@ -415,8 +415,7 @@ This section primarily covers the operators supported by the Horizon Processor f
 | ReduceMin | CPU computation |  |  |
 | ReduceProd | CPU computation |  |  |
 | ReduceSum | BPU acceleration | 1. Supports int16 input and output.<br/>2. Input supports 2-5 dimensions, requires axes attribute with 1 axis, no reduction across more than 1 dimension.| Axes supported: 0, 1, or equal to input data dimensions. |
-| ReduceSumSquare | CPU computation |  |   |   |
-
+| ReduceSumSquare | CPU computation |  |   |
 | Relu                    | BPU acceleration      | Unlimited                                                                                               | Only supports float type.                                                                              |
 | Reshape                 | BPU acceleration      | 1. Supports int16 inputs and outputs.<br/>2. Supports 1-10 dimensional inputs and outputs.                      | None.                                                                                                  |
 | Resize                  | BPU acceleration      | 1. NCHW input featuremaps, resize only on H and W dimensions. onnx opset=11 supports ROI input (PyTorch models need manual modification to add ROI input, which only accepts constant inputs).<br/>2. Mode supports nearest and linear.<br/>3. Supports scaling up or down.<br/>4. For nearest mode, scale factors must be powers of 2 (e.g., 2, 4, 8, 16, 32) with H_factor <= W_factor.<br/>5. onnx opset=11 supports half_pixel, pytorch_half_pixel, asymmetric, align_corners, and tf_crop_and_resize. ROI input is only effective in tf_crop_and_resize mode, requiring integer boundary coordinates after conversion.<br/>6. extrapolation_value not supported. |
