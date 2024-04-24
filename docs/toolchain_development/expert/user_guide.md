@@ -1012,7 +1012,7 @@ The exported ONNX model shown in the image contains CPU operators highlighted in
 
 When encountering precision issues with QAT or quantized models, you can use various tools provided to analyze the models and identify precision drop points.
 
-![debug_tools](./image/expert/debug_tools.svg)
+![debug_tools](./image/expert/debug_tools.png)
 
 ### Overview
 
