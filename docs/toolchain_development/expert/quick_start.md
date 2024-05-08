@@ -9,7 +9,7 @@ The Horizon Plugin Pytorch (referred to as Plugin) refers to the PyTorch officia
 
 The basic process of using the quantization training tool is as follows:
 
-![quick_start](./image/expert/quick_start.png)
+![quick_start](./image/expert/quick_start.svg)
 
 Below, we take the `MobileNetV2` model in `torchvision` as an example to introduce the specific operations of each stage in the process.
 

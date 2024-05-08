@@ -31,7 +31,7 @@ The development board provides a 40-pin standard interface for convenient periph
 
 The development board has silk screen markings on the 40-pin interface to facilitate operation. The locations of PIN1 and PIN40 are as follows:
 
-![image-20220828203207798](./image/40pin_user_guide/image-20220828203207798.png)
+![image-20220828203207798](./image/40pin_user_guide/image-20220828203207798.jpg)
 
 :::info
 The RDK X3 Module provides the 40-pin GPIOs and their definitions as follows:

@@ -50,16 +50,6 @@ After downloading, unzip the Ubuntu system image file, such as `ubuntu-preinstal
 
 </TabItem>
 
-<TabItem value="ulrta" label="RDK Ultra">
-
-Click [**here**](http://sunrise.horizon.cc/downloads/os_images) to download the image. Go to the rdk_ultra folder and select the corresponding version to enter the download page. Taking the example of downloading version 1.0.0 of the system image:
-
-![image-20230510143353330](./image/install_os/20231010120539.png)
-
-After the download is complete, extract the Ubuntu system image file, such as `ubuntu-preinstalled-desktop-arm64-rdkultra.img`.
-
-</TabItem>
-
 </Tabs>
 
 :::tip
@@ -177,65 +167,12 @@ The `hbupdate` tool supports two versions: Windows and Linux, which start with `
 
 </TabItem>
 
-<TabItem value="ulrta" label="RDK Ultra">
-
-When burning the Ubuntu system on RDK Ultra development kit, you need to use the Horizon `hbupdate` burning tool. Currently, the tool supports two versions: Windows and Linux, which are named with `hbupdate_win64` and `hbupdate_linux` respectively. You can download the tool from the following link: [hbupdate](http://sunrise.horizon.cc/downloads/hbupdate/).
-
-:::tip Note
-
-  - Decompress the tool package and pay attention not to include **spaces, Chinese characters, special characters**, etc. in the decompression path.
-  - The tool communicates with RDK Ultra through Ethernet to ensure the burning speed, please make sure that the **PC supports Gigabit Ethernet and uses a direct connection**.
-  - The PC-side network needs to be configured in **Static IP mode** in advance, as follows:
-    - IP: 192.168.1.195
-    - netmask: 255.255.255.0
-    - gateway: 192.168.1.1
-:::
-
-1. Connect RDK Ultra and the PC directly with an Ethernet cable, and ensure that the network can be pinged.
-
-2. Short the `FC_REC` and `GND` signals of the Function Control Interface (Interface 10).
-
-![image-ultra-fc-rec](image/install_os/image-ultra-fc-rec.jpg)
-
-3. Run the `hbupdate` main program, open the download tool, and select the development board model as `RDK_ULTRA`, which is a required option.
-
-![image-flash-system1](./image/install_os/image-rdk-ultra-system1.jpg)
-
-4. Click the `Browse` button to select the image file to be burned, which is a required option.
-
-![image-flash-system2](./image/install_os/image-rdk-ultra-system2.jpg)
-
-5. Click the `Start` button to start the flashing process. After confirming that the operation is correct according to the prompt, click the `OK` button:
-
-![image-flash-system3](./image/install_os/image-system-download3.jpg)
-
-6. When the tool displays the following printout, it indicates that the burning process has started. The duration of this process depends on the network transmission speed, so please be patient.
-
-![image-flash-system4](./image/install_os/image-rdk-ultra-system4.jpg)
-
-7. Wait for the tool to complete the burning process and check the result:
-
-- When the image burning is successful, the tool will prompt as follows:
-
-![image-flash-system6](./image/install_os/image-rdk-ultra-system6.png)
-
-- If the tool prompts the following errors, please confirm whether steps 1-3 were operated correctly.
-
-![image-flash-system7](./image/install_os/image-rdk-ultra-system7.png)
-
-- If the tool prompts the following error, it means that the network transmission speed is too slow. It is recommended to replace a better-performing PC and upgrade again. 
-  ![image-flash-system8](./image/install_os/image-rdk-ultra-system8.jpg)
-
-</TabItem>
-
 </Tabs>
 
 :::caution
 
 If the burning process is interrupted, please follow the above steps to restart.
 :::
-
-
 
 ## Start the system
 
@@ -289,14 +226,6 @@ RDK X3 Module supports two modes of system startup: eMMC mode and SD card mode.
   sudo parted /dev/mmcblk0 set 2 boot on
   sudo reboot
   ```
-
-</TabItem>
-
-<TabItem value="ulrta" label="RDK Ultra">
-
-First, power off the development board and remove the short circuit wire connecting the FC_REC and GND signals from the functional control interface (Interface 10). Then connect the development board to the monitor via an HDMI cable. Finally, power on the development board.
-
-During the initial system startup, it will perform default environment configuration, which takes about 45 seconds. After the configuration is completed, the Ubuntu system desktop will be displayed on the monitor.
 
 </TabItem>
 

@@ -14,23 +14,23 @@ import TabItem from '@theme/TabItem';
 <TabItem value="x3" label="RDK X3">
 
 RDK X3 provides interfaces such as Ethernet port, USB, camera, LCD, HDMI, 40PIN, etc., which facilitate the development and testing of image multimedia and deep learning algorithms. The interface layout of the development board is as follows:
-![image-20220802160110194](./image/hardware_interface/image-20220802160110194.png)
+![image-20220802160110194](./image/hardware_interface/image-20220802160110194.jpg)
 
 
 | No. | Function | No. | Function | No. | Function |
 | --- | -------- | --- | -------- | --- | -------- |
-| 1   | USB Type C power interface | 6   | USB 3.0 Type A interface     | 11  | Wi-Fi antenna interface |
-| 2   | MIPI CSI camera interface  | 7   | Gigabit Ethernet port       | 12  | TF card interface (bottom) |
-| 3   | Debug serial port          | 8   | 40PIN interface             | 13  | MIPI interface LCD screen interface |
-| 4   | Micro USB 2.0 interface    | 9   | HDMI interface              | 14  | Touchscreen interface |
-| 5   | Two USB 2.0 Type A interfaces | 10 | Power and status LED indicators |  |  |
+| 1 | USB Type C power interface | 2 | MIPI CSI camera interface | 3 | Debug serial port |
+| 4 | Micro USB 2.0 interface | 5 | Two USB 2.0 Type A interfaces | 6 | USB 3.0 Type A interface |
+| 7 | Gigabit Ethernet port | 8 | 40PIN interface | 9 | HDMI interface |
+| 10 | Power and status LED indicators | 11 | Wi-Fi antenna interface | 12 | TF card interface (bottom) |
+
 </TabItem>
 
 <TabItem value="x3md" label="RDK X3 Module">
 
 The official carrier board of RDK X3 Module provides various peripheral interfaces such as Ethernet port, USB, HDMI, MIPI CSI, MIPI DSI, 40PIN, etc., which facilitate the functional verification and development testing of RDK X3 Module. The interface layout is as follows:
 
-![image-carrier-board1](./image/hardware_interface/image-carrier-board1.png) 
+![image-carrier-board1](./image/hardware_interface/image-carrier-board1.jpg) 
 
 | No. | Interface Function | No. | Interface Function      | No. | Interface Function      |
 | --- | ----------------- | --- | --------------------- | --- | --------------------- |
@@ -40,24 +40,6 @@ The official carrier board of RDK X3 Module provides various peripheral interfac
 | 4   | RTC battery interface | 10 | MIPI DSI interface         | 16  | CAM2 interface, 2 lanes |
 | 5   | Fan interface    | 11  | CAM1 interface, 4 lanes    | 17  | CAM0 interface, 2 lanes |
 | 6   | Gigabit Ethernet port | 12 | Core module interface      | 18 | Micro SD Card interface (back) |
-
-</TabItem>
-
-<TabItem value="ulrta" label="RDK Ultra">
-
-RDK Ultra development kit provides various peripheral interfaces such as Ethernet port, USB, HDMI, MIPI CSI, 40PIN, etc., which facilitate the functional experience and development testing of RDK Ultra development kit. The interface layout is as follows:
-
-![image-carrier-board1](./image/hardware_interface/image-rdk-ultra-interface1.jpg)
-![image-carrier-board2](./image/hardware_interface/image-rdk-ultra-interface2.jpg) 
-
-| Number | Interface Function     | Number | Interface Function       | Number | Interface Function         |
-| ------ | --------------------- | ------ | ------------------------ | ------ | -------------------------- |
-| 1      | Power Interface       | 7      | 40pin header             | 13     | CAM3 Interface, 24PIN, 4lane   |
-| 2      | HDMI Display Interface| 8      | PWM Fan Interface        | 14     | CAM1 Interface, 24PIN, 4lane   |
-| 3      | 4 USB3.0 Interfaces   | 9      | rtc Battery Interface    | 15     | Wireless Card Interface, PCIe M.2-E |
-| 4      | Gigabit Ethernet Port | 10     | Function Control Interface | 16     | SSD Hard Drive Interface, PCIe M.2-M |
-| 5      | Debug Interface       | 11     | CAM2 Interface, 15PIN, 2lane | 17     | SSD Hard Drive Interface, PCIe M.2-M |
-| 6      | Status Indicator Light| 12     | CAM0 Interface, 15PIN, 2lane |        |                                 |
 
 </TabItem>
 
@@ -77,7 +59,7 @@ Full integration design, no core module.
 
 RDK X3 Module carrier board provides a 200-pin board-to-board connector for installation of the core module. When installing, confirm the correct orientation and positioning to avoid damage to the core module and carrier board connectors.
 
-![image-x3-md-setup](./image/hardware_interface/image-x3-md-setup.png) 
+![image-x3-md-setup](./image/hardware_interface/image-x3-md-setup.jpg) 
 
 Steps for module installation:
 
@@ -87,13 +69,6 @@ Steps for module installation:
 
 </TabItem>
 
-<TabItem value="ulrta" label="RDK Ultra">
-
-The RDK Ultra Module core board hardware interface is compatible with the Jetson Orin series development board, making it easy for users to integrate and productize.
-
-![rdk_ultra_module](image/hardware_interface/rdk_ultra_module.png)
-
-</TabItem>
 
 </Tabs>
 
@@ -113,11 +88,6 @@ The RDK X3 Module carrier board is powered via the DC interface, and it is recom
 
 </TabItem>
 
-<TabItem value="ulrta" label="RDK Ultra">
-
-The RDK Ultra development board is powered via the DC interface, and it is recommended to use the power adapter included in the kit or use a power adapter of at least **12V/5A**. After connecting the power, if the **red power indicator light is on** (Interface 6), it indicates that the device is powered normally.
-
-</TabItem>
 
 </Tabs>
 
@@ -144,7 +114,7 @@ The development board provides one debug UART (Interface 3) for serial port logi
 - Stop bits: 1
 - Flow Control: None
 
-When connecting the UART, the DuPont wire needs to be connected to Interface 3 of the development board, and the USB serial adapter needs to be connected to the computer. After the connection is completed, it should look like the following figure:![image-20220612121707048](./image/hardware_interface/image-20220612121707048.png)
+When connecting the UART, the DuPont wire needs to be connected to Interface 3 of the development board, and the USB serial adapter needs to be connected to the computer. After the connection is completed, it should look like the following figure:![image-20220612121707048](./image/hardware_interface/image-20220612121707048.jpg)
 
 
 </TabItem>
@@ -152,20 +122,6 @@ When connecting the UART, the DuPont wire needs to be connected to Interface 3 o
 <TabItem value="x3md" label="RDK X3 Module">
 
 The RDK X3 Module carrier board provides one debugging interface (Interface 15). Hardware-wise, the core module debugging serial port is converted into a USB interface via the `CH340` chip, allowing users to perform various debugging tasks using this interface. The parameters of the computer serial port tool should be configured as follows:
-
-- Baud rate: 921600
-- Data bits: 8
-- Parity: None
-- Stop bits: 1
-- Flow Control: None
-
-Typically, when users use this interface for the first time, they need to install the CH340 driver on the computer. Users can search for the keyword `CH340 serial port driver` for downloading and installation.
-
-</TabItem>
-
-<TabItem value="ulrta" label="RDK Ultra">
-
-The RDK Ultra development board provides one debugging interface (Interface 5). Hardware-wise, the core module debugging serial port is converted into a USB interface via the `CH340` chip, allowing users to perform various debugging tasks using this interface. The parameters of the computer serial port tool should be configured as follows:
 
 - Baud rate: 921600
 - Data bits: 8
@@ -238,33 +194,6 @@ If the system displays the following printout after inserting the Ethernet cable
 
 </TabItem>
 
-<TabItem value="ulrta" label="RDK Ultra">
-
-The development board provides one Gigabit Ethernet interface (Interface 4), supporting the 1000BASE-T and 100BASE-T standards. It defaults to static IP mode with the IP address `192.168.1.10`. To confirm the IP address of the development board, you can log in to the device via serial port and use the `ifconfig` command to view the configuration of the `eth0` interface:
-
-```bash
-sunrise@ubuntu:/# ifconfig 
-eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
-        inet 192.168.1.10  netmask 255.255.255.0  broadcast 192.168.1.255
-        inet6 fe80::211:22ff:fe6f:de17  prefixlen 64  scopeid 0x20<link>
-        ether 00:11:22:6f:de:17  txqueuelen 1000  (Ethernet)
-        RX packets 112  bytes 7327 (7.3 KB)
-        RX errors 0  dropped 0  overruns 0  frame 0
-        TX packets 197  bytes 8678 (8.6 KB)
-        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
-        device interrupt 39  base 0xc000 
-```
-
-If the system displays the following printout after inserting the Ethernet cable into the development board, it indicates that the Ethernet connection is normal:
-
-```bash
-[13293.952661] st_gmac a5014000.ethernet eth0: Link is Down
-[13295.062996] st_gmac a5014000.ethernet: Link is Up - 1000/Full 
-[13296.000750] st_gmac a5014000.ethernet eth0: Link is Up - 1Gbps/Full - flow control rx/tx
-```
-
-</TabItem>
-
 </Tabs>
 
 ## HDMI Interface {#hdmi_interface}
@@ -297,13 +226,6 @@ The currently supported display resolutions for the HDMI interface are as follow
 
 </TabItem>
 
-<TabItem value="ulrta" label="RDK Ultra">
-
-The RDK Ultra development board provides one HDMI display interface (Interface 2), supporting a maximum resolution of 1080P. Upon powering on the development board, the Ubuntu graphical interface is output via the HDMI interface. With specific example programs, the HDMI interface also supports preview display of camera and video stream images.
-
-Currently, the HDMI interface only supports the 1080p60 display mode. More display modes will be supported in future software versions.
-
-</TabItem>
 
 </Tabs>
 
@@ -358,12 +280,6 @@ The USB host/device mode switch is completely implemented by the hardware circui
 
 The USB host and device functions on the development board are mutually exclusive. After connecting a device to the device interface, the host interface will be automatically disabled.
 :::
-
-</TabItem>
-
-<TabItem value="ulrta" label="RDK Ultra">
-
-The RDK Ultra development board provides four USB3.0 standard interfaces (Interface 3), which can support four USB peripherals to be connected simultaneously. It is important to note that the USB interfaces on RDK Ultra only support the host mode.
 
 </TabItem>
 
@@ -461,7 +377,7 @@ The development board provides 1 MIPI CSI interface (Interface 2), which allows 
 The camera module is connected to the development board through a FPC cable. Please note that the blue side of the cable should face up when inserting it into the connector.
 
 Taking the JXF37 camera module as an example, after installation, it should look like the following picture:
-![image-X3-PI-Camera](./image/hardware_interface/image-X3-PI-Camera.png)
+![image-X3-PI-Camera](./image/hardware_interface/image-X3-PI-Camera.jpg)
 
 After installation, users can use the i2cdetect command to verify if the I2C address of the module can be detected correctly. If it cannot be detected, users need to check if the FPC cable connection is correct. When the I2C address is successfully detected, the log will print as follows:
 ```bash
@@ -506,27 +422,6 @@ The purchase links for the above camera modules can be found [here](/hardware_de
 
 </TabItem>
 
-<TabItem value="ulrta" label="RDK Ultra">
-
-The RDK Ultra development board provides four camera interfaces labeled `CAM 0~3`, allowing for the simultaneous connection of four MIPI camera modules. Please note the following:
-
-1. CAM 0/2 (Interfaces 11/12), using 15-pin FPC connectors, support connection to camera modules such as Raspberry Pi's OV5647, IMX219, IMX477, etc.
-2. CAM 1/3 (Interfaces 13/14), using 24-pin FPC connectors, support connection to camera modules such as F37, GC4663, IMX415, etc.
-
-The specifications of the camera modules are as follows:
-
-| Number | Sensor | Resolution | FOV              | I2C Device Address |
-| ------ | ------ | ---------- | ---------------- | ------------------ |
-| 1      | GC4663 | 4MP        | H:104 V:70 D:113 | 0x29               |
-| 2      | JXF37  | 2MP        | H:62  V:37 D:68  | 0x40               |
-| 3      | IMX219 | 8MP        | H:62  V:37 D:68  | 0x10               |
-| 4      | IMX477 | 12MP       | H:62  V:37 D:68  | 0x1a               |
-| 5      | OV5647 | 5MP        | H:62  V:37 D:68  | 0x36               |
-
-The purchase links for the camera modules can be found on the community accessories page, [here](https://developer.horizon.cc/accessory).
-
-</TabItem>
-
 </Tabs>
 
 :::caution
@@ -551,11 +446,6 @@ For detailed instructions on how to use the MIPI DSI interface, please refer to 
 
 </TabItem>
 
-<TabItem value="ulrta" label="RDK Ultra">
-
-No such interface.
-
-</TabItem>
 
 </Tabs>
 
@@ -574,11 +464,6 @@ The RDK X3 Module carrier board provides 1 Micro SD card interface (Interface 18
 
 </TabItem>
 
-<TabItem value="ulrta" label="RDK Ultra">
-
-No such interface.
-
-</TabItem>
 
 </Tabs>
 
@@ -608,13 +493,7 @@ To revert to the onboard antenna, use the following command: sed -i 's/cable/tra
 
 The development board supports both on-board and external antenna configurations for wireless networking. In most cases, the on-board antenna can meet the usage requirements. However, when the development board is installed with a metal housing, an external antenna needs to be connected to enhance signal strength.
 
-![rdk_x3_module_wifi](image/hardware_interface/rdk_x3_module_wifi.png)
-
-</TabItem>
-
-<TabItem value="ulrta" label="RDK Ultra">
-
-The development board comes with a pre-installed wireless network card module and antenna (Interface 15).
+![rdk_x3_module_wifi](image/hardware_interface/rdk_x3_module_wifi.jpg)
 
 </TabItem>
 
@@ -631,7 +510,7 @@ The RDK X3 development board provides a 40-pin header interface with IO signals 
 
 The development board has silk screen marking for the 40-pin interface, making it convenient for users to operate. The positions of PIN1 and PIN40 are as follows:
 
-![image-X3-PI-40Pin_Index](./image/hardware_interface/image-X3-PI-40Pin_Index.png)
+![image-X3-PI-40Pin_Index](./image/hardware_interface/image-X3-PI-40Pin_Index.jpg)
 
 For the usage of each function of the 40-pin interface, please refer to the [40PIN Function Usage](../python_development/40pin_user_guide/40pin_define) section.
 
@@ -641,17 +520,11 @@ For the usage of each function of the 40-pin interface, please refer to the [40P
 
 The RDK X3 Module carrier board provides a set of 40-pin header interfaces (Interface 9), and the interface voltage level is determined by the IO level switching header (Interface 14), supporting both 1.8V and 3.3V modes. The pin definitions are compatible with products such as Raspberry Pi. The detailed pin definitions and multiplex relationships are as follows:
 
-![image-40pin-header](./image/hardware_interface/image-40pin-header.png)
+![image-40pin-header](./image/hardware_interface/image-40pin-header.jpg)
 
 :::caution Caution
 By default, the RDK X3 Module core module firmware and carrier board voltage configuration are set to 3.3V. If you need to switch the IO level, please refer to the [IO Level Selection Header Interface](#io-level-switching-interface).
 :::
-
-</TabItem>
-
-<TabItem value="ulrta" label="RDK Ultra">
-
-The RDK Ultra development board provides a set of 40-pin header interfaces (Interface 7), supporting GPIO, UART, I2C, SPI, I2S, and other interfaces. The detailed pin definitions and multiplex relationships are as follows:![image-40pin-header](./image/hardware_interface/image-interface-40pin.jpg)
 
 </TabItem>
 
@@ -688,26 +561,6 @@ In addition, for user convenience, the above pin definitions are also reflected 
 
 </TabItem>
 
-<TabItem value="ulrta" label="RDK Ultra">
-
-The RDK Ultra development board provides a set of functional control interfaces (Interface 10) to control the functional modes of the core module. The pin functions are defined as follows:
-
-| Pin Number | Pin Name | Function Description                 | Usage                                      |
-| ---------- | -------- | ------------------------------------ | ------------------------------------------ |
-| 1          | WAKE_UP  | Used to wake up the development board | Use a jumper cap to short with GND         |
-| 2          | GND      | Ground signal                        | GND                                        |
-| 3          | FC_REC   | Force the development board into recovery mode | Use a jumper cap to short with GND |
-| 4          | GND      | Ground signal                        | GND                                        |
-| 5          | SYS_RST  | Used to reset the system              | Use a jumper cap to short with GND and then remove it to reset the system |
-| 6          | GND      | Ground signal                        | GND                                        |
-| 7      | PWR_EN   | Power Enable Signal        | Short connect with GND using a jumper cap to turn off the power to the core board. |
-| 8      | GND      | GDN                        | GND                                 |
-
-
-![image-carrier-board-control-pin1](./image/hardware_interface/image-rdk-ultra-interface-control.jpg)  
-
-</TabItem>
-
 </Tabs>
 
 
@@ -738,12 +591,6 @@ By default, the firmware of the core module of RDK X3 Module and the level confi
 2. Use the official programming tool `hbupdate` to update the boot firmware of the core board. For detailed instructions, please refer to [Image Flash](./install_os).
 3. Power off the device, short connect the `vref` and `1.8V` signals using a jumper cap, and then power on again.
 :::
-
-</TabItem>
-
-<TabItem value="ulrta" label="RDK Ultra">
-
-This interface is not available.
 
 </TabItem>
 
@@ -794,7 +641,7 @@ In order to make the Bluetooth discoverable to nearby devices, execute `discover
 
 Now, you can use a mobile phone or computer to scan for the Bluetooth device with the name `ubuntu`, as shown in the image below:
 
-![image-20220601175322650](./image/hardware_interface/image-20220601175322650.png)
+![image-20220601175322650](./image/hardware_interface/image-20220601175322650.jpg)
 
 Next, test the active scanning function of Bluetooth. In the interactive interface of `bluetoothctl`, enter `scan on` to enable active scanning. It will periodically print nearby devices. You can see that my mobile phone device has been discovered. Enter `scan off` to disable the scanning function and summarize the scanned Bluetooth devices.
 

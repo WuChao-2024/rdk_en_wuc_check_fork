@@ -27,11 +27,6 @@ The RDK X3 Module is powered through the power interface on the carrier board. T
 
 </TabItem>
 
-<TabItem value="ultra" label="RDK Ultra">
-
-The RDK Ultra development board is powered through a DC interface. It is recommended to use the power adapter that comes with the [official kit](http://localhost:3000/documents_rdk/hardware_development/rdk_ultra/interface), or use a power adapter with at least **12V/5A**.
-
-</TabItem>
 </Tabs>
 
 :::caution
@@ -56,11 +51,6 @@ The RDK X3 Module has onboard eMMC (optional) and supports booting the system fr
 
 </TabItem>
 
-<TabItem value="ultra" label="RDK Ultra">
-
-The RDK Ultra has onboard 64GB eMMC storage space and does not require additional storage cards.
-
-</TabItem>
 </Tabs>
 
 
@@ -79,11 +69,6 @@ The RDK X3 Module supports HDMI display interface, and connects the official car
 
 </TabItem>
 
-<TabItem value="ultra" label="RDK Ultra">
-
-The RDK Ultra development board supports HDMI display interface, and connects the development board and monitor via HDMI cable to support graphical desktop display.
-
-</TabItem>
 </Tabs>
 
 
@@ -100,11 +85,6 @@ The RDK X3 Module supports two types of network interfaces: Ethernet and Wi-Fi (
 
 </TabItem>
 
-<TabItem value="ultra" label="RDK Ultra">
-
-The RDK Ultra development board supports two types of network interfaces: Ethernet and Wi-Fi. Users can achieve network connectivity through either interface.
-
-</TabItem>
 </Tabs>
 
 

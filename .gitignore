@@ -21,3 +21,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 translate_doc.py
+
+
+test*
+origin_png_wuc_tag_*

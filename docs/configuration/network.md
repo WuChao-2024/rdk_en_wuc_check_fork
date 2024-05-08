@@ -104,10 +104,10 @@ In Station mode, the development board as a client and accesses the router's wir
 
 :::tip
 If you receive the following message after connecting to the hotspot, it means the hotspot is not found. You can execute the `sudo nmcli device wifi rescan` command to rescan and reconnect.
-    ```shell
-    root@ubuntu:~# sudo wifi_connect "WiFi-Test" "12345678" 
-    Error: No network with SSID 'WiFi-Test' found.
-    ```
+```shell
+root@ubuntu:~# sudo wifi_connect "WiFi-Test" "12345678" 
+Error: No network with SSID 'WiFi-Test' found.
+```
 :::
 
 ### Soft AP Mode

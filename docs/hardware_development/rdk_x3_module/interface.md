@@ -7,7 +7,7 @@ This chapter introduces the interface functions and usage of the official carrie
 
 The interface layout of the RDK X3 Module carrier board is as follows:
 
-![image-carrier-board1](./image/rdk_x3_module/image-carrier-board1.png) 
+![image-carrier-board1](./image/rdk_x3_module/image-carrier-board1.jpg) 
 
 | No.  | Interface Function             | No.  | Interface Function         | No.  | Interface Function        |
 | ---- | ----------------------------- | ---- | -------------------------- | ---- | ------------------------- |
